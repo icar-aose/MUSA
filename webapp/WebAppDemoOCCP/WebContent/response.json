@@ -1,0 +1,13 @@
+{
+    "id":1,
+    "created":"2015-04-30",
+    "session":"p4",
+    "service":"Receive order",
+    "role":{
+        "id":1,
+        "name":"supervisor",
+        "agent":"ids_quote_supervisor"
+    },
+    "label":"",
+    "agent":"occp Agent"
+}

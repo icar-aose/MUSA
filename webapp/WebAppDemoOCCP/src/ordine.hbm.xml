@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>  
+<!DOCTYPE hibernate-mapping PUBLIC  
+ "-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+ "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">  
+  
+ <hibernate-mapping>  
+  <class name="cnr.icar.db.hibernate.Ordine" table="Ordini">  
+    <id name="id_fattura">  
+     <generator class="native"></generator>  
+    </id>  
+            
+    <property name="importo"  column="importo" type="float" ></property>  
+    <property name="data_emissione"  column="data_emissione" type="date"></property>  
+    <property name="data_evasione"  column="data_evasione" type="date"></property>  
+    <property name="id_cliente"  column="id_cliente" type="int"></property>
+  	<property name="evaso"  column="evaso" type="byte"></property>
+            
+  </class>  
+            
+ </hibernate-mapping> 

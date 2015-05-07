@@ -1,0 +1,167 @@
+boby{
+	 background-color:#F0F8FF;
+}
+
+
+table.altrowstable {
+	width:60%;
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	color:#08457E;
+	border-width: 1px;
+	border-color: #000080;
+	border-collapse: collapse;
+	margin-up:10%
+}
+table.altrowstable th {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #000080;
+	
+}
+table.altrowstable td {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #000080;
+}
+.oddrowcolor{
+	background-color:#6397D0;
+}
+.evenrowcolor{
+	background-color:#ABCDEF;
+}
+.checkbokStruts{
+	text-align:center;
+	vertical-align:middle
+}
+div#footer{background-color:#ABCDEF;margin-top: 60%;  }
+div#mailFooter{ text-align:center;}
+div#mailFooter a{ color: #000 ;align: center;}
+div#footer img{padding-left:1%;padding-top:2%; width: 150px; height: 70px;  color: #000    ;float: left;}
+
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+    heigth:70%;
+    background-color:#ABCDEF;
+}
+
+.center form {
+	margin-top: 28px;
+	padding-top: 20px;
+	padding-up: 30px;
+	align:center;
+
+    }
+div#logoICAR{
+	align:center;
+	 margin-left: 35%;
+    margin-right: auto;
+   }
+.logoOCCP{
+	align:center;
+	 margin-left: 35%;
+    margin-right: auto;
+   }
+.center a:link    {text-decoration: underline; font-size: 12pt; color: black; margin-left:46% ; font-style: italic;}
+.center a:visited {text-decoration: underline; font-size: 12pt;color: green; align:center; }
+.center a:hover   {color: red; font-size: 12pt; align:center;}
+
+.centerTable{
+	margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    heigth:90%;
+    background-color:#ABCDEF;
+	
+}
+.menu{
+	margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    heigth:70%;
+background-color:#6397D0;
+
+}
+
+/* .menu submit{ */
+/* 	display:block; */
+
+/* float:left; */
+
+/* } */
+/* .menusubmit { */
+/*   font-family: Verdana, sans-serif; */
+/*     font-size: 11px; */
+/*    width: 90%; */
+/*     heigth:70%; */
+/*  float: left; */
+/*     list-style: none; */
+ 
+/* } */
+/* .menu a:hover{ */
+/* background-color:#99CBFF; */
+/* color:#cff; */
+/* } */
+
+.submitCss{
+	 background-color:#ABCDEF;
+    border-bottom: 7px solid #1560BD;
+    display: block;
+    width: 150px;
+    height: 30px;
+    margin: 5px;
+    float: left; /* elementi su singola riga */
+}
+.menu2{
+	float:left; display:block; width:150px; height:150px; background-color:#F00;
+}
+.submitCss2{
+	 background-color:#ABCDEF;
+    border-bottom: 7px solid #1560BD;
+    display: block;
+    width: 50px;
+    height: 30px;
+    margin: 5px;
+    float: left; /* elementi su singola riga */
+}
+
+ul#menuUL {
+    font-family: Verdana, sans-serif;
+    font-size: 11px;
+   width: 90%;
+    heigth:70%;
+
+    list-style: none;
+}
+  
+ul#menuUL li {
+    background-color: #5E86C1;
+    border-bottom: 7px solid #0095B6;
+    display: block;
+    width: 180px;
+    height: 30px;
+    margin: 25px;
+    float: left; /* elementi su singola riga */
+}
+  
+ul#menuUL li a {
+    color: #08457E;
+    display: block;
+    font-weight: bold;
+    line-height: 30px;
+    text-decoration: none;
+    width: 180px;
+    height: 30px;
+    text-align: center;
+}
+  
+ul#menuUL li.active, ul#menu li:hover {
+    background-color:#ABCDEF;
+    border-bottom: 7px solid #1560BD;
+     margin-up: 20px;
+}

@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>  
+<!DOCTYPE hibernate-mapping PUBLIC  
+ "-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+ "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">  
+  
+ <hibernate-mapping>  
+  <class name="cnr.icar.db.hibernate.Prodotto" table="Prodotti">  
+    <id name="id">  
+     <generator class="native"></generator>  
+    </id>  
+            
+    <property name="denominazione"  column="denominazione" type="string" ></property>  
+    <property name="descrizione"  column="descrizione" type="string"></property>  
+    <property name="disponibilita"  column="disponibilita" type="int"></property>  
+    <property name="prezzo"  column="prezzo" type="float"></property>
+    <property name="tipologia"  column="tipologia" type="string"></property>
+  
+            
+  </class>  
+            
+ </hibernate-mapping> 

@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>  
+<!DOCTYPE hibernate-mapping PUBLIC  
+ "-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+ "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">  
+  
+ <hibernate-mapping>  
+  <class name="cnr.icar.db.hibernate.CloudServices" table="CloudServices">  
+ <composite-id name ="cloudServicePK" class="cnr.icar.db.hibernate.CloudServicePK" >
+    <key-property name="idUtente"/> 
+    <key-property name="tipoServizio" /> 
+</composite-id>
+            
+    <property name="accessToken"  column="accessToken" type="string"></property>  
+    
+            
+  </class>  
+       
+ </hibernate-mapping> 
