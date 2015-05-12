@@ -1,0 +1,19 @@
+MAS adaptive_workflow {
+
+	infrastructure: Centralised
+
+	environment: c4jason.CartagoEnvironment
+	
+	agents:
+		travel_agent smart_travel_agent agentArchClass c4jason.CAgentArch;
+		
+	classpath: 	"lib/mysql-connector-java-5.1.24-bin.jar";
+				"moise.jar";
+				"cartago.jar";
+				"c4jason.jar";
+				"joda-time-2.3.jar";
+
+	aslSourcePath:
+		"src/asl";
+		
+}

@@ -1,0 +1,153 @@
+[travel_agent] ** INITIALIZE TEST FOR SMART TRAVEL DEMO **
+[travel_agent] List of available capabilities/services
+[travel_agent] flight_monaco_palermo
+[travel_agent] flight_catania_monaco
+[travel_agent] visit
+[travel_agent] train
+[travel_agent] pulman
+[travel_agent] hotel
+[travel_agent] *************
+[travel_agent] *START TEST*
+[travel_agent] Test Description:
+[travel_agent] 7 days, first day at palermo
+[travel_agent] visit palermo at least 2 days
+[travel_agent] visit agrigento 1 or 1.5 days
+[travel_agent] being at siracuse the forth day
+[travel_agent] visit catania 1 or 2 days
+[travel_agent] INITIALIZE SEARCH
+[travel_agent] SG: social_goal(condition(being_at(palermo)),par_condition([datetime],and([being_at(catania),property(it_is,[datetime]),data_is(datetime,date(2014,2,22))])),[system,luca])
+[travel_agent] Goal: agent_goal(condition(true),condition(visited(palermo,2)),system,maintain)
+[travel_agent] Goal: agent_goal(condition(true),par_condition([visittime],and([property(visited,[agrigento,visittime]),between(visittime,1,1.5)])),system,maintain)
+[travel_agent] Goal: agent_goal(par_condition([datetime],and([property(it_is,[datetime]),data_is(datetime,date(2014,2,20))])),condition(being_at(siracusa)),system)
+[travel_agent] Goal: agent_goal(condition(true),par_condition([visittime],and([property(visited,[catania,visittime]),between(visittime,1,2)])),system,maintain)
+[travel_agent] Norms: [vacation_end,budget,avoid_2visit]
+[travel_agent] Metrics: [qos]
+[travel_agent] START SEARCH
+[travel_agent] new solution! at step 72  number of solutions: 1
+[travel_agent] new solution! at step 74  number of solutions: 2
+[travel_agent] new solution! at step 84  number of solutions: 3
+[travel_agent] new solution! at step 96  number of solutions: 4
+[travel_agent] new solution! at step 104  number of solutions: 5
+[travel_agent] END SEARCH
+[travel_agent] SOLUTION
+[travel_agent] (visit[it_is(dt(2014,2,16,20,30,0))][visited(palermo,1)][done(visit_full_day,palermo,16)])
+[travel_agent] (hotel[it_is(dt(2014,2,17,8,30,0))][cost(70)][done(hotel,palermo,16)])
+[travel_agent] (visit[it_is(dt(2014,2,17,20,30,0))][visited(palermo,2)][done(visit_full_day,palermo,17)])
+[travel_agent] (hotel[it_is(dt(2014,2,18,8,30,0))][cost(140)][done(hotel,palermo,17)])
+[travel_agent] (train[it_is(dt(2014,2,18,10,52,0))][being_at(agrigento)][cost(148.3)][dist(127)][done(train,palermo,agrigento)])
+[travel_agent] (visit[it_is(dt(2014,2,18,20,30,0))][visited(agrigento,1)][done(visit_full_day,agrigento,18)])
+[travel_agent] (hotel[it_is(dt(2014,2,19,8,30,0))][cost(218.3)][done(hotel,agrigento,18)])
+[travel_agent] (train[it_is(dt(2014,2,19,13,22,0))][being_at(catania)][cost(228.70000000000002)][dist(287)][done(train,agrigento,catania)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,15,10,0))][being_at(taormina)][cost(233.8)][dist(340)][done(pulman,catania,taormina)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,17,25,0))][being_at(catania)][cost(238.8)][dist(393)][done(pulman,taormina,catania)])
+[travel_agent] (train[it_is(dt(2014,2,19,19,18,0))][being_at(siracusa)][cost(245.15)][dist(460)][done(train,catania,siracusa)])
+[travel_agent] (hotel[it_is(dt(2014,2,20,8,30,0))][cost(315.15)][done(hotel,siracusa,19)])
+[travel_agent] (train[it_is(dt(2014,2,20,9,57,0))][being_at(catania)][cost(321.5)][dist(527)][done(train,siracusa,catania)])
+[travel_agent] (visit[it_is(dt(2014,2,20,20,30,0))][visited(catania,1)][done(visit_full_day,catania,20)])
+[travel_agent] (train[it_is(dt(2014,2,20,22,45,0))][being_at(siracusa)][cost(331)][dist(594)][done(train,catania,siracusa)])
+[travel_agent] (hotel[it_is(dt(2014,2,21,8,30,0))][cost(401)][done(hotel,siracusa,20)])
+[travel_agent] (visit[it_is(dt(2014,2,21,20,30,0))][visited(siracusa,1)][done(visit_full_day,siracusa,21)])
+[travel_agent] (hotel[it_is(dt(2014,2,22,8,30,0))][cost(471)][done(hotel,siracusa,21)])
+[travel_agent] (train[it_is(dt(2014,2,22,9,57,0))][being_at(catania)][cost(477.35)][dist(661)][done(train,siracusa,catania)])
+[travel_agent] SOLUTION
+[travel_agent] (visit[it_is(dt(2014,2,16,20,30,0))][visited(palermo,1)][done(visit_full_day,palermo,16)])
+[travel_agent] (hotel[it_is(dt(2014,2,17,8,30,0))][cost(70)][done(hotel,palermo,16)])
+[travel_agent] (visit[it_is(dt(2014,2,17,20,30,0))][visited(palermo,2)][done(visit_full_day,palermo,17)])
+[travel_agent] (hotel[it_is(dt(2014,2,18,8,30,0))][cost(140)][done(hotel,palermo,17)])
+[travel_agent] (train[it_is(dt(2014,2,18,10,52,0))][being_at(agrigento)][cost(148.3)][dist(127)][done(train,palermo,agrigento)])
+[travel_agent] (visit[it_is(dt(2014,2,18,20,30,0))][visited(agrigento,1)][done(visit_full_day,agrigento,18)])
+[travel_agent] (hotel[it_is(dt(2014,2,19,8,30,0))][cost(218.3)][done(hotel,agrigento,18)])
+[travel_agent] (train[it_is(dt(2014,2,19,13,22,0))][being_at(catania)][cost(228.70000000000002)][dist(287)][done(train,agrigento,catania)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,15,10,0))][being_at(taormina)][cost(233.8)][dist(340)][done(pulman,catania,taormina)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,17,25,0))][being_at(catania)][cost(238.8)][dist(393)][done(pulman,taormina,catania)])
+[travel_agent] (train[it_is(dt(2014,2,19,19,18,0))][being_at(siracusa)][cost(245.15)][dist(460)][done(train,catania,siracusa)])
+[travel_agent] (hotel[it_is(dt(2014,2,20,8,30,0))][cost(315.15)][done(hotel,siracusa,19)])
+[travel_agent] (train[it_is(dt(2014,2,20,9,57,0))][being_at(catania)][cost(321.5)][dist(527)][done(train,siracusa,catania)])
+[travel_agent] (visit[it_is(dt(2014,2,20,20,30,0))][visited(catania,1)][done(visit_full_day,catania,20)])
+[travel_agent] (hotel[it_is(dt(2014,2,21,8,30,0))][cost(391.5)][done(hotel,catania,20)])
+[travel_agent] (pulman[it_is(dt(2014,2,21,10,10,0))][being_at(taormina)][cost(396.6)][dist(580)][done(pulman,catania,taormina)])
+[travel_agent] (visit[it_is(dt(2014,2,21,20,30,0))][visited(taormina,1)][done(visit_full_day,taormina,21)])
+[travel_agent] (hotel[it_is(dt(2014,2,22,8,30,0))][cost(466.6)][done(hotel,taormina,21)])
+[travel_agent] (pulman[it_is(dt(2014,2,22,10,2,0))][being_at(catania)][cost(471.70000000000005)][dist(633)][done(pulman,taormina,catania)])
+[travel_agent] SOLUTION
+[travel_agent] (visit[it_is(dt(2014,2,16,20,30,0))][visited(palermo,1)][done(visit_full_day,palermo,16)])
+[travel_agent] (hotel[it_is(dt(2014,2,17,8,30,0))][cost(70)][done(hotel,palermo,16)])
+[travel_agent] (visit[it_is(dt(2014,2,17,20,30,0))][visited(palermo,2)][done(visit_full_day,palermo,17)])
+[travel_agent] (hotel[it_is(dt(2014,2,18,8,30,0))][cost(140)][done(hotel,palermo,17)])
+[travel_agent] (train[it_is(dt(2014,2,18,10,52,0))][being_at(agrigento)][cost(148.3)][dist(127)][done(train,palermo,agrigento)])
+[travel_agent] (visit[it_is(dt(2014,2,18,20,30,0))][visited(agrigento,1)][done(visit_full_day,agrigento,18)])
+[travel_agent] (hotel[it_is(dt(2014,2,19,8,30,0))][cost(218.3)][done(hotel,agrigento,18)])
+[travel_agent] (train[it_is(dt(2014,2,19,13,22,0))][being_at(catania)][cost(228.70000000000002)][dist(287)][done(train,agrigento,catania)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,15,10,0))][being_at(taormina)][cost(233.8)][dist(340)][done(pulman,catania,taormina)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,17,25,0))][being_at(catania)][cost(238.8)][dist(393)][done(pulman,taormina,catania)])
+[travel_agent] (train[it_is(dt(2014,2,19,19,18,0))][being_at(siracusa)][cost(245.15)][dist(460)][done(train,catania,siracusa)])
+[travel_agent] (hotel[it_is(dt(2014,2,20,8,30,0))][cost(315.15)][done(hotel,siracusa,19)])
+[travel_agent] (train[it_is(dt(2014,2,20,9,57,0))][being_at(catania)][cost(321.5)][dist(527)][done(train,siracusa,catania)])
+[travel_agent] (visit[it_is(dt(2014,2,20,20,30,0))][visited(catania,1)][done(visit_full_day,catania,20)])
+[travel_agent] (hotel[it_is(dt(2014,2,21,8,30,0))][cost(391.5)][done(hotel,catania,20)])
+[travel_agent] (visit[it_is(dt(2014,2,21,20,30,0))][visited(catania,2)][done(visit_full_day,catania,21)])
+[travel_agent] (hotel[it_is(dt(2014,2,22,8,30,0))][cost(461.5)][done(hotel,catania,21)])
+[travel_agent] SOLUTION
+[travel_agent] (visit[it_is(dt(2014,2,16,20,30,0))][visited(palermo,1)][done(visit_full_day,palermo,16)])
+[travel_agent] (hotel[it_is(dt(2014,2,17,8,30,0))][cost(70)][done(hotel,palermo,16)])
+[travel_agent] (visit[it_is(dt(2014,2,17,20,30,0))][visited(palermo,2)][done(visit_full_day,palermo,17)])
+[travel_agent] (hotel[it_is(dt(2014,2,18,8,30,0))][cost(140)][done(hotel,palermo,17)])
+[travel_agent] (train[it_is(dt(2014,2,18,10,52,0))][being_at(agrigento)][cost(148.3)][dist(127)][done(train,palermo,agrigento)])
+[travel_agent] (visit[it_is(dt(2014,2,18,20,30,0))][visited(agrigento,1)][done(visit_full_day,agrigento,18)])
+[travel_agent] (hotel[it_is(dt(2014,2,19,8,30,0))][cost(218.3)][done(hotel,agrigento,18)])
+[travel_agent] (train[it_is(dt(2014,2,19,13,22,0))][being_at(catania)][cost(228.70000000000002)][dist(287)][done(train,agrigento,catania)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,15,10,0))][being_at(taormina)][cost(233.8)][dist(340)][done(pulman,catania,taormina)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,17,25,0))][being_at(catania)][cost(238.8)][dist(393)][done(pulman,taormina,catania)])
+[travel_agent] (train[it_is(dt(2014,2,19,19,18,0))][being_at(siracusa)][cost(245.15)][dist(460)][done(train,catania,siracusa)])
+[travel_agent] (hotel[it_is(dt(2014,2,20,8,30,0))][cost(315.15)][done(hotel,siracusa,19)])
+[travel_agent] (visit[it_is(dt(2014,2,20,20,30,0))][visited(siracusa,1)][done(visit_full_day,siracusa,20)])
+[travel_agent] (hotel[it_is(dt(2014,2,21,8,30,0))][cost(385.15)][done(hotel,siracusa,20)])
+[travel_agent] (visit[it_is(dt(2014,2,21,20,30,0))][visited(siracusa,2)][done(visit_full_day,siracusa,21)])
+[travel_agent] (hotel[it_is(dt(2014,2,22,8,30,0))][cost(455.15)][done(hotel,siracusa,21)])
+[travel_agent] (train[it_is(dt(2014,2,22,9,57,0))][being_at(catania)][cost(461.5)][dist(527)][done(train,siracusa,catania)])
+[travel_agent] (visit[it_is(dt(2014,2,22,12,30,0))][visited(catania,0.5)][done(visit_half_day_morn,catania,22)])
+[travel_agent] (visit[it_is(dt(2014,2,22,20,30,0))][visited(catania,1)][done(visit_half_day_after,catania,22)])
+[travel_agent] SOLUTION
+[travel_agent] (visit[it_is(dt(2014,2,16,20,30,0))][visited(palermo,1)][done(visit_full_day,palermo,16)])
+[travel_agent] (hotel[it_is(dt(2014,2,17,8,30,0))][cost(70)][done(hotel,palermo,16)])
+[travel_agent] (visit[it_is(dt(2014,2,17,20,30,0))][visited(palermo,2)][done(visit_full_day,palermo,17)])
+[travel_agent] (hotel[it_is(dt(2014,2,18,8,30,0))][cost(140)][done(hotel,palermo,17)])
+[travel_agent] (train[it_is(dt(2014,2,18,10,52,0))][being_at(agrigento)][cost(148.3)][dist(127)][done(train,palermo,agrigento)])
+[travel_agent] (visit[it_is(dt(2014,2,18,20,30,0))][visited(agrigento,1)][done(visit_full_day,agrigento,18)])
+[travel_agent] (hotel[it_is(dt(2014,2,19,8,30,0))][cost(218.3)][done(hotel,agrigento,18)])
+[travel_agent] (train[it_is(dt(2014,2,19,13,22,0))][being_at(catania)][cost(228.70000000000002)][dist(287)][done(train,agrigento,catania)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,15,10,0))][being_at(taormina)][cost(233.8)][dist(340)][done(pulman,catania,taormina)])
+[travel_agent] (pulman[it_is(dt(2014,2,19,17,25,0))][being_at(catania)][cost(238.8)][dist(393)][done(pulman,taormina,catania)])
+[travel_agent] (train[it_is(dt(2014,2,19,19,18,0))][being_at(siracusa)][cost(245.15)][dist(460)][done(train,catania,siracusa)])
+[travel_agent] (hotel[it_is(dt(2014,2,20,8,30,0))][cost(315.15)][done(hotel,siracusa,19)])
+[travel_agent] (visit[it_is(dt(2014,2,20,20,30,0))][visited(siracusa,1)][done(visit_full_day,siracusa,20)])
+[travel_agent] (hotel[it_is(dt(2014,2,21,8,30,0))][cost(385.15)][done(hotel,siracusa,20)])
+[travel_agent] (visit[it_is(dt(2014,2,21,20,30,0))][visited(siracusa,2)][done(visit_full_day,siracusa,21)])
+[travel_agent] (hotel[it_is(dt(2014,2,22,8,30,0))][cost(455.15)][done(hotel,siracusa,21)])
+[travel_agent] (train[it_is(dt(2014,2,22,9,57,0))][being_at(catania)][cost(461.5)][dist(527)][done(train,siracusa,catania)])
+[travel_agent] (visit[it_is(dt(2014,2,22,20,30,0))][visited(catania,1)][done(visit_full_day,catania,22)])
+[travel_agent] Statistics:
+[travel_agent] debug_search_with_many_goals;5;72;104;18;2.6;60.05;107
+[travel_agent] Discovered Solution: 5
+[travel_agent] First Solution: 72
+[travel_agent] Total Steps: 104
+[travel_agent] Max Depth: 18
+[travel_agent] AverageBranch: 2.6
+[travel_agent] AverageSize: 60.05
+[travel_agent] MaxSize: 107
+[travel_agent] MaxBranch: 7
+[travel_agent] ------------------------------
+[travel_agent] *************
+[travel_agent] *START TEST*
+[travel_agent] Test Description:
+[travel_agent] 7 days, first day and last day at palermo
+[travel_agent] visit palermo 2 or 3 days
+[travel_agent] INITIALIZE SEARCH
+[travel_agent] SG: social_goal(condition(being_at(palermo)),par_condition([datetime],and([being_at(palermo),property(it_is,[datetime]),data_is(datetime,date(2014,2,22))])),[system,luca])
+[travel_agent] Goal: agent_goal(condition(true),par_condition([visittime],and([property(visited,[palermo,visittime]),between(visittime,2,3)])),system,maintain)
+[travel_agent] Norms: [vacation_end,budget,avoid_2visit]
+[travel_agent] Metrics: [qos]
+[travel_agent] START SEARCH
+[travel_agent] new solution! at step 49  number of solutions: 1
+[travel_agent] new solution! at step 55  number of solutions: 2
+[CAgentArch] Op insertItem(cs([parcap(visit,[assign(datetime,dt(2014,2,16,8,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,16,8,30,0))),remove(visited(palermo,0)),add(it_is(dt(2014,2,16,20,30,0))),add(visited(palermo,1)),add(done(visit_full_day,palermo,16))]),parcap(hotel,[assign(datetime,dt(2014,2,16,20,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,16,20,30,0))),remove(cost(0)),add(it_is(dt(2014,2,17,8,30,0))),add(cost(70)),add(done(hotel,palermo,16))]),parcap(visit,[assign(datetime,dt(2014,2,17,8,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,17,8,30,0))),remove(visited(palermo,1)),add(it_is(dt(2014,2,17,20,30,0))),add(visited(palermo,2)),add(done(visit_full_day,palermo,17))]),parcap(hotel,[assign(datetime,dt(2014,2,17,20,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,17,20,30,0))),remove(cost(70)),add(it_is(dt(2014,2,18,8,30,0))),add(cost(140)),add(done(hotel,palermo,17))]),parcap(pulman,[assign(fromdatetime,dt(2014,2,18,8,30,0)),assign(fromcity,palermo)],[remove(it_is(dt(2014,2,18,8,30,0))),remove(being_at(palermo)),remove(cost(140)),remove(dist(0)),add(it_is(dt(2014,2,18,11,30,0))),add(being_at(catania)),add(cost(155.5)),add(dist(208)),add(done(pulman,palermo,catania))]),parcap(visit,[assign(datetime,dt(2014,2,18,11,30,0)),assign(city,catania)],[remove(it_is(dt(2014,2,18,11,30,0))),remove(visited(catania,0)),add(it_is(dt(2014,2,18,20,30,0))),add(visited(catania,1)),add(done(visit_full_day,catania,18))]),parcap(hotel,[assign(datetime,dt(2014,2,18,20,30,0)),assign(city,catania)],[remove(it_is(dt(2014,2,18,20,30,0))),remove(cost(155.5)),add(it_is(dt(2014,2,19,8,30,0))),add(cost(225.5)),add(done(hotel,catania,18))]),parcap(pulman,[assign(fromdatetime,dt(2014,2,19,8,30,0)),assign(fromcity,catania)],[remove(it_is(dt(2014,2,19,8,30,0))),remove(being_at(catania)),remove(cost(225.5)),remove(dist(208)),add(it_is(dt(2014,2,19,10,10,0))),add(being_at(taormina)),add(cost(230.6)),add(dist(261)),add(done(pulman,catania,taormina))])]),evo([world([being_at(palermo),it_is(dt(2014,2,16,8,30,0))]),world([being_at(palermo),it_is(dt(2014,2,16,20,30,0)),visited(palermo,1),done(visit_full_day,palermo,16)]),world([being_at(palermo),cost(70),it_is(dt(2014,2,17,8,30,0)),visited(palermo,1),done(hotel,palermo,16),done(visit_full_day,palermo,16)]),world([being_at(palermo),cost(70),it_is(dt(2014,2,17,20,30,0)),visited(palermo,2),done(hotel,palermo,16),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(palermo),cost(140),it_is(dt(2014,2,18,8,30,0)),visited(palermo,2),done(hotel,palermo,16),done(hotel,palermo,17),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(catania),cost(155.5),dist(208),it_is(dt(2014,2,18,11,30,0)),visited(palermo,2),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,palermo,catania),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(catania),cost(155.5),dist(208),it_is(dt(2014,2,18,20,30,0)),visited(catania,1),visited(palermo,2),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,palermo,catania),done(visit_full_day,catania,18),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(catania),cost(225.5),dist(208),it_is(dt(2014,2,19,8,30,0)),visited(catania,1),visited(palermo,2),done(hotel,catania,18),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,palermo,catania),done(visit_full_day,catania,18),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(taormina),cost(230.6),dist(261),it_is(dt(2014,2,19,10,10,0)),visited(catania,1),visited(palermo,2),done(hotel,catania,18),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,catania,taormina),done(pulman,palermo,catania),done(visit_full_day,catania,18),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)])]),1.4397166202333453) on artifact null by travel_agent failed - op: insertItem(cs([parcap(visit,[assign(datetime,dt(2014,2,16,8,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,16,8,30,0))),remove(visited(palermo,0)),add(it_is(dt(2014,2,16,20,30,0))),add(visited(palermo,1)),add(done(visit_full_day,palermo,16))]),parcap(hotel,[assign(datetime,dt(2014,2,16,20,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,16,20,30,0))),remove(cost(0)),add(it_is(dt(2014,2,17,8,30,0))),add(cost(70)),add(done(hotel,palermo,16))]),parcap(visit,[assign(datetime,dt(2014,2,17,8,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,17,8,30,0))),remove(visited(palermo,1)),add(it_is(dt(2014,2,17,20,30,0))),add(visited(palermo,2)),add(done(visit_full_day,palermo,17))]),parcap(hotel,[assign(datetime,dt(2014,2,17,20,30,0)),assign(city,palermo)],[remove(it_is(dt(2014,2,17,20,30,0))),remove(cost(70)),add(it_is(dt(2014,2,18,8,30,0))),add(cost(140)),add(done(hotel,palermo,17))]),parcap(pulman,[assign(fromdatetime,dt(2014,2,18,8,30,0)),assign(fromcity,palermo)],[remove(it_is(dt(2014,2,18,8,30,0))),remove(being_at(palermo)),remove(cost(140)),remove(dist(0)),add(it_is(dt(2014,2,18,11,30,0))),add(being_at(catania)),add(cost(155.5)),add(dist(208)),add(done(pulman,palermo,catania))]),parcap(visit,[assign(datetime,dt(2014,2,18,11,30,0)),assign(city,catania)],[remove(it_is(dt(2014,2,18,11,30,0))),remove(visited(catania,0)),add(it_is(dt(2014,2,18,20,30,0))),add(visited(catania,1)),add(done(visit_full_day,catania,18))]),parcap(hotel,[assign(datetime,dt(2014,2,18,20,30,0)),assign(city,catania)],[remove(it_is(dt(2014,2,18,20,30,0))),remove(cost(155.5)),add(it_is(dt(2014,2,19,8,30,0))),add(cost(225.5)),add(done(hotel,catania,18))]),parcap(pulman,[assign(fromdatetime,dt(2014,2,19,8,30,0)),assign(fromcity,catania)],[remove(it_is(dt(2014,2,19,8,30,0))),remove(being_at(catania)),remove(cost(225.5)),remove(dist(208)),add(it_is(dt(2014,2,19,10,10,0))),add(being_at(taormina)),add(cost(230.6)),add(dist(261)),add(done(pulman,catania,taormina))])]),evo([world([being_at(palermo),it_is(dt(2014,2,16,8,30,0))]),world([being_at(palermo),it_is(dt(2014,2,16,20,30,0)),visited(palermo,1),done(visit_full_day,palermo,16)]),world([being_at(palermo),cost(70),it_is(dt(2014,2,17,8,30,0)),visited(palermo,1),done(hotel,palermo,16),done(visit_full_day,palermo,16)]),world([being_at(palermo),cost(70),it_is(dt(2014,2,17,20,30,0)),visited(palermo,2),done(hotel,palermo,16),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(palermo),cost(140),it_is(dt(2014,2,18,8,30,0)),visited(palermo,2),done(hotel,palermo,16),done(hotel,palermo,17),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(catania),cost(155.5),dist(208),it_is(dt(2014,2,18,11,30,0)),visited(palermo,2),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,palermo,catania),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(catania),cost(155.5),dist(208),it_is(dt(2014,2,18,20,30,0)),visited(catania,1),visited(palermo,2),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,palermo,catania),done(visit_full_day,catania,18),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(catania),cost(225.5),dist(208),it_is(dt(2014,2,19,8,30,0)),visited(catania,1),visited(palermo,2),done(hotel,catania,18),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,palermo,catania),done(visit_full_day,catania,18),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)]),world([being_at(taormina),cost(230.6),dist(261),it_is(dt(2014,2,19,10,10,0)),visited(catania,1),visited(palermo,2),done(hotel,catania,18),done(hotel,palermo,16),done(hotel,palermo,17),done(pulman,catania,taormina),done(pulman,palermo,catania),done(visit_full_day,catania,18),done(visit_full_day,palermo,16),done(visit_full_day,palermo,17)])]),1.4397166202333453)
