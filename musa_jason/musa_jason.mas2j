@@ -1,0 +1,42 @@
+MAS musa_jason {
+
+	infrastructure: Centralised
+	
+	environment: c4jason.CartagoEnvironment
+	
+	agents:
+
+		boss			boss_agent			agentArchClass c4jason.CAgentArch;		
+		fusion_agent 	wf_Fusion_Agent 	agentArchClass c4jason.CAgentArch;
+
+		
+		//----SIGMA----
+//		firefighter 	ids_firefighter 	agentArchClass c4jason.CAgentArch;
+//		worker_operator ids_worker_operator agentArchClass c4jason.CAgentArch;
+//		policeman		ids_policeman 		agentArchClass c4jason.CAgentArch;
+		
+		
+		//----OCCP-----
+		proxy_agent 							agentArchClass c4jason.CAgentArch;
+		worker 			occp_worker 			agentArchClass c4jason.CAgentArch;
+		order_manager 	occp_order_manager 		agentArchClass c4jason.CAgentArch;
+   		failure_handler occp_failure_handler 	agentArchClass c4jason.CAgentArch;
+		//-------------
+		
+		//----IDS-----
+		//proxy_agent agentArchClass c4jason.CAgentArch;	
+		//user_employer ids_user_employer agentArchClass c4jason.CAgentArch;
+		//customer ids_customer agentArchClass c4jason.CAgentArch;
+		//classifier ids_automatic_classification agentArchClass c4jason.CAgentArch;
+		//-----------
+		
+	classpath: 	"lib/mysql-connector-java-5.1.24-bin.jar";
+				"moise.jar";
+				"cartago.jar";
+				"c4jason.jar";
+				"lib/joda-time-2.3.jar";
+
+	aslSourcePath:
+		"src/asl";
+		
+}

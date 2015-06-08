@@ -1,0 +1,3 @@
+social_goal( condition(and([received_order(order,user),true])), condition(set_user_data(user,email)), system )[goal(process0),pack(p4),parlist([par(order,idOrder),par(user,idUser),par(email,mailUser)])].
+agent_goal( condition(received_order(order,user)), condition(order_placed(order,user)), system )[goal(g0),pack(p4),parlist([par(order,idOrder),par(user,idUser)])].
+agent_goal( condition(order_placed(order,user)), condition(set_user_data(user,email)), system )[goal(g1),pack(p4),parlist([par(order,idOrder),par(user,idUser),par(email,mailUser)])].
