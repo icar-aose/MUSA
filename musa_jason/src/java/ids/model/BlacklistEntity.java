@@ -13,6 +13,7 @@ public class BlacklistEntity extends Entity
 	private String agent;
 	private int failure_rate;
 	private Timestamp updated;
+	private int project_ref;
 	
 	
 	public int getId() {
@@ -44,6 +45,12 @@ public class BlacklistEntity extends Entity
 	}
 	public void setUpdated(Timestamp updated) {
 		this.updated = updated;
+	}
+	public int getProject_ref() {
+		return project_ref;
+	}
+	public void setProject_ref(int project_ref) {
+		this.project_ref = project_ref;
 	}
 	
 	

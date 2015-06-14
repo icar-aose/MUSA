@@ -7,21 +7,13 @@
  *
  * TODOs:
  * 	- il piano +!commit_to_goal_pack dovrà avere come parametro anche la lista delle norme appartenenti al task di riferimento
+ * 
  * Bugs:  
  * 	- devo ripristinare check_capability_precondition_in_context. In particolare, nel verificare se una capability può essere 
  	  attivata devo verificare i predicati usando check_action_validity, che effettua un controllo sui timestamp
  *
  *
  **************************/
-
-/* ELIMINARE */
-+!commit_to_goal_pack(Context,Pack,Capability)
-	<-
-		Lifecycle = capability_lifecycle( Pack,Context,ready );
-		
-		!!capability_achievement_lifecycle(Capability,Lifecycle,condition(true),condition(true));
-		.println(Capability, " is ready [DEPRECATED]");
-	.
 	
 /**
  * [davide]
@@ -35,8 +27,6 @@
 	<-
 		Lifecycle = capability_lifecycle( Pack,Context,ready );
 		
-		//prepare the capability
-		//.send(Agent, achieve, prepare(Capability,Context));
 		.println(Capability, " is ready");
 		
 		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList);
@@ -170,9 +160,13 @@
 	.
 
 /*
- * Capability life cycle plan. This checks if pre condition and parameters are valid.
+ * Capability life cycle plans. These plans checks if pre condition and parameters are valid.
  * If true, change the capability state from ready to active state. 
  */
+ 
+//********************************
+//		READY STATE
+//********************************
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,  AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,ready )
@@ -200,9 +194,10 @@
 			
 			!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList);
 		}		
-		
 	.
-
+//********************************
+//		ACTIVE STATE
+//********************************
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,active )
@@ -219,6 +214,9 @@
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre,TaskPost,AssignmentList);
 		.println(Capability, " is wait");
 	.
+//********************************
+//		WAIT STATE
+//********************************
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,wait )
@@ -252,25 +250,19 @@
 		.wait(Delay);
 		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList);
 	.
+//********************************
+//		CHECK STATE
+//********************************
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,check )
 	<-
-		//?capability_postcondition(Capability, PostCondition );
+		?capability_postcondition(Capability, PostCondition );
 		.my_name(Me);
-		!get_remote_capability_postcondition(commitment(Me,Capability,_), PostCondition); 
-		!get_remote_capability_precondition(commitment(Me,Capability,_), PreCondition);
+
+		!check_condition_true_in_context(Capability, PostCondition, Context, AssignmentList, Bool);
 		
-		
-		// ~~~~~~DA VERIFICARE QUI~~~~~~~
-		
-		
-		
-		//!check_condition_true_in_context(PreCondition, Context,Bool);
-		!check_condition_true_in_context(PostCondition, Context,Bool);
-		
-		
-		if (Bool=true) 
+		if (Bool) 
 		{
 			.println(Capability," was succesfully done");
 			NewLifecycle = capability_lifecycle( Pack,Context,success );
@@ -283,6 +275,9 @@
 			!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre,TaskPost,AssignmentList);
 		}
 	.
+//********************************
+//		SUCCESS STATE
+//********************************
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,success )
@@ -296,17 +291,14 @@
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre, TaskPost,AssignmentList);
 		.println(Capability, " is ready");
 	.
+//********************************
+//		FAILURE STATE
+//********************************
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,failure )
 	<-
 		!communicate_failure(Capability,Lifecycle);
-		
-//		.my_name(Me);
-//		+capability_blacklist(Me, Capability);
-		
-		
-//		.print("-------------------------->CAPABILITY [",Capability,"]IS BLACKLISTED.");
 	.
 
 +!communicate_failure(Capability,Lifecycle)
@@ -315,9 +307,27 @@
 		Context 	= project_context(Department , Project);
 		getDptManager(Department,Manager);		
 		.my_name(Me);
+		
+		
 		.send(Manager,tell,capability_failure(Capability, Me, Context));
 	.
-	
+
+/**
+ * Check if a condition is verified in context. This is used when a capability is in check
+ * state and its par_condition must be verified in current world state to check if the 
+ * capability has terminated correctly or not.
+ */
++!check_condition_true_in_context(Capability, Condition, Context, AssignmentSet, Bool)
+	<-
+		!build_current_state_of_world(Context, World);
+		UpdatedAccumulation = accumulation(World, par_world([],[]), assignment_list([]));		
+//		.print("#######################TESTING\n",Condition," ON\n",UpdatedAccumulation,"\n##############");
+
+		//Test the condition within the current world state
+		if(not .empty(AssignmentSet))	{!test_condition(Condition, AssignmentSet, UpdatedAccumulation, Bool);}
+		else							{!test_condition(Condition, UpdatedAccumulation, Bool);}
+	.
+//TODO da eliminare.....
 +!check_condition_true_in_context(Condition, Context, Bool)
 	<-
 		!build_current_state_of_world(Context, World);

@@ -8,8 +8,6 @@
  * Last Modifies:  
  *
  * TODOs:
- * 	- il piano !create_substitution_for_properties dovrebbe essere riscritto in
- *    modo più elegante...
  *
  * Reported Bugs:  
  *
@@ -17,17 +15,6 @@
 
 { include( "core/world.asl" ) }
 
-
- /**
- * [davide]
- * 
- * DEBUG PLAN for !check_if_all_vars_are_assigned(CN, AssignmentSet, Bool)
- */
-+!debug_check_if_all_par_condition_vars_are_assigned
-	<-
-		!check_if_all_par_condition_vars_are_assigned(par_condition([msg],[property(printed,[msg])]), [assignment(msg,ciao)], Bool);
-		.print("Assigned: ",Bool);
-	.
 
 /**
  * [davide]
@@ -43,6 +30,20 @@
 	<-
 		!do_check_if_all_par_condition_vars_are_assigned(Vars, AssignmentSet, Bool);				//call the auxiliary plan
 	.
++!check_if_vars_are_assigned(Vars, AssignmentSet, Bool)
+	:
+		Vars = []
+	<-
+		Bool = true;
+	.
+	
+/** 
+ * [davide] 
+ * 
+ * Given a par_condition, check if all its vars has an assignment to which
+ * it can be unified. If *every* var has an assignment, Bool is unified with
+ * true
+ */
 +!check_if_all_par_condition_vars_are_assigned(CN, AssignmentSet, Bool)
 	:
 		CN = par_condition(Vars, _)
@@ -63,16 +64,6 @@
 	<-	Bool=true;
 	.
  
- /**
- * [davide]
- * 
- * DEBUG PLAN for !retrieve_vars_from_property_list(PropertyList,VarList)
- */
-+!debug_retrieve_vars_from_property_list
-	<-
-		!retrieve_vars_from_property_list([property(p,[x,a]), property(q,[g,y])],VarList);
-		.print("Vars: ",VarList);
-	.
 /**
  * [davide]
  * 
@@ -95,18 +86,6 @@
 	<-	VarList=[];
 	.
  
- /**
- * [davide]
- * 
- * DEBUG PLAN for apply_unification_to_par_condition
- */
-+!debug_apply_unification_to_par_condition
-	<-
-		!apply_unification_to_par_condition(par_condition([x,m,z], [property(p,[x,b]), property(q,[m,z])]) ,
-													      [assignment(x,a),assignment(m,n),assignment(z,r)],
-													      Out);
-		.print("Out: ",Out);
-	.
 	
  /**
  * [davide]
@@ -118,7 +97,7 @@
 		PC = par_condition(Vars, Formulae)
 	<-
 		!unroll_par_condition_formula(Formulae, UnrolledFormulae);										//Unroll the par_condition
-		!apply_unification_to_par_condition_formulae(UnrolledFormulae, AssignmentList, OutFormulae);	//Apply the unification to the terms of every property
+		!apply_unification_to_par_condition_formulae(UnrolledFormulae, AssignmentList, OutFormulae,_);	//Apply the unification to the terms of every property
 		!get_var_list_from_assignment_list(AssignmentList, AssignmentVars);						//Get vars from the assignment list
 		.difference(Vars,AssignmentVars,OutVars);												//calculate the final var set
 		OutPC = par_condition(OutVars, OutFormulae);											//build the output par_condition
@@ -143,23 +122,6 @@
 	<-	OutVars 		= [];
 	.
 
-/**
- * [davide]
- * 
- * DEBUG PLAN for apply_unification_to_par_condition_formulae
- */
-+!debug_apply_unification_to_par_condition_formulae
-	<-
-		InProperties = [property(p,[x,b]), property(q,[m,z]), property(l,[o])];
-		!apply_unification_to_par_condition_formulae(InProperties,
-													 [assignment(x,a),assignment(m,n),assignment(z,r)],
-													 Out,
-													 UnifiedFormulae);											 
-		.print("Out: ",Out);
-		.difference(InProperties,UnifiedFormulae, NotUnifiedFormalae);
-		.print("Not Unified Formulae: ",NotUnifiedFormalae);
-
-	.
 /**
  * [davide]
  * 
@@ -211,25 +173,12 @@
 	<-	OutFormulae 		= [];
 		UnifiedFormulae 	= [];
 	.
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for apply_unification_to_property
- */
-+!debug_apply_unification_to_property
-	<-
-		!apply_unification_to_property([x,b],[assignment(x,a),assignment(m,z)],OutTerms);
-		.print("Out: ",OutTerms);
-	.
 	
 /**
  * [davide]
  * 
- * Given a terms list from a property and an assignment list, apply the unification
- * and return the new terms list.
- * 
- * [TODO descrivere un pò meglio...]
+ * Unify each term within the given input term list by using a 
+ * set of assiggnment.
  */
 +!apply_unification_to_property(Terms, AssignmentList, OutTerms)
 	:
@@ -253,20 +202,12 @@
 	<-	OutTerms 	= [];
 	.
 
-/**
- * DEBUG PLAN FOR exists_assignment_for_commitment
- */
-+!debug_exists_assignment_for_commitment
-	<-
-		!find_assignment_for_commitment(print, [assignment(msg,"wella"),assignment(a,x)], OutAssignment);
-		.print("OutAssignment: ",OutAssignment);	
 	
-	.	
 //--------------------
 //--------------------
-/** DA ELIMINARE... */
-+?capability_parameters(CapName,VarList) <-	VarList = [];.
--?capability_parameters(CapName,VarList) <-	VarList = [];.
+/**TODO DA ELIMINARE... */
+//+?capability_parameters(CapName,VarList) <-	VarList = [];.
+//-?capability_parameters(CapName,VarList) <-	VarList = [];.
 //--------------------
 //--------------------
 
@@ -300,18 +241,6 @@
 		
 		if(.empty(AssignmentFound))	{.union([],OutAssignmentRec,OutAssignment)	}
 		else						{.union([AssignmentFound],OutAssignmentRec,OutAssignment)}
-	.
-
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for +!exists_assignment_for_property plan
- */
-+!debug_exists_assignment_for_property
-	<-
-		!exists_assignment_for_property([x,a],[assignment(a,r)],Found);
-		.print("Found: ",Found);
 	.
 
 +!exists_assignment_for_property(TermList,AssignmentList,Found)
@@ -360,7 +289,12 @@
 		OutAssignment 	= [];
 	.
 
-//se è una lista di elementi, allora fai ricorsione e ritorna lista di elementi contenuti in assignmentList
+/**
+ * [davide]
+ * 
+ * Check if Elem appear as variable name in an assignment into the given
+ * input assignment list.
+ */
 +!check_if_assignment_list_contains(Elem, AssignmentList, Return, Bool)
 	:
 		Elem = []
@@ -419,100 +353,6 @@
 		Bool	= false;
 		Return 	= [];
 	.
-	
- /**
- * [davide]
- * 
- * DEBUG PLANS for do_find_substitution_for_par_condition
- */
-+!debug_do_par_condition_unification_1
-	<-
-		!do_find_substitution_for_par_condition([property(p,[x,b]), property(q,[m,z])], 
-									  [property(p,[a,y]), property(q,[n,r])], 
-									  [x,m,z], 
-									  [y],
-									  [], 
-									  OutAssignmentList,
-									  Success);
-									  
-		.print("par_condition A: par_condition(",[x,m,z],",",[property(p,[x,b]), property(q,[m,z])],")");
-		.print("par_condition B: par_condition(",[y],",",[property(p,[a,y]), property(q,[n,r])],")");		
-		.print("success: ",Success);
-		if(Success=true)
-		{
-			.print("OutAssignment: ",OutAssignmentList);
-		}				
-	.		
-+!debug_do_par_condition_unification_2
-	<-
-	.print("unifico");
-		!do_find_substitution_for_par_condition([property(p,[x,a]), property(p,[b,y])], 
-									  [property(p,[b,y]), property(p,[a,a])], 
-									  [x,y], 
-									  [y], 
-									  [],
-									  OutAssignmentList,
-									  Success);
-		
-		.print("par_condition A: par_condition(",[x,y],",",[property(p,[x,a]), property(p,[b,y])],")");
-		.print("par_condition B: par_condition(",[y],",",[property(p,[b,y]), property(p,[a,a])],")");		
-		.print("success: ",Success);
-		if(Success=true)
-		{
-			.print("OutAssignment: ",OutAssignment);
-		}
-	.
-/**-----------------------------------------------------------------------------------------------------*/
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for unify_par_condition
- */
-+!debug_unify_par_condition
-	<-	
-		.print("Test sulle par condition:\n",par_condition([x,m,z], and([property(p,[x,b]), property(q,[m,z])]),"\n",par_condition([y],     and([property(p,[a,y]), property(q,[n,r])]))));
-		!find_substitution_for_par_condition( par_condition([x,m,z,o], and([property(p,[x,b]), property(q,[m,z]), property(k,[o,q])]) ),
-							  				  par_condition([y],     and([property(p,[a,y]), property(q,[n,r])]) ),
-							 [assignment(x,a)],
-							 OutAssignment,
-							 Success);
-		
-		.print("success: ",Success);
-		.print("OutputAssignment: ",OutAssignment);
-	.
-	
-+!debug_unify_par_condition_2
-	<-	
-		P1 = par_condition([a,b], and([property(p,[a]), property(f,[b,a])]) );
-		P2 = par_condition([m],   and([property(p,[c]), neg(property(h,[m]))     ]) );
-		!find_substitution_for_par_condition( P1,
-							  				  P2,
-											  [assignment(a,c),assignment(a,d)],
-											  OutAssignment,
-											  Success);
-		.print("P1: ",P1);
-		.print("P2: ",P2);
-		.print("success: ",Success);
-		.print("OutputAssignment: ",OutAssignment);
-	.
-	
-+!debug_unify_par_condition_3
-	<-	
-		P1 = par_condition([],[property(received_emergency_notification,[locationT,worker_operatorT])]); //CNI_tmp
-		P2 = par_condition([location,worker_operator],and([property(received_emergency_notification,[location,worker_operator])])); //PA
-		!find_substitution_for_par_condition( P1,
-							  				  P2,
-							  				  [],
-											  [],
-											  OutAssignment,
-											  Success);
-		.print("P1: ",P1);
-		.print("P2: ",P2);
-		.print("success: ",Success);
-		.print("OutputAssignment: ",OutAssignment);
-	.
-/**-----------------------------------------------------------------------------------------------------*/
 
 /**
  * [davide]
@@ -559,9 +399,7 @@
  		
  		.intersection(ParVarsA, InputVars, VarsA);
  		.intersection(ParVarsB, InputVars, VarsB);
- 		//.print("InputVars: ",InputVars);
-	/*.print("VarsA: ",VarsA);
-	.print("VarsB: ",VarsB);*/
+ 		
  		!do_find_substitution_for_par_condition(UnrolledFormulaA,					//Create the unification
 			 									UnrolledFormulaB, 
 			 									VarsA, 
@@ -634,27 +472,7 @@
 	:	PropertiesA = []
 	<-	OutAssignmentList = [];
 	.
-
-+!debug_unroll_par_condition_formula_1
-	<-
-		!unroll_par_condition_formula(
-			and([property(p,[x,b]), property(q,[m,z])]),
-			OutParCondition
-		);
-		
-		.print("OutParCondition: ", OutParCondition);
-	.	
 	
-+!debug_unroll_par_condition_formula_2
-	<-
-		!unroll_par_condition_formula(
-			and([property(p,[x,b]), property(q,[m,z])]),
-			OutParCondition
-		);
-		
-		.print("OutParCondition: ", OutParCondition);
-	.	
-//
 /**
  * [davide]
  * 
@@ -730,24 +548,6 @@
 		Formula = OutParCondition;
 	.
 	
-	
-	
-/**
- * [davide]
- * 
- * DEBUG PLANS for search_for_property_with_the_same_functor
- */
-+!debug_search_for_property_with_the_same_functor_1
-	<-
-		!search_for_property_with_the_same_functor(property(p,[x,y]), [  property(a,[x,y]), property(a,[x,o]), property(p,[x,y]) ], OutProperty, Bool);
-		.print("OutProperty: ",OutProperty);
-	.
-+!debug_search_for_property_with_the_same_functor_2
-	<-
-		!search_for_property_with_the_same_functor(property(p,[x,y]), [  property(a,[x,y]), property(b,[x,o]), property(c,[x,y]) ], OutProperty, Bool);
-		.print("OutProperty: ",OutProperty);
-	.	
-
 /**
  * [davide]
  * 
@@ -789,37 +589,6 @@
 /**
  * [davide]
  * 
- * DEBUG PLANS for create_substitution_for_properties
- */
-+!debug_create_substitution_for_properties_1
-	<-
-		!create_substitution_for_properties([b,y],[a,a],[x,y],[y],[],OutAssignmentA,SuccessA);
-		!create_substitution_for_properties([a,a],[b,y],[y],[x,y],[],OutAssignmentB,SuccessB);
-		
-		.concat(OutAssignmentA,OutAssignmentB,OutAssignment);
-		.eval(Success, SuccessA & SuccessB);
-		.print("Success: ",Success);
-		if(Success=true)
-		{
-			.print("OutAssignment: ",OutAssignment);
-		}
-	.
-+!debug_create_substitution_for_properties_2
-	<-
-		!create_substitution_for_properties([x,b],[a,y],[x,m,z],[y],[],OutAssignmentA,SuccessA);
-		!create_substitution_for_properties([a,y],[x,b],[y],[x,m,z],[],OutAssignmentB,SuccessB);
-		
-		.concat(OutAssignmentA,OutAssignmentB,OutAssignment);
-		.eval(Success, SuccessA & SuccessB);
-		.print("Success: ",Success);
-		if(Success=true)
-		{
-			.print("OutAssignment: ",OutAssignment);
-		}
-	.
-/**
- * [davide]
- * 
  * Create a substitution for the term lists of two properties that has the same functor.
  * VarA and VarB are the lists of variable in the par_condition containing the properties
  * related to the given term lists. 
@@ -829,8 +598,6 @@
  * 
  * Notes:
  * 	- TermsA and TermsB are assumed to be related to two properties that have THE SAME functor.
- * 
- * OK
  */
  +!create_substitution_for_properties(TermsA,TermsB,VarA,VarB,InAssignment, OutAssignment, Success)
 	:
@@ -922,75 +689,45 @@
  * works with parametric conditions where all variables are assigned.
  * 
  * PCN 				=> par_condition(Variables,ParamLogicFormula)
- * AssignmentSet	=> [assign(Var, Val),...]
- * World 			=> world(WS)
+ * AssignmentSet	=> [assignment(Var, Val),...]
+ * World 			=> accumulation state accumulation(world(WS),par_world(Vars,Properties),AssignmentSet)
  * Bool				=> Output boolean value
  */
 +!test_parametric_condition(PCN,AssignmentSet,World,Bool)
 	:
-		PCN = par_condition(Variables,ParamLogicFormula)
+		PCN = par_condition(Variables,ParamLogicFormula)			
 	<-
 		//Check if every variable has a corresponding assignment
 		!check_if_vars_are_assigned(Variables,AssignmentSet,BoundBool);
 		
+//		.print(Variables," have assignment in ",AssignmentSet,"? ",BoundBool);
+		
 		//If all variables are bounded
-		if (BoundBool=true)
+		if (BoundBool)
 		{
-			//convert the input parametric condition to a simple formula
+			//convert the input parametric condition to a simple formula using the input assignment set
 			!convert_parametric_to_simple_formula(ParamLogicFormula, Variables, AssignmentSet, LogicFormula);
 			
-			//test the obtained simple formula in world  
-			!test_logic_formula(LogicFormula, World, Bool);
+//			LogicFormulaList = [LogicFormula|_];
+//			.print("------------> condition(",LogicFormula,") on ",World);
+//			!check_if_par_condition_addresses_accumulation(condition(LogicFormula), World, [], [], OutAssignment, Bool, _);
+			
+			!check_if_par_condition_addresses_accumulation(PCN, World, [], [], OutAssignment, Bool, _);
+			
+			
+			
+			//TODO non posso usarla qui perchè gli assignment non rendono PCN uguale al predicato atteso in
+			//World quando ci si trova in fase di esecuzione
+			 
+			//[]test the obtained simple formula in world  
+			//!test_logic_formula(LogicFormula, World, Bool);
 		} 
 		else 
 		{
+//			.print("VAR ",Variables," are not assigned");
 			Bool = false;
 		}		
-	. 
-/* OK  */
-+!debug_test_parametric_condition <- !test_parametric_condition(
-	par_condition([city,duration],property(visited,[luca,city,duration])),
-	[assign(city,palermo),assign(duration,2)],
-	world([s1,visited(luca,palermo,3),s7]),
-	Bool
-); .println(Bool).
-+!debug_test_parametric_condition_2 <- !test_parametric_condition(
-	par_condition([activity], and([property(done,[activity]),eq(activity,classify)]) ),
-	[assign(activity,classify)],
-	world([s1,done(classify),s7]),
-	Bool
-); .println(Bool).
-+!debug_test_parametric_condition_3 <- !test_parametric_condition(
-	par_condition([datetime],and([property(it_is,[datetime]),data_earlier_than(datetime,dt(2014,2,20,24,0,0))])),
-	[assign(datetime,dt(2014,2,17,8,30,0))],
-	world([being_at(palermo),visited(palermo,2),it_is(dt(2014,2,17,8,30,0))]),
-	Bool
-); .println(Bool); .
-+!debug_test_parametric_condition_4 <- !test_parametric_condition(
-	par_condition([datetime],and([property(it_is,[datetime]),data_is(datetime,date(2014,2,17))])),
-	[assign(datetime,dt(2014,2,17,8,30,0))],
-	world([being_at(palermo),visited(palermo,2),it_is(dt(2014,2,17,8,30,0))]),
-	Bool
-); .println(Bool); .
-
-+!debug_convert_parametric_to_simple_formula
-	<-
-		!convert_parametric_to_simple_formula(property(f,[a,b]),[],[],SimpleFormula);
-		.print("Simple formula: ",SimpleFormula);
 	.
-
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for !convert_parametric_formulae_to_simple_formula(PW,Out)
- */
-+!debug_convert_parametric_formulae_to_simple_formula
-	<-
-		!convert_parametric_formulae_to_simple_formula([property(f,[x,d]), property(q,[g,y])], Out);
-		.print("Out:",Out);
-	.
-
 /**
  * [davide]
  * 
@@ -1175,18 +912,6 @@
 	<-
 		LogicFormula=ParamLogicFormula;
 	.
-		
-/* OK */
-+!debug_convert_parametric_to_simple_formula 
-	<- 
-		!convert_parametric_to_simple_formula(  property(visited,[luca,city,duration]),
-												[city,duration],
-												[assign(city,palermo),assign(duration,2)],
-												LogicFormula);												 
-		.println(LogicFormula); 
-	.
-
-
 
 +!convert_parametric_to_simple_list(ParametricOperands,Variables,AssignmentSet,Operands)
 	:
@@ -1203,17 +928,6 @@
 		Operands = [HeadLogicFormula | TailLogicFormula];
 	.
 
- /**
- * [davide]
- * 
- * DEBUG PLAN for !assemble_par_condition_from_accumulation
- */
-+!debug_convert_simple_condition_to_par_condition
-	<-
-		!convert_simple_condition_to_par_condition(world([p(x),q(y,j)]), PA);
-		.print("PA: ",PA);	
-	.
-
 /**
  * passo 1
  * 
@@ -1227,6 +941,21 @@
  * 	
  * 		par_condition([],[property(run,[John])])
  */
++!convert_simple_condition_list_to_par_conditions(CNlist,CNPlist)
+	:
+		CNlist = [Head|Tail]
+	<-
+		!convert_simple_condition_list_to_par_conditions(Tail,CNPlistRec);
+		!convert_simple_condition_to_par_condition(Head,CNP);
+		.union(CNPlistRec,[CNP],CNPlist);
+	.
++!convert_simple_condition_list_to_par_conditions(CNlist,CNPlist)
+	:
+		CNlist=[]
+	<-
+		CNPlist = [];
+	.
+	
 +!convert_simple_condition_to_par_condition(CN,CNP)
 	:
 		CN=condition(CNS)
@@ -1235,9 +964,31 @@
 		CNP = par_condition([],NormalizedCNS);						//Assemble the output par_condition
 	.
 +!convert_simple_condition_to_par_condition(CN,CNP)
+	:
+		CN=Statement
+	<-
+		!normalize_world_statement([Statement], NormalizedCNS);			//Normalize WS
+		CNP = par_condition([],NormalizedCNS);						//Assemble the output par_condition
+	.
++!convert_simple_condition_to_par_condition(CN,CNP)
 	:	CN 	= par_condition(_,_)
 	<-	CNP = CN
-	.	
-
-
+	.
+	
+	
+	
++!unroll_par_condition_to_get_properties(PCL, Properties)
+	:
+		PCL 	= [Head|Tail]				&
+		Head 	= par_condition([],PC)
+	<-
+		!unroll_par_condition_to_get_properties(Tail, PropertiesRec);
+		.union(PC,PropertiesRec,Properties);
+	.
++!unroll_par_condition_to_get_properties(PCL, Properties)
+	:
+		PCL 	= []
+	<-
+		Properties = [];
+	.
 	

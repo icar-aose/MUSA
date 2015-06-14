@@ -319,12 +319,19 @@ public abstract class Table {
 		return getOne(resultSet);
 	}
 
-	public List<Entity> getAll() throws SQLException {
-		PreparedStatement st = getConnection().prepareStatement("SELECT * FROM "+getTableName() );
+	public List<Entity> getAll() throws SQLException 
+	{
+		String query = "SELECT * FROM "+getTableName();
+		PreparedStatement st = getConnection().prepareStatement( query );
+		
+		System.out.println(query);
 		ResultSet resultSet = st.executeQuery();
 		LinkedList<Entity> results = new LinkedList<Entity>();
-		while (resultSet.next()) {
+		while (resultSet.next()) 
+		{
+			
 			Entity elem = fillEntity(resultSet);
+//			System.out.println("Elem: "+elem.toString());
 			results.add(elem);
 		}		
 		return results;

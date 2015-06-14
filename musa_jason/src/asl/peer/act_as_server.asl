@@ -22,7 +22,7 @@
 		?http_interface(Capability,RequestType,Path,Artifact);
 		
 		Request = request(Path,ParamSet,Proxy);
-//		.println("\n\nParamSet: ",ParamSet,"\n\n");
+		.println("\n\nParamSet: ",ParamSet,"\n\n");
 		
 		!check_interface_is_ready(Capability, RequestType, Bool);
 

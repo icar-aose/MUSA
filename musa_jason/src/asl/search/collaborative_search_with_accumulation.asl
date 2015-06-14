@@ -13,7 +13,6 @@
  * - condition_to_world_statement must handle NEG predicates.
  * - get_goal_TC e get_goal_FS devono gestire i goal con annotazioni
  * 
- * - [NORME] implementare !filter_capabilities_that_satisfy_par_condition(...) nel piano !select_hypotetical_capabilities(...)
  * - [IMPORTANTE] inserire dei piani !get_capability_postcondition e !get_capability_precondition che gestiscano i casi in cui le capability non 
  *   siano trovate. 
  * - manca EVO in !ask_for_tasks_that_address_final_state
@@ -32,6 +31,7 @@
 { include( "core/accumulation.asl" ) }
 { include( "core/goal.asl" ) }
 { include( "core/task.asl" ) }
+{ include( "core/blacklist.asl" ) }
 
 /**
  * [davide]
@@ -282,15 +282,11 @@
 						 ag([]),
 						 0 );
 			
-			
-			
-			!unroll_solution_to_get_commitment_set(TaskSet, CommitmentSet);
-			!get_blacklisted_capability_list(CommitmentSet, BlacklistedCS);
-			.print("BlacklistedCS: ",BlacklistedCS);
-	 		.length(BlacklistedCS, BlacklistedCSCardinality);
-			
-			
-			
+//			!unroll_solution_to_get_commitment_set(TaskSet, CommitmentSet);
+//			!get_blacklisted_capability_list(CommitmentSet, BlacklistedCS);
+//			.print("BlacklistedCS: ",BlacklistedCS);
+//	 		.length(BlacklistedCS, BlacklistedCSCardinality);
+//			
 			!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet,[], Item , Pack, MaxDepth, []);
 			!orchestrate_search_with_accumulation([],MaxSolution,Pack,Members,MaxDepth,Steps, OutSol);		
 			
@@ -499,15 +495,6 @@
 		.print("OutCS: ",OutCS);
 	.
 
-
-/*+!unroll_solution_to_get_commitment_set(Item, OutCS)
-	:
-		Item = [Head|Tail]
-	<-
-		!unroll_solution_to_get_commitment_set([Head], HeadCS);
-		!unroll_solution_to_get_commitment_set(Tail, TailCS);
-		.union(HeadCS,TailCS,OutCS);
-	.*/
 +!unroll_solution_to_get_commitment_set(Item, OutCS)
 	:
 		(Item = [Head|Tail] & Head = item(cs(CS),Acc,Ag,Score)) |
@@ -833,7 +820,8 @@
 +!score_sequence_on_accumulation(CS,InSolutions,Accumulation,Pack,AddressedGoal,CSmaxlen,InputAssignment,Score)
 	<-
 		?orchestrate_verbose(VB);
-	
+		?blacklist_enabled(BlacklistEnabled);
+		
 		if(VB=true)
 		{
 			.println("[score_sequence_on_accumulation] focus for scoring on ",CS);
@@ -849,22 +837,19 @@
 		InputSolutionScore = InputSolutionCardinality*0.5;
 		.length(CS, CSCardinality);		//Calculate the cardinality of the solution
 
+ 		if(BlacklistEnabled)	
+ 		{
+ 			!unroll_solution_to_get_commitment_set(CS, CommitmentSet);
+			!unroll_solution_to_get_commitment_set(InSolutions, InSolutionCommitmentSet);		
+			.union(InSolutionCommitmentSet, CommitmentSet, OverallCS);
+ 			!get_blacklisted_capability_list(OverallCS, BlacklistedCS);
+ 			!score_blacklisted_CS(BlacklistedCS,BlacklistScore);
+ 		}
+		else 					
+		{
+			BlacklistScore = 0;
+		}
 
-		//Unroll the overall commitment set (input solutions + currently examined CS)
-		//and find within this set the blacklisted capabilities. Then, calculate the
-		//cardinality of the blacklisted capability set (BlacklistedCSCardinality)
-		!unroll_solution_to_get_commitment_set(CS, CommitmentSet);
-		!unroll_solution_to_get_commitment_set(InSolutions, InSolutionCommitmentSet);		
-		.union(InSolutionCommitmentSet, CommitmentSet, OverallCS);
-		!get_blacklisted_capability_list(OverallCS, BlacklistedCS);
- 		.length(BlacklistedCS, BlacklistedCSCardinality);
- 		
- 		!score_blacklisted_CS(BlacklistedCS,BlacklistScore);
- 		.print("---------------------------------->BlacklistScore: ",BlacklistScore);
- 		
- 		
-		//---------
-		
 		if(SGSatisfied=true)		{	Cardinality = CSCardinality+1; 	}
 		else						{	Cardinality = CSCardinality;	}
 		
@@ -875,42 +860,6 @@
 		
 		Score = (2*GoalScore)+DomainScore;
 		if(VB=true){.println("[score_sequence_on_accumulation] Score: ",Score);}
-	.
-
-//CS -> blacklisted cs
-+!score_blacklisted_CS(CS,OutScore)
-	:
-		CS 		= [Head|Tail]					&
-		Head 	= commitment(Agent,Cap,_)
-	<-
-		!score_blacklisted_CS(Tail,OutScoreRec);
-		
-		?orchestration_start_at(Orchestration_start_time);
-		
-		
-		getBlacklistedCapabilityTimestamp(Cap, Agent, Capability_blacklist_timestamp_str);
-		.term2string(Capability_blacklist_timestamp, Capability_blacklist_timestamp_str);
-//		.print("Orchestration_start_time ",Orchestration_start_time);
-//		.print("Capability_blacklist_timestamp ",Capability_blacklist_timestamp);
-		
-		!how_many_times_elapsed(Capability_blacklist_timestamp,Orchestration_start_time, Blacklist_time);
-		?blacklist_expiration(ExpHH,ExpMM,ExpSS);
-		!timestamp_add(Capability_blacklist_timestamp, duration(0,0,0,ExpHH,ExpMM,ExpSS), BlacklistTimeStampDelayed);
-		
-		!how_many_times_elapsed(Capability_blacklist_timestamp, BlacklistTimeStampDelayed, Blacklist_max_time);
-		
-		.print("Blacklist_time for [",Cap,"]: ",Blacklist_time);
-		.print("Blacklist_max_time for [",Cap,"]: ",Blacklist_max_time);
-		
-		OutScore = OutScoreRec + (Blacklist_time/Blacklist_max_time); 
-		
-	.
-
-+!score_blacklisted_CS(CS,OutScore)
-	:
-		CS = []
-	<-
-		OutScore = 0;
 	.
 
 
@@ -932,28 +881,13 @@
 /**
  * [davide]
  * 
- * Update an accumulation state by applying the evolution plans related to CS.
+ * Update an accumulation state by applying the given evolution plans.
  * This plan takes an accumulation state, for example
  * 
  * accumulation(world(..),par_world([...],[property(f,[x])],assignment_list(...)))
  * 
  * and apply the evolution plans from the capability set CS to get AccumulationNext.
  */
- 
- 
-// COMMENTATO 13-5-2015. DA PROVARE
- 
-// +!update_accumulation(Accumulation, CS, AccumulationNext)
-//	:
-//		CS=[]
-//	<-
-//		true
-//	.
-// +!update_accumulation(Accumulation, CS, AccumulationNext)
-//	:	CS=[Head|Tail]
-//	<-	true
-//	.	
-	
 +!update_accumulation(Accumulation, PlanEvFunc, AccumulationNext)
 	:	PlanEvFunc = []
 	<-  AccumulationNext = Accumulation;
@@ -1045,7 +979,7 @@
 		!normalize_world_statement([Statement], NormalizedStatement_List);			//normalize the operator's statement	
 		
 		Capability = commitment(Ag,CapName,_);										//Get the capability terms
-		!get_remote_capability_pars(Capability,ParamsList);							//Get the capability parameters name
+		!get_remote_capability_pars(Capability,ParamsList);							//Get the capability parameters name list
 		NormalizedStatement_List = [Head|_];									
 		Head = property(F,Terms);
 		.intersection(ParamsList,Terms,EffectiveParams);							//Get the effective variabiles to be added in Vars
@@ -1103,7 +1037,6 @@
 		.eval(Bool, BoolRec | true);
 		.concat([Head],VarListRec,VarList);
 	.
-
 +!check_if_property_contains_vars(NormalizedStatementTerms, ParamList, Bool, VarList)
 	:
 		NormalizedStatementTerms = [Head|Tail] &
@@ -1111,7 +1044,6 @@
 	<-
 		!check_if_property_contains_vars(Tail, ParamList, Bool, VarList);
 	.
-
 +!check_if_property_contains_vars(NormalizedStatementTerms, ParamList, Bool, VarList)
 	:
 		NormalizedStatementTerms = []
@@ -1139,7 +1071,10 @@
 +!ask_for_hypotetical_capabilities(Members, Accumulation, TaskSet)
 	<-
 		?orchestrate_verbose(VB);
+		?blacklist_enabled(BlacklistEnabled);
+		
 		!select_hypotetical_capabilities(Accumulation, LocalCommitmentSet);
+		
 		
 		if(VB=true) {.println("[ask_for_hypotetical_capabilities]Accumulation state ",Accumulation);
 					 .println("[ask_for_hypotetical_capabilities]LocalCommitmentSet:",LocalCommitmentSet);}
@@ -1157,209 +1092,33 @@
 		}
 		if(VB=true) {.println("[ask_for_hypotetical_capabilities]selected capabilities:",CommitmentSet);}
 
-		!update_capability_blacklist(CommitmentSet,Context);
-		!get_blacklisted_capability_list(CommitmentSet, BlacklistedCS);
-//		.length(BlacklistedCS,LengthBCS);
-		
-		//filter_capabilities_that_offer_same_service QUI
-		
-		
+
+		if(BlacklistEnabled)
+		{
+			.my_name(Me);
+			.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
+			
+			if (.empty(Members))	
+			{
+				BlacklistedCS = LocalBlacklistedCommitmentSet
+			}
+			else					
+			{
+				!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
+				.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
+			}
+			
+			getDatabaseSystemCurrentTimeStamp(DBCurrentTimeStampStr);
+			.term2string(DBCurrentTimeStamp,DBCurrentTimeStampStr);
+			
+			!update_capability_blacklist(BlacklistedCS, DBCurrentTimeStamp, Context);
+		}
 		
 		//Costruisco lista di task
 		!build_task_list_from_commitment_set(CommitmentSet, TaskSet);
 	.
 
 
-//------------------------------BLACKLIST
-
-
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for +!get_blacklisted_capability_list+!update_capability_blacklist_expiration
- */
-+!debug_get_blacklisted_capability_list
-	<-
-		CS = [commitment(worker,receive_order,_),commitment(worker,place_order,_), commitment(worker,place_order_alternative,_), commitment(worker,place_order_alternative2,_)];
-		
-		!get_blacklisted_capability_list(CS, BlacklistedCS);
-		.print("CS: ",CS);
-		.print("BlacklistedCS: ",BlacklistedCS);
-	.
-
-/**
- * [davide]
- * 
- * Given a set CS of capabilities, return the blacklisted subset of CS capabilities. 
- */
-+!get_blacklisted_capability_list(CS, BlacklistedCS)
-	:
-		CS = [Head|Tail] &
-		Head = commitment(Agent,Cap,_)
-	<-
-		!get_blacklisted_capability_list(Tail, BlacklistedCSRec);
-				
-		//!get_remote_capability_blacklist(Head, IsHeadBlacklisted);
-		checkIfCapabilityIsBlacklisted(Cap, Agent, IsHeadBlacklisted);
-		
-		if(IsHeadBlacklisted)	{.union(BlacklistedCSRec, [Head], BlacklistedCS);}
-		else					{.union(BlacklistedCSRec, [], BlacklistedCS);}
-	.
-+!get_blacklisted_capability_list(CS, BlacklistedCS)
-	:	CS 				= []
-	<-	BlacklistedCS 	= []
-	.
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for +!update_capability_blacklist_expiration
- */
-+!debug_update_capability_blacklist_expiration(Context)
-	<-
-		CS = [commitment(worker,receive_order,_),commitment(worker,place_order,_), commitment(worker,place_order_alternative,_), commitment(worker,place_order_alternative2,_)];
-		
-		!get_blacklisted_capability_list(CS, BlacklistedCS);
-		.print("CS: ",CS);
-		.print("BlacklistedCS: ",BlacklistedCS);
-
-		.my_name(Me);
-		+capability_blacklist(Me, receive_order);
-		!register_statement(capability_blacklist(Me, receive_order), Context);
-		
-		.print("waiting....");
-		.wait(10000);
-		!update_capability_blacklist(CS,Context);
-		
-		.print("waiting....");
-		.wait(1000);
-		
-		!get_blacklisted_capability_list(CS, BlacklistedCS_2);
-		.print("BlacklistedCS: ",BlacklistedCS_2);
-	.
-
-/**
- * [davide]
- * 
- * Update the agents blacklist. For each commitment in CS, this plan check
- * if a capability is blacklisted, and if true, then check if its persistence 
- * period within the blacklist has expired. In this case, the capability is 
- * removed from the blacklist.
- * 
- * This is executed by the dpt manager.
- */
-+!update_capability_blacklist(CS,Context)
-	:
-		CS 		= [Head|Tail] 						&
-		Head 	= commitment(Agent,Capability,_)
-	<-
-		?blacklist_verbose(BV);
-		
-		//Recursive call
-		!update_capability_blacklist(Tail,Context);
-		
-		//Get the current capability blacklist timestamp in context (adw_state table in database)
-//		!get_condition_timestamp_in_context(condition(capability_blacklist(Agent,Capability)), Context, TSblacklist);
-		
-		getBlacklistedCapabilityTimestamp(Capability, Agent, TSblacklistStr);
-		.term2string(TSblacklist,TSblacklistStr);
-		
-		//If capability is blacklisted
-		if(TSblacklist \== no_timestamp)
-		{
-			//Get the current system timestamp
-			getDatabaseSystemCurrentTimeStamp(CurrentTimeStampStr);
-			.term2string(CurrentTimeStamp,CurrentTimeStampStr);
-			
-			//get the blacklist expiration time
-			?blacklist_expiration(HDelay,MDelay,SDelay);
-			
-			//Add the expiration rate to the capability blacklist timestamp
-			!timestamp_add(TSblacklist, duration(0,0,0,HDelay,MDelay,SDelay), TimeStampDelayed);
-			
-			//Take the less recent timestamp
-			!pick_less_recent(TimeStampDelayed, CurrentTimeStamp, LessRecentTS );
-			
-			LessRecentTS 		= ts(LESS_Y, LESS_MTH, LESS_DAY, LESS_H, LESS_M, LESS_S);
-			TimeStampDelayed	= ts(TS_Y, TS_MTH, TS_DAY, TS_H, TS_M, TS_S);
-			
-			//If the blacklist capability timestamp, to which the expiration rate has been added,
-			//if less recent than the current timestamp
-			if( LESS_Y==TS_Y 	& LESS_MTH==TS_MTH 		& LESS_DAY==TS_DAY	&
-				LESS_H==TS_H 	& LESS_M==TS_M			& LESS_S==TS_S ) 	
-			{ 
-				//tell the owner of the capability to remove it from the blacklist
-//				.print("ok, RIMUOVO ",capability_blacklist(Agent, Capability)," LessRecentTS: ",LessRecentTS," TimeStampDelayed: ",TimeStampDelayed);
-				.send( Agent, tell, abolish( capability_blacklist(Agent, Capability) ) );
-				
-				removeCapabilityFromBlacklist(Capability, Agent);
-			}
-//			else
-//			{
-//				if(BV){.print("NIENTE...");}
-//			}
-		}
-	.
-
-+!update_capability_blacklist(CS,Context)
-	:
-		CS 		= []
-	.
-	
-+!get_blacklist_cs_score
-	<-
-		true
-	.
-
-
-+!commitment_set_difference(SetA, SetB, SetOut)
-	:
-		SetA = [Head|Tail] &
-		.list(SetB)
-	<-
-		!commitment_set_difference(Tail, SetB, SetOutRec);
-		
-		if(not .member(Head, SetB))
-		{
-			.concat(SetOutRec, [Head], SetOut);
-		}
-		else
-		{
-			.concat(SetOutRec, [], SetOut);
-		}
-	.
-
-+!commitment_set_difference(SetA, SetB, SetOut)
-	:	SetA 	= []
-	<-	SetOut 	= [];
-	.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//------------------------------BLACKLIST
 /**
  * [davide]
  * 
@@ -1410,6 +1169,7 @@
 	<-
 		.print("Failed to get Capability '",Cap,"' post condition.");
 	. 
+
  
 +collaboration_request(Token,MaxCounter,Request)[source(Manager)]
 	:
@@ -1418,16 +1178,29 @@
 		?orchestrate_verbose(VB);
 		if(VB=true){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
 		
-		
-		//.print("------> collaboration request from manager ",Manager);
-		
 		.abolish( collaboration_request(Token,MaxCounter,Request) );
 		+max_time_for_collecting(Token,MaxCounter);
 		!select_hypotetical_capabilities(Accumulation,CommitmentSet);
 		
-		//.print("I have these caps: ",CommitmentSet);
-		
 		.send(Manager,tell,collaboration_answer(Token,CommitmentSet));
+		-max_time_for_collecting(Token,MaxCounter);
+	.
+	
++collaboration_request(Token,MaxCounter,Request)[source(Manager)]
+	:
+		Request=blacklist_request
+	<-
+		?orchestrate_verbose(VB);
+		if(VB=true){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
+		
+		.abolish( collaboration_request(Token,MaxCounter,Request) );
+		+max_time_for_collecting(Token,MaxCounter);
+		
+		.my_name(Me);
+		.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), BlacklistCS);
+		//!!!!
+		
+		.send(Manager,tell,collaboration_answer(Token,BlacklistCS));
 		-max_time_for_collecting(Token,MaxCounter);
 	.
 
@@ -1470,9 +1243,6 @@
 		//get the capabilities that have multiple types specified (only simple and parametric)
 		.findall(commitment(Me, Cap, HeadPercent)[capability_types(CapabilityTypes)], agent_capability(Cap)[capability_types(CapabilityTypes)], AllCapabilityWithDifferentTypes);
 		
-		
-		
-		
 		!filter_capability_with_multiple_types_specified(AllCapabilityWithDifferentTypes, OutFilteredCapabilities);
 		
 		/**
@@ -1482,21 +1252,8 @@
 		.union(AllSimpleCapabilities, AllParCapabilities, AllCapabilities_tmp);													//ALLcapabilities
 		.union(OutFilteredCapabilities, AllCapabilities_tmp, AllCapabilities);
 		
-		//.print("Capabilities found: ",AllCapabilities);
-		//!filter_capabilities_that_offer_same_service(AllCapabilities);
-		
-		//.wait(90000);
-		
-		
-		//Do not consider the blacklisted capabilities
-		//.findall(BlacklistedCap, capability_blacklist(BlacklistedCap), BlacklistedCS);
-		//.intersection(AllCapabilities_with_blacklisted, BlacklistedCS, AllCapabilities);
-		
 		!filter_capabilities_that_triggers_on_accumulation(AllCapabilities, Accumulation, CapabilitiesThatTriggersAcc);
 		!filter_capabilities_that_create_a_new_world_in_accumulation(CapabilitiesThatTriggersAcc, Accumulation, CommitmentSet);
-		//
-		//QUI andrebbe il terzo criterio sui parametri, ossia la validazione dei parametri,
-		//!filter_capabilities_that_satisfy_par_condition(...)
 	.
 
 /**
@@ -1525,17 +1282,6 @@
 +!filter_capability_with_multiple_types_specified(CommitmentList, OutCapList)
 	:	CommitmentList 		= []
 	<-	OutCapList 			= [];
-	.
-
-/**
- * [davide]
- * Questo piano filtra le capability in ingresso restituendo solamente quelle che soddisfano i vincoli di PRESENZA e CORRETTEZZA dei parametri
- * TODO
- * DA IMPLEMENTARE
- */
-+!filter_capabilities_that_satisfy_par_condition(InCapabilities,Accumulation,OutCapabilities)
-	<-
-		OutCapabilities = InCapabilities;
 	.
 
 /**

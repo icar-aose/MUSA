@@ -23,6 +23,9 @@ import ids.model.RoleEntity;
 import ids.model.StateEntity;
 import ids.model.UserEntity;
 import ids.model.ValueEntity;
+import jason.asSyntax.ASSyntax;
+import jason.asSyntax.ListTerm;
+import jason.asSyntax.ListTermImpl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -53,6 +56,21 @@ public class Database extends Artifact
 	void init() 
 	{
 	}
+	
+	
+	@OPERATION
+	void deleteUncompletedProjects(int dept) throws SQLException
+	{
+		ProjectTable project_table 	= new ProjectTable();
+		List<ProjectEntity> toDelete = project_table.getUncompleteProjects(dept);
+		
+		for(ProjectEntity p : toDelete)
+		{
+			project_table.deleteOneByID(p.getId());
+		}
+		
+	}
+	
 	
 	@OPERATION
 	void readWorkflowUsers() {
@@ -109,6 +127,20 @@ public class Database extends Artifact
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Remove all the blacklist entries from the database
+	 * 
+	 * @author davide
+	 */
+	@OPERATION
+	void clearBlacklist()
+	{
+		BlacklistTable tt 		= new BlacklistTable();
+		try 					{tt.deleteAll();} 
+		catch (SQLException e) 	{e.printStackTrace();}
+	}
+	
 	
 	/**
 	 * Insert a capability into the database blacklist table. If the capability is already 
@@ -225,6 +257,7 @@ public class Database extends Artifact
 	@OPERATION
 	void checkIfCapabilityIsBlacklisted(String capabilityName, String agent, OpFeedbackParam result)
 	{
+//		System.out.println("Entering checkIfCapabilityIsBlacklisted");
 		BlacklistTable tt 		= new BlacklistTable();
 		BlacklistEntity elem 	= null;
 		
@@ -236,6 +269,42 @@ public class Database extends Artifact
 			else				{result.set(false);}
 		} 
 		catch (SQLException e) {e.printStackTrace();}
+//		System.out.println("Exiting checkIfCapabilityIsBlacklisted");
+	}
+	
+	/**
+	 * Retrieve the blacklisted capability set from the database and creates,
+	 * for each one, a predicate of type
+	 * <br/><br/>
+	 * <b>capability_blacklist(Agent,CapName,Timestamp)</b>
+	 * <br/><br/>
+	 * that is inserted into the result list.
+	 * 
+	 * @param result a JASON list of predicates.
+	 * @author davide
+	 */
+	@OPERATION
+	void getBlacklistedCapabilitySet(String project)
+	{
+		BlacklistTable tt 			= new BlacklistTable();
+		List<Entity> blacklistedCap;
+		try 
+		{
+			blacklistedCap = tt.getAll();
+			
+			Iterator<Entity> it = blacklistedCap.iterator();
+			while (it.hasNext()) {
+				
+				BlacklistEntity blacklistedCapability = (BlacklistEntity) it.next();
+					
+				System.out.println("[BLACKLIST] Got "+blacklistedCapability.getCapability());
+				signal("receive_capability_blacklist",blacklistedCapability.getAgent(), blacklistedCapability.getCapability(), blacklistedCapability.getUpdated());
+			}
+		} 
+		catch (SQLException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	

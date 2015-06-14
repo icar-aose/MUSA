@@ -1,12 +1,12 @@
 /**************************
- * @Author: Luca Sabatucci
+ * @Author: Luca Sabatucci, Davide Guastella
  * Description: project manager role activities
  * 
  * Last Modifies:  
  * 
  *
  * TODO: 
- *	- delete plans +!unroll_solutions_to_select_best
+ *	
  * Bugs:  
  * 
  *
@@ -29,47 +29,87 @@
 		!build_goal_pack(SocialGoal,Pack);
 		!organize_solution(Context,Pack);
 	.
-//-!create_project(DepartmentName, ProjectName)
-//	<-
-//		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-//		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-//		?frequency_long_perception_loop(Delay);
-//		.wait(Delay);
-//		!!create_project(DepartmentName,ProjectName);
-//	.
+-!create_project(DepartmentName, ProjectName)
+	<-
+		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+		?frequency_long_perception_loop(Delay);
+		.wait(Delay);
+		!!create_project(DepartmentName,ProjectName);
+	.
 
- 
+
+
+/**
+ * [davide]
+ * 
+ * Retrieve from the database the previously blacklisted capability 
+ * referred to the given context. For each blacklisted capability found,
+ * a belief is added into the dpt manager knowledge base.
+ */
++!read_blacklist_from_database(Context)
+	<-
+		Context 	= project_context(Department , Project);
+		getBlacklistedCapabilitySet(Project);
+	.
+	
+/**
+ * 
+ * This plan is triggered when an employee agent tell the project manager that 
+ * one of its capabilities is failed. The project manager, when receive this message,
+ * add the involved capability into the blacklist. Also, the project manager keep
+ * in its knowledge base the predicate capability_error(...) that will cause a
+ * replanning of the project. 
+ */ 
 +capability_failure(Capability, Agent, Context)
 	<-
+		?blacklist_enabled(BlacklistEnabled);
+		
 		+capability_error(Context);
 		
-		insertOrUpdateCapabilityIntoBlacklist(Capability, Agent);
-		.print("----------------->Capability [",Capability,"] Updated in blacklist");
+		if(BlacklistEnabled)
+		{
+			insertOrUpdateCapabilityIntoBlacklist(Capability, Agent);	
+			getBlacklistedCapabilityTimestamp(Capability, Agent, TSstr);
+			.term2string(TS,TSstr);
+
+			.print("[BLACKLIST] Capability [",Capability,"] Added/Updated in blacklist @",TS);
+			.send(Agent, tell, capability_blacklist(Me, Capability, TS));
+		}
 		.abolish( capability_failure(Capability, Agent, Context) );
 	.
 	
 +!organize_solution(Context, Pack)
 	<-
+		?blacklist_enabled(BlacklistEnabled);
 //		action.clearContext;
-		occp.logger.action.info("Organizing solution");
+		occp.logger.action.info("Organizing solution. Context: ",Context);
 		getEmployees(DptMembers);
 
 		.my_name(Me);
 		.delete(Me,DptMembers,Members);
-		
 		!build_current_state_of_world(Context,WI);
-		!retrieve_assignment_from_context(Context,AssignmentList);		//????
+		!retrieve_assignment_from_context(Context, AssignmentList);		//????
 		
 		Accumulation_state = accumulation(WI, par_world([],[]), assignment_list(AssignmentList));
 		
-		//Keep the timestamp...  
-		!numeric_timestamp(Now);
-		+orchestration_start_at(Now);
+		if(BlacklistEnabled)	
+		{
+			!read_blacklist_from_database(Context);
+				
+			//Keep the timestamp of when the solution planning is starting  
+			getDatabaseSystemCurrentTimeStamp(NowStr);
+			.term2string(Now,NowStr);
+			+orchestration_start_at(Now);
+		}
 		
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
 		//TODO per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
 		
-		-orchestration_start_at(Now);
+		if(BlacklistEnabled)	
+		{
+			-orchestration_start_at(Now);
+		}
 		
 		Context = project_context(DepartmentName,ProjectName);
 		
@@ -331,10 +371,8 @@
 		Context = project_context(Department , Project);			//context
 		Pack 	= pack(SocialGoal, GoalList, Norms, Metrics);		//goal pack
 		
-		
 		for ( .member(Goal, GoalList) )								//for each goal in goal pack
 		{
-			.print("Setting goal ",Goal," to ready");
 			GoalLifeCycle = goal_lifecycle( Context, ready );		
 			!!check_goal_lifecycle(Goal, GoalLifeCycle);
 		}
@@ -498,7 +536,7 @@
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 
 		.print("---SOCIAL GOAL COMMITMENT SUSPENDED---");
-		.wait(10000);
+		.wait(5000);
 
 		//TODO ...other stuff?
 		!organize_solution(Context,Pack);
@@ -652,7 +690,6 @@
 		ParentCS	= task(PRE,POST , _, _, AssignmentList, _)	&
 		Head 		= commitment(Agent,Capability,HeadPercent)
 	<-
-		.print("[ECCOMI] preparo ",Capability);
 		.send(Agent,tell,start_social_commitment(Context,Pack,Capability,PRE,POST,AssignmentList));
 		
 		!unroll_solution_to_inform_social_commitment_and_extract_members(Tail,ParentCS,Context,Pack,TailMembers);

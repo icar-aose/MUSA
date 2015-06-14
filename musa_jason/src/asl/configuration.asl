@@ -24,7 +24,10 @@ time_for_project_employment(2500).
 
 
 
+use_capability_failure_gui(false).
+
 //---
+blacklist_enabled(true).
 blacklist_base_time(120000).
 blacklist_expiration(0,20,0).
 

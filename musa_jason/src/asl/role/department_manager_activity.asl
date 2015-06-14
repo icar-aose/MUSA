@@ -56,6 +56,11 @@
 		}
 	.
 
+/**
+ * Called from each agent. It checks if an agent has a capability which
+ * execution generates a world state that will be used as start point for
+ * searching solutions.
+ */
 +!check_if_I_am_able_to_manage_dpt( Pack, ResultBool)
 	<-
 		Pack=pack(SocialGoal,AgentGoals,Norms,Metrics);		
@@ -271,14 +276,7 @@
 		if(TC_Satisfied==true)
 		{
 			//If the trigger condition is satisfied, then the current capability is registered to the database.
-//			!!register_capability(CapabilityName,DptContext);
-			
-			
-			
-			//ONLY IF RUNNING LOCAL INSTANCE (DEBUG)
-			!activate_capability(CapabilityName,DptContext,[]);
-			.print(CapabilityName," executed");
-			
+			!!register_capability(CapabilityName,DptContext);			
 		}
 		
 		!unroll_parametric_cap_set_to_activate_project(TC, GoalParams, Tail, DptContext);			//Recall the plan with the remaining capabilities.

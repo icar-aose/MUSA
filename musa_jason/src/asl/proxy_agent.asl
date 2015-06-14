@@ -24,9 +24,10 @@
 	.
 +!awake : execution(test) 
 	<- 
-		!start_proxy_server;
-//		.wait(10000);
-//		!simulate_quote_request;
+//		!start_proxy_server;
+		.wait(9000);
+		.print("---------------SIMULATING REQUEST---------------");
+		!simulate_quote_request;
 	.
 
 
@@ -70,7 +71,7 @@
 		
 		Session = "p4_dept";
 		User = user("luca","occp_user");
-		!forward(worker,"access_to_order",paramset(Session,User,[]),HTML1);
+		!forward(worker,"access_to_order",paramset(Session,User,[param(idOrder,1111),param(idUser,116)]),HTML1);
 	.		
 
 

@@ -139,6 +139,81 @@
 		.print("Satisfied: ",Satisfied," Percent: ",Percent);
 		.print("Out assignment: ",OutAssignment);
 	.
+	
+	
++!debug_check_if_par_condition_addresses_accumulation_8
+	<-
+		Condition 		= par_condition([order_id,user_id], property(order_placed,[order_id,user_id]));
+		Accumulation 	= accumulation(world([]),par_world([order,user],[property(order_placed,[order,user])]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.
++!debug_check_if_par_condition_addresses_accumulation_9
+	<-
+		Condition 		= condition(order_placed(order,user));
+		Accumulation 	= accumulation(world([]),par_world([order,user],[property(order_placed,[order,user])]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.	
++!debug_check_if_par_condition_addresses_accumulation_10
+	<-
+		Condition 		= condition(order_placed(order_id,user_id));
+		Accumulation 	= accumulation(world([]),par_world([order,user],[property(order_placed,[order,user])]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.
++!debug_check_if_par_condition_addresses_accumulation_11//false
+	<-
+		Condition 		= condition(order_placed(order_id,user_id));
+		Accumulation 	= accumulation(world([]),par_world([],[property(order_placed,[order,user])]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.	
++!debug_check_if_par_condition_addresses_accumulation_12
+	<-
+		Condition 		= par_condition([order_id,user_id], property(order_placed,[order_id,user_id]));
+		Accumulation 	= accumulation(world([]),par_world([],[property(order_placed,[order,user])]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.
++!debug_check_if_par_condition_addresses_accumulation_13
+	<-
+		Condition 		= par_condition([order_id,user_id], property(order_placed,[order_id,user_id]));
+		Accumulation 	= accumulation(world([]),par_world([order,user],[property(order_placed,[order,user])]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.
++!debug_check_if_par_condition_addresses_accumulation_14 //false
+	<-		
+		Condition 		= par_condition([order_id,user_id], property(order_placed,[order_id,user_id]));
+		Accumulation 	= accumulation(world([  condition(order_placed(order_id,user_id))  ]),par_world([],[]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.		
++!debug_check_if_par_condition_addresses_accumulation_15
+	<-		
+		Condition 		= condition(order_placed(order_id,user_id));
+		Accumulation 	= accumulation(world([  condition(order_placed(order_id,user_id))  ]),par_world([],[]),assignment_list([]));
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Satisfied, Percent);
+		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
+		.print("Out assignment: ",OutAssignment);
+	.
+	
+	
+	
+
+	
+
+
+
+
 
 +!debug_filter_par_world_to_keep_only_parametric_condition
 	<-

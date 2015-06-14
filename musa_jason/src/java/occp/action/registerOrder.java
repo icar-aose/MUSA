@@ -45,6 +45,8 @@ public class registerOrder extends DefaultInternalAction
 		OrderEntity e 		= new OrderEntity();
 		
 		//Metto solo le informazioni necessarie
+		System.out.println(order_id);
+		
 		e.set_billing_id(Integer.parseInt(order_id));
 		e.set_user_id(Integer.parseInt(user_id));
 		e.set_issue_date(new Date());

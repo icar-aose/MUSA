@@ -93,3 +93,77 @@
 	<-
 		ids.goalspec.loadFromFile(Description);
 	.
+
+	
+	
+	
+	
+	
+/**
+ * [davide]
+ * 
+ * 
+ */
++capability_failure_state(Ag,CapStr,Failure)
+	<-
+		.print("SETTING FAILURE STATE FOR ",CapStr," to ",Failure);
+		
+		.term2string(Cap,CapStr);
+		if(Failure)
+		{
+			.print("aggiungo...");
+			-+fail(Cap);
+		}
+		else
+		{
+			.abolish(fail(Cap));
+		}
+		
+		.abolish(capability_failure_state(Ag,Cap,_));
+	.
+
+/**
+ * [davide]
+ * 
+ * ...
+ */
++remove_from_blacklist(Capability)[source(Manager)]
+	<-
+		.my_name(Me);
+		-capability_blacklist(Me,Capability,_);
+		.abolish( remove_from_blacklist(Capability) );
+		
+		.print("[Blacklist] Capability ",Capability," removed from local blacklist");
+	.
+	
+	
+	
+
++get_capability_set(CS)
+	<-
+		.my_name(Me);
+		
+		.print("Ho capability [",Me,"]");
+		
+		.findall(commitment(Me, Cap, 0), agent_capability(Cap), CS);
+		
+		
+	.
+	
++request_for_capability_set[source(X)]
+	<-
+		!get_capability_set(CS);
+		for(.member(Cap,CS))
+		{
+			.send(X,tell,Cap);
+		}
+		.my_name(Me);
+		+agent_response(Me);
+	.
+	
++!get_capability_set(CS)
+	<-
+		.my_name(Me);
+		.findall(commitment(Me, Cap, 0), agent_capability(Cap), CS);
+		
+	.

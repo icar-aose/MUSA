@@ -26,7 +26,7 @@
 	<-
 		MaxCounter=Counter;
 	.
-			
+	
 +!ask_for_collaborations(CollaboratorList,Predicate,ResponseList)
 	<-
 		!timestamp(Token); /* unique string (from common.asl) */

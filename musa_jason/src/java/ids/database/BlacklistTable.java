@@ -31,13 +31,14 @@ public class BlacklistTable extends Table
 	protected Entity fillEntity(ResultSet set) throws SQLException 
 	{
 		BlacklistEntity response = new BlacklistEntity();
-		set.first();
+//		set.first();
 		
 		response.setId( set.getInt("id") );
 		response.setCapability( set.getString("capability") );
 		response.setAgent( set.getString("agent") );
 		response.setFailure_rate( set.getShort("failure_rate") );
 		response.setUpdated( set.getTimestamp("updated") );
+		response.setProject_ref( set.getInt("project_ref") );
 		
 		return response;
 	}

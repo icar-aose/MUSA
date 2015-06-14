@@ -20,15 +20,25 @@
 		.print("Found evolution plan: ",TX);	
 	.
 
-
-+!get_remote_capability_blacklist(Commitment, IsBlacklisted)
+/*
+ * [davide]
+ */
++!get_remote_capability_blacklist(Commitment, Response)
 	:
 		Commitment = commitment(Agent, Cap, _)
 	<-
-		.send(Agent, askOne, capability_blacklist(Agent, Cap), Reply);
+		.send(Agent, askOne, capability_blacklist(Agent, Cap, _), Reply);
 		
-		if (Reply \== false) 	{IsBlacklisted = true;}
-		else					{IsBlacklisted = false;}
+		if (Reply \== false) 	
+		{
+			Reply = capability_blacklist(Agent, Cap, TS)[source(Agent)];
+			Response = TS;
+		}
+		else
+		{
+			Response = no_timestamp;
+		}
+//		Response = Reply;
 	.
 
 /**

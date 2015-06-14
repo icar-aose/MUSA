@@ -154,8 +154,15 @@
  * Test a condition (simple or parametric) in a given accumulation state. Note that
  * possible assignment must be applied on the accumulation before using this plan.
  * 
- */ 
+ */ 	
 +!test_condition(Condition,Accumulation,Bool)
+	:
+		Condition 		= condition(LogicFormula)				&
+		Accumulation 	= accumulation(world(WS),_,_)
+	<-
+		!test_logic_formula(LogicFormula, WS, Bool);
+	.
++!test_condition(Condition,AssignmentSet,Accumulation,Bool)
 	:
 		Condition 		= condition(LogicFormula)				&
 		Accumulation 	= accumulation(world(WS),_,_)
@@ -176,7 +183,7 @@
 	. 
 +!test_condition(ParCondition,AssignmentSet,Accumulation,Bool)
 	:
-		ParCondition 		= par_condition(Variables,ParamLogicFormula)
+		ParCondition = par_condition(Variables,ParamLogicFormula)
 	<-
 		!test_parametric_condition(ParCondition,AssignmentSet,Accumulation,Bool);
 	. 
@@ -207,81 +214,6 @@
 		Statements=[Head | TailStatements];
 	.
 
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for +!unroll_condition_formulae
- */
-+!debug_unroll_condition_formulae
-	<-
-		Formulae = and([received_order(order_id,user_id),true]);
-		
-		!unroll_condition_formulae(Formulae, OutFormulae);		
-		
-		.print("Input formula: ",Formulae);
-		.print("Out formula: ",OutFormulae);
-	. 
-/**
- * [davide]
- * 
- * Unroll the properties within the formula of a given par_condition formula. For example,
- * the output for the following formula
- * 
- * 	and([property(p,[x,b]), property(q,[m,z])])
- *
- * 	is given by
- *  
- * 	[property(p,[x,b]),property(q,[m,z])]
- * 
- * ---> INUTILIZZATA <---
- */
-+!unroll_condition_formulae(Formula, OutParCondition)
-	<-
-		!unroll_condition_formulae(Formula, OutParCondition, _);
-	.
-	
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	:
-		Formula = [Head|Tail]
-	<-
-		!unroll_condition_formulae(Head, OutParConditionH, NegFlag);
-		!unroll_condition_formulae(Tail, OutParConditionT, NegFlag);
-		.concat(OutParConditionH, OutParConditionT, OutParCondition);
-	.
-
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	:	Formula = and(List) | Formula = or(List)
-	<-	!unroll_condition_formulae(List, OutParCondition, NegFlag)
-	.
-
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	:
-		Formula = neg(List)
-	<-
-		if(NegFlag = false)		{ N=true; }
-		else					{ N=false; }
-		
-		!unroll_condition_formulae(List, OutParCondition, N);
-	.
-
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	:	not .list(Formula) & NegFlag = true
-	<-	OutParCondition = [Formula];
-	.
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	:	not .list(Formula) & NegFlag = false
-	<-	OutParCondition = [];
-	.	
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	:	Formula 			= []
-	<-	OutParCondition 	= [];
-	.
-+!unroll_condition_formulae(Formula, OutParCondition, NegFlag)
-	<-	Formula = OutParCondition;
-	.
-
-
 /**
  * [luca]
  * 
@@ -294,7 +226,7 @@
 +!unroll_assignments_to_get_value_for_variable(AssignmentSet,Variable,Value)
 	:
 		AssignmentSet=[ Head | Tail ]
-	&	Head=assign(FreeVariable,ConstantValue)
+	&	Head=assignment(FreeVariable,ConstantValue)
 	<-
 		//.println("comparing ",Head," with ",Variable);
 		if (FreeVariable = Variable) {
@@ -309,7 +241,7 @@
 	:
 		not .ground(LogicFormula)
 	<-
-		.print("[conditions->test_logic_formula] ",LogicFormula," is not bounded\n\n");
+		.print("[conditions->test_logic_formula] ",LogicFormula," is not bounded. Waiting...\n\n");
 		.wait(50000);
 		Bool = false;
 		
@@ -387,11 +319,11 @@
 		LogicFormula 	= Statement
 	&	World 			= world( StateOfWorld )
 	<-
-		//.print("Testing logic formula ",LogicFormula," ...");
-		if (.member(Statement,StateOfWorld)) 
+//		.print("Testing logic formula ",LogicFormula," ...");
+		if (.member(Statement,StateOfWorld) | .member(condition(Statement),StateOfWorld)) 
 		{
 			Bool = true;
-			//.print("Statement ",Statement," is member of ",StateOfWorld);
+//			.print("Statement ",Statement," is member of ",StateOfWorld);
 		} 
 		else 
 		{

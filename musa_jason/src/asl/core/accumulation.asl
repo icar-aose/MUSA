@@ -16,6 +16,8 @@
  { include( "core/world.asl" ) }
  { include( "core/par_condition.asl" ) }
  { include( "core/conditions.asl" ) }
+ { include( "debug/accumulation_debug.asl" ) }
+ 
  
  /**
   * [davide]
@@ -245,7 +247,7 @@
 		
 		.intersection(Terms,GoalVars,EffectiveVars);
 		if (not .empty(EffectiveVars))	{.concat([Head],PropertyOutRec,PropertyOut);}
-		else				{.concat([],PropertyOutRec,PropertyOut);}
+		else							{.concat([],PropertyOutRec,PropertyOut);}
 		
 		.union(VarOutRec,EffectiveVars, VarOut);
 		
@@ -358,7 +360,8 @@
 		Acc = accumulation(world(WS), par_world(Vars, PWS), _)	&
 		CN 	= condition( CNs ) 
 	<-
-		?accumulation_verbose(VB);	
+		?accumulation_verbose(VB);
+
 
 		//Step 1 -> Assemble the par_condition from both the accumulation state and the input condition CN
 		!assemble_par_condition_from_accumulation(accumulation(world([]), par_world(Vars, PWS), _), PA);
@@ -366,6 +369,7 @@
 		//Convert CN, the input condition, to a par_condition CNI_tmp
 		!convert_simple_condition_to_par_condition(CN, CNI_tmp);			
 		CNI_tmp = par_condition(CNI_tmp_Vars, PC_Properties);
+//		.print("CNI_tmp: ",CNI_tmp);
 		
 		//TODO In realtà il !get_assignment_from_par_list sarebbe inutile perche gli assignment ottenuti dalla parlist del goal da testare sono  già inclusi in InAssignment.
 		!get_assignment_from_par_list(GoalParams, GoalAssignmentList);
@@ -377,19 +381,25 @@
 		!get_var_list_from_assignment_list(GoalAssignmentList, GoalVars);
 		
 		
-		!filter_effective_parametric_par_condition(PC_Properties, GoalVars, PC_Properties_filtered, EffectiveVars);
+//		!filter_effective_parametric_par_condition(PC_Properties, GoalVars, PC_Properties_filtered, EffectiveVars);
 		
-		CNI = par_condition(CNI_tmp_Vars,PC_Properties_filtered);
+//		CNI = par_condition(CNI_tmp_Vars,PC_Properties_filtered);
+		
+//		.print("FILTERED CNI: ",CNI_tmp);
 		
 		//Step 2 -> find for a substitution that makes the two par_condition identicals.
-		!find_substitution_for_par_condition(CNI, PA, Vars, InAssignment, OutAssignment, Success);
-		
+//		!find_substitution_for_par_condition(CNI, PA, Vars, InAssignment, OutAssignment, Success);
+
+		.union(GoalVars,Vars,AllVars);
+//		!find_substitution_for_par_condition(CNI_tmp, PA, Vars, InAssignment, OutAssignment, Success);
+		!find_substitution_for_par_condition(CNI_tmp, PA, AllVars, InAssignment, OutAssignment, Success);
 		
 		if(VB=true)
 		{
 			.print("-----------------------------------------------");
 			.print("[check_if_par_condition_addresses_accumulation] FIND_SUBSTITUTION SUCCESS: ",Success);
-			.print("[check_if_par_condition_addresses_accumulation] CN: ",CN);		
+			.print("[check_if_par_condition_addresses_accumulation] PA: ",PA);		
+			.print("[check_if_par_condition_addresses_accumulation] CNI_tmp: ",CNI_tmp);		
 			.print("[check_if_par_condition_addresses_accumulation] Input Assignment: ",InAssignment);
 			.print("[check_if_par_condition_addresses_accumulation](PASSO 1) CNI: ",CNI);
 			.print("[check_if_par_condition_addresses_accumulation](PASSO 2) Assignment trovati: ",OutAssignment);
@@ -411,6 +421,8 @@
 			
 			AccII = accumulation(world(WII), par_world(VarList, PWII), _);
 			//Step 4 -> Test the condition within the dummy accumulation state (where the found assignment have been applied).
+			
+//			.print("--->.-.-.-.-.-TESTING ",CN,"\non ",WII);
 			!test_condition(CN, WII, Bool);
 			
 			if(VB=true){.print("[check_if_par_condition_addresses_accumulation] ----->TEST_CONDITION: ",Bool);}
@@ -429,41 +441,63 @@
 +!check_if_par_condition_addresses_accumulation(CN, Acc, InAssignment, GoalParams, OutAssignment, Bool, HeadPercent)
 	:
 		Acc = accumulation(world(WS), par_world(VarList, PWS), _)
-	&	CN = par_condition( _, _ )
+	&	CN = par_condition( PCNVar, PCNproperties )
 	<-
 		//Passo1 -> Converto lo stato di accumulazione in ingresso in una par_condition
 		!assemble_par_condition_from_accumulation(Acc, PA);
 		
 		//Prendi le par_condition per cui vi è almeno un assignment nella lista degli assignment in ingresso
-		!filter_effective_parametric_par_condition(CN, GoalParams, CNI);
+//		!filter_effective_parametric_par_condition(PCNproperties, GoalParams, CNI, _);
 		
 		//Passo2
-		!find_substitution_for_par_condition(CNI, PA, InAssignment, OutAssignment, Success);
+		!find_substitution_for_par_condition(CN, PA, InAssignment, OutAssignment, Success);
 		
 		if(Success=true)
 		{
+			
+//			.print("[",Success,"]HO TROVATO UNA SOSTITUZIONE TRA ",CN," E ",PA);
 			//Passo3
 			!apply_substitution_to_Accumulation(Acc ,OutAssignment, AccII);
 			
 			//Creo il nuovo stato di accumulazione
-			AccII = accumulation(world(WII),par_world(PWII),_);
+			AccII = accumulation(world(WII),par_world(PWIIVars, PWII),_);
 			
 			// CN' <- applico la sostituzione a CN
 			!apply_unification_to_par_condition(CN, OutAssignment, OutPC);
+//			.print("@@@@@@@@@@@@@@@@ input PC: ",CN);
+//			.print("@@@@@@@@@@@@@@@@ unified PC: ",OutPC);
+			
 			
 			//Unisci tutti gli assignment e verifica se questo soddisfa tutte le variabili della par_condition in ingresso
 			
 			.union(InAssignment,OutAssignment, NewAssignmentSet);
 			!check_if_all_par_condition_vars_are_assigned(CN, NewAssignmentSet, VarsAssigned);
-			
+//			
+//			.print("@@@@@@@@@@@@@@@@ NewAssignmentSet = ",NewAssignmentSet);
+//			.print("@@@@@@@@@@@@@@@@ InAssignment = ",InAssignment);
+//			.print("@@@@@@@@@@@@@@@@ OutAssignment = ",OutAssignment);
+//			.print("@@@@@@@@@@@@@@@@ VarsAssigned = ",VarsAssigned);
 			if(VarsAssigned = false)
 			{
 				Bool = false;
+				
 			}
 			else
 			{
 				//Passo4
-				!test_condition(OutPC, WII, Bool);
+				!get_var_list_from_assignment_list(NewAssignmentSet, Vars); 
+//				.print("Converting ",OutPC," [Vars] ",Vars," [AssSet] ",NewAssignmentSet);
+				
+				OutPC = par_condition([],OutPCLogicFormula);
+				!convert_parametric_to_simple_formula(OutPCLogicFormula, Vars, NewAssignmentSet, LogicFormula);
+				
+//				.print("...................LogicFormula: ",LogicFormula);
+//				.print("@@@@@@@@@@@@@@@@ testing  ",LogicFormula,"\non\n",WII);
+				
+//				!test_condition(LogicFormula, WII, Bool);
+				!test_logic_formula(LogicFormula,WII,Bool);
+//				!test_condition(OutPC, AccII, Bool);
+//				.print("@@@@@@@@@@@@@@@@ test_condition = ",Bool);
 				!elaborate_logic_formula_truth_percent(CN, world(WII), HeadPercent);
 			} 
 		}
