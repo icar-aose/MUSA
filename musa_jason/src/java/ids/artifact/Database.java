@@ -58,6 +58,17 @@ public class Database extends Artifact
 	}
 	
 	
+	
+	@OPERATION
+	void updateFailureRate(String capabilityName){
+		//faccio query ad DB per aggiornare il valore del campo failure_rate
+		
+		//TODO
+		// se tale valore è 0 allora la elimino dal database e imposto come valore di ritorno false
+		// in questo modo l'agente rimuove dalla black list la capability
+		
+	}
+	
 	@OPERATION
 	void deleteUncompletedProjects(int dept) throws SQLException
 	{

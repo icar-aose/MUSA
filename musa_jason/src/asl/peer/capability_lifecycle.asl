@@ -299,7 +299,22 @@
 		?frequency_long_perception_loop(Delay);
 		.wait(Delay);
 
+	
 		//TODO DECREASE FAILURE RATE HERE
+		//ANTONELLA START MODIFY
+		//verifico se la capabiliy è in black list, 
+		//se è cosi decremento richaiamo un operation che derementa il valore del campo failure_rate della tabella adw_blacklist
+		//se tale valore diventa = la capbility deve essere rimossa dalla black list
+		.my_name(Me);
+		.desire(capability_blacklist(Me,Capability))
+		
+		if(.desire(capability_blacklist(Me,Capability))){
+			updateFailureRate(Capability);
+			//se l'operation ritorna false allora la capabiliy va rimossa dalla black list 
+		}
+		
+		//ANTONELLA END MODIFY
+		
 
 		NewLifecycle = capability_lifecycle( Pack,Context,ready );
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre, TaskPost,AssignmentList);
