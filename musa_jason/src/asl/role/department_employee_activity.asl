@@ -127,7 +127,7 @@
  * 
  * ...
  */
-+remove_from_blacklist(Capability)[source(Manager)]
++remove_from_blacklist(Capability)//[source(Manager)]
 	<-
 		.my_name(Me);
 		-capability_blacklist(Me,Capability,_);

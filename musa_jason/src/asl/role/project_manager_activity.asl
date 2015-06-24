@@ -29,16 +29,14 @@
 		!build_goal_pack(SocialGoal,Pack);
 		!organize_solution(Context,Pack);
 	.
-//-!create_project(DepartmentName, ProjectName)
-//	<-
-//		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-//		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-//		?frequency_long_perception_loop(Delay);
-//		.wait(Delay);
-//		!!create_project(DepartmentName,ProjectName);
-//	.
-
-
+-!create_project(DepartmentName, ProjectName)
+	<-
+		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+		?frequency_long_perception_loop(Delay);
+		.wait(Delay);
+		!!create_project(DepartmentName,ProjectName);
+	.
 
 /**
  * [davide]
@@ -50,7 +48,10 @@
 +!read_blacklist_from_database(Context)
 	<-
 		Context 	= project_context(Department , Project);
-		getBlacklistedCapabilitySet(Project);
+		getBlacklistedCapabilitySet(Project,String);
+		
+		.term2string(List,String);
+		.print("--------------->received ",List);
 	.
 	
 /**
@@ -109,12 +110,8 @@
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
 		//TODO per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
 		
-//		?blacklist_access(BA);
-//		.print("######################\nblacklist accesses: ",BA,"\n######################");
-		
 		if(BlacklistEnabled)	
 		{
-			
 			-orchestration_start_at(Now);
 		}
 		
@@ -139,7 +136,6 @@
 			.print("Activating social commitment");
 			!activate_social_commitment(Context,Pack,TheSolutionWithAssignment);
 //			occp.logger.action.info("Activating project monitoring");
-			
 			.print("Activating project monitoring");
 			!activate_project_monitoring(Context,Pack,TheSolutionWithAssignment);
 //			occp.logger.action.info("Activating goal state monitoring");
@@ -156,8 +152,6 @@
 		}
 	.		
 	
-
-
 /**
  * [davide]
  * 

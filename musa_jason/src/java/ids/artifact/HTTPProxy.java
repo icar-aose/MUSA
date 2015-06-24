@@ -15,6 +15,7 @@
 package ids.artifact;
 
 import http.Connection;
+import http.Server;
 import http.ServerOCCP;
 
 import java.io.IOException;
@@ -30,8 +31,8 @@ public class HTTPProxy extends Artifact
 	private boolean debug = false;
 	private int conn_id_counter = 0;
 	
-//	private Server server = null;
-	private ServerOCCP server = null;
+	private Server server = null;
+//	private ServerOCCP server = null;
 	
 	private java.util.Date date = new java.util.Date();
 	private Hashtable<String,Connection> open_connections;
@@ -69,8 +70,8 @@ public class HTTPProxy extends Artifact
 		} else {		
 			try {
 				
-				server = new ServerOCCP(generate_id());
-//				server = new Server(generate_id());
+//				server = new ServerOCCP(generate_id());
+				server = new Server(generate_id());
 
 				
 				if (debug) System.out.println("server created");

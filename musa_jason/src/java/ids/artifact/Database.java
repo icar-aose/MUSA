@@ -295,10 +295,13 @@ public class Database extends Artifact
 	 * @author davide
 	 */
 	@OPERATION
-	void getBlacklistedCapabilitySet(String project)
+	void getBlacklistedCapabilitySet(String project, OpFeedbackParam list)
 	{
 		BlacklistTable tt 			= new BlacklistTable();
 		List<Entity> blacklistedCap;
+		String belief = "[";
+		boolean first = true;
+		
 		try 
 		{
 			blacklistedCap = tt.getAll();
@@ -308,9 +311,13 @@ public class Database extends Artifact
 				
 				BlacklistEntity blacklistedCapability = (BlacklistEntity) it.next();
 					
-				System.out.println("[BLACKLIST] Got "+blacklistedCapability.getCapability());
-				signal("receive_capability_blacklist",blacklistedCapability.getAgent(), blacklistedCapability.getCapability(), blacklistedCapability.getUpdated());
+				if (!first) 	{belief += ",";} 
+				else 			{first = false;}
+				
+				belief += "capability_blacklist("+blacklistedCapability.getAgent()+","+blacklistedCapability.getCapability()+","+this.convertTimeStamp(blacklistedCapability.getUpdated())+")";
 			}
+			belief += "]";
+			list.set(belief);
 		} 
 		catch (SQLException e) 
 		{
@@ -792,21 +799,37 @@ public class Database extends Artifact
 	}
 	
 	private String convertTimeStamp(Timestamp t) {
-		int year = (1900+t.getYear());
+//		int year = (1900+t.getYear());
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("ts(");
-		stringBuilder.append(year);
+//		stringBuilder.append(year);
+//		stringBuilder.append(",");
+//		stringBuilder.append(t.getMonth());
+//		stringBuilder.append(",");
+//		stringBuilder.append(t.getDate());
+//		stringBuilder.append(",");
+//		stringBuilder.append(t.getHours());
+//		stringBuilder.append(",");
+//		stringBuilder.append(t.getMinutes());
+//		stringBuilder.append(",");
+//		stringBuilder.append(t.getSeconds());
+//		stringBuilder.append(")");
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(t);
+		stringBuilder.append(calendar.get(calendar.YEAR));
 		stringBuilder.append(",");
-		stringBuilder.append(t.getMonth());
+		stringBuilder.append(calendar.get(calendar.MONTH+1));
 		stringBuilder.append(",");
-		stringBuilder.append(t.getDate());
+		stringBuilder.append(calendar.get(calendar.DAY_OF_MONTH));
 		stringBuilder.append(",");
-		stringBuilder.append(t.getHours());
+		stringBuilder.append(calendar.get(calendar.HOUR_OF_DAY));
 		stringBuilder.append(",");
-		stringBuilder.append(t.getMinutes());
+		stringBuilder.append(calendar.get(calendar.MINUTE));
 		stringBuilder.append(",");
-		stringBuilder.append(t.getSeconds());
+		stringBuilder.append(calendar.get(calendar.SECOND));
 		stringBuilder.append(")");
+		
 		String ts = stringBuilder.toString();
 		return ts;
 	}
