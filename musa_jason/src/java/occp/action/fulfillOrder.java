@@ -27,6 +27,9 @@ public class fulfillOrder extends DefaultInternalAction
 ////		String password 	= WorkflowProperties.get_password();
 //		String password 	= "root";
 	
+		
+		
+		/*
 		String ip_address 	= MusaProperties.get_demo_db_ip();
 		String port 		= MusaProperties.get_demo_db_port();
 		String database 	= MusaProperties.get_demo_db_name();
@@ -41,7 +44,7 @@ public class fulfillOrder extends DefaultInternalAction
 		//Expedition date is set to the current date
 		order.set_expedition_date(new Date());
 		t.updateElementByPrimary(order);
-		
+		*/
 		return true;
 	}
 }

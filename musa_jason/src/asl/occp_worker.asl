@@ -71,7 +71,7 @@ capability_evolution(check_order_feasibility,[add( order_checked(order_id) )]).
 agent_capability(complete_transaction)[type(simple)].
 capability_parameters(complete_transaction, []).
 capability_precondition(complete_transaction, condition(true) ).
-capability_postcondition(complete_transaction, condition(done(complete_transaction)) ).
+capability_postcondition(complete_transaction, condition( done(complete_transaction) ) ).
 capability_cost(complete_transaction,[0]).
 capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
@@ -148,7 +148,7 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		   User_id 		\== unbound)
 	    {
 	    	occp.logger.action.info("[place_order] Registerind order ",Order_id);
-	    	occp.action.registerOrder(Order_id, User_id);
+//	    	occp.action.registerOrder(Order_id, User_id);
 			occp.logger.action.info("[place_order] Order ",Order_id," registered");
 	    }
 	    else
@@ -271,7 +271,11 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
 +!terminate(check_order_feasibility, Context, Assignment) 
 	<- 
-		!register_statement(order_status(refused), Context);
+		.random(X);
+		
+		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
+		else		{!register_statement(order_status(refused), Context);}
+		
 		!register_statement(order_checked(order), Context);
 	.
 	

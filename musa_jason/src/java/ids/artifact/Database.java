@@ -499,7 +499,7 @@ public class Database extends Artifact
 			end = new Timestamp( now.getTime() );
 		}
 		
-		System.out.println("sono qui1");
+		
 		DepartmentTable dept_table = new DepartmentTable();
 		try 
 		{
@@ -513,9 +513,7 @@ public class Database extends Artifact
 			project.setEnd(end);
 			
 			ProjectTable project_table = new ProjectTable();
-			System.out.println("sono qui2");
 			project_table.insertElement(project);
-			System.out.println("sono qui3");
 		} 
 		catch (SQLException e) 
 		{

@@ -24,10 +24,10 @@
 	.
 +!awake : execution(test) 
 	<- 
-//		!start_proxy_server;
-		.wait(9000);
-		.print("---------------SIMULATING REQUEST---------------");
-		!simulate_quote_request;
+		!start_proxy_server;
+//		.wait(9000);
+//		.print("---------------SIMULATING REQUEST---------------");
+//		!simulate_quote_request;
 	.
 
 
@@ -132,6 +132,9 @@
 		!evaluate_reply(List,Reply);
 		.abolish(html_response(RequestPath, ParamSet, _ ));
 		.abolish(response(RequestPath, ParamSet, _ ));
+		
+		//TODO perchè questa attesa??
+		.wait(50000);
 	.
 
 +html_response(RequestPath,ParamSet, HTML)

@@ -10,7 +10,7 @@
 		CS 		= [Head|Tail]					&
 		Head 	= commitment(Agent,Cap,_)
 	<-
-		BV= false;
+		BV = false;
 		!score_blacklisted_CS(Tail,OutScoreRec);
 		?orchestration_start_at(Orchestration_start_time);
 		
@@ -157,7 +157,6 @@
 		{ 
 			//tell the owner of the capability to remove it from the blacklist
 			.send( Agent, tell, abolish( capability_blacklist(Agent, Capability,_) ) );
-			
 			
 			removeCapabilityFromBlacklist(Capability, Agent);
 			.send(Agent, tell, remove_from_blacklist(Capability));

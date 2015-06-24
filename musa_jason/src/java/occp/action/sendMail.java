@@ -1,5 +1,7 @@
 package occp.action;
 
+import http.ConnectionOCCP;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
@@ -34,6 +36,7 @@ public class sendMail extends DefaultInternalAction
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
 		final String to 				= args[0].toString().replace("\"", "");
+//		final String to 				= ConnectionOCCP.getMail();
 		final String email_subject 		= args[1].toString().replace("\"", "");
 		final String email_body 		= args[2].toString().replace("\"", "");
 		final String personal_name 		= args[3].toString().replace("\"", "");

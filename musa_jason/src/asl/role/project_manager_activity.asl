@@ -29,14 +29,14 @@
 		!build_goal_pack(SocialGoal,Pack);
 		!organize_solution(Context,Pack);
 	.
--!create_project(DepartmentName, ProjectName)
-	<-
-		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-		?frequency_long_perception_loop(Delay);
-		.wait(Delay);
-		!!create_project(DepartmentName,ProjectName);
-	.
+//-!create_project(DepartmentName, ProjectName)
+//	<-
+//		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+//		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+//		?frequency_long_perception_loop(Delay);
+//		.wait(Delay);
+//		!!create_project(DepartmentName,ProjectName);
+//	.
 
 
 
@@ -101,13 +101,20 @@
 			getDatabaseSystemCurrentTimeStamp(NowStr);
 			.term2string(Now,NowStr);
 			+orchestration_start_at(Now);
+			
+			.abolish( blacklist_access(_) );
+			+blacklist_access(0);
 		}
 		
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
 		//TODO per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
 		
+//		?blacklist_access(BA);
+//		.print("######################\nblacklist accesses: ",BA,"\n######################");
+		
 		if(BlacklistEnabled)	
 		{
+			
 			-orchestration_start_at(Now);
 		}
 		
@@ -187,7 +194,7 @@
 		+data_value(Department,Project,mailUser,usermail2);
 		+data_value(Department,Project,idUser,199);
 		
-		.print("ECCOMI");
+//		.print("ECCOMI");
 		!unroll_solution_to_set_goal_param_values_into_assignment(CS, GoalList, Context, OutCS);
 		
 		.print("[test 3] InputCS: ",CS);

@@ -4,18 +4,17 @@
 { include( "search/select_filter_capabilities.asl" ) }
 
 agent_capability(deliver_billing)[type(parametric)].
-capability_parameters(deliver_billing, [billing_data, recipient, order_id, recipient_email]).
+capability_parameters(deliver_billing, [billingData, theRecipient, orderId, recipientEmail]).
 capability_precondition(deliver_billing, condition(true) ).
-capability_postcondition(deliver_billing, par_condition([billing_data, recipient, order_id, recipient_email], property(billing_delivered,[billing_data, recipient, order_id, recipient_email])) ).
+capability_postcondition(deliver_billing, par_condition([billingData, theRecipient, orderId, recipientEmail], property(billing_delivered,[billingData, theRecipient, orderId, recipientEmail])) ).
 capability_cost(deliver_billing,0).
-capability_evolution(deliver_billing,[add( billing_delivered(billing_data, recipient, order_id, recipient_email) )]).
+capability_evolution(deliver_billing,[add( billing_delivered(billingData, theRecipient, orderId, recipientEmail) )]).
 
 agent_capability(upload_billing_to_user_cloud)[type(parametric)].
 capability_parameters(upload_billing_to_user_cloud, [user_id]).
 capability_precondition(upload_billing_to_user_cloud, condition(true) ).
 capability_postcondition(upload_billing_to_user_cloud, condition(billing_uploaded(user_id)) ).
 capability_cost(upload_billing_to_user_cloud,0).
-//capability_evolution(upload_billing_to_user_cloud,[add( done(billing_uploaded) )]).
 capability_evolution(upload_billing_to_user_cloud,[add( billing_uploaded(user_id) )]).
 
 agent_capability(fulfill_order)[type(parametric)].
@@ -52,16 +51,18 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
 		occp.logger.action.info("[deliver_billing] Delivering billing to user ",User_id);
 		
 		if(Order_id 	\== unbound 	& 
-		   User_id 		\== unbound 	& 
+		   User_id 		\== unbound 	&
 		   User_email 	\== unbound)
 	    {
-	   		occp.action.sendBilling(Order_id, User_id, User_email);
+//	   		occp.action.sendBilling(Order_id, User_id, User_email);
+			occp.action.tad.sendBillingTAD(User_email);
 	   		occp.logger.action.info("[deliver_billing] Billing for user ",User_id," related to order ",Order_id," sent to email address ",User_email);
 	    }
 	    else
 	    {
 	    	occp.logger.action.error("[deliver_billing] Billing for user ",User_id," related to order ",Order_id," CAN NOT BE SENT to email address ",User_email);
 	    }
+	    .print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- deliver_billing ACTION OK");
 	.
 
 +!terminate(deliver_billing, Context, Assignment) 
@@ -81,9 +82,11 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
 		!get_variable_value(Assignment, user_id, User_id);
 		occp.logger.action.info("[upload_billing_to_user_cloud] Uploading billing to user (",User_id,")cloud ");
 		
-		occp.action.upload_billing_to_cloud("/tmp/billing.pdf", true, User_id);
+//		occp.action.upload_billing_to_cloud("/tmp/billing.pdf", true, User_id);
+		occp.action.tad.upload_billing_to_cloudTAD;
 				
 		occp.logger.action.info("[upload_billing_to_user_cloud] Billing has been succesfully uploaded to user cloud");
+		.print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- upload_billing_to_user_cloud ACTION OK");
 	.
 
 +!terminate(upload_billing_to_user_cloud, Context, Assignment) 
@@ -109,7 +112,7 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
 		   User_id 		\== unbound)
 	    {
 	    	occp.logger.action.info("[fulfill_order] Fulfilling order ",Order_id);
-			occp.action.fulfillOrder(Order_id);
+//			occp.action.fulfillOrder(Order_id);
 			occp.logger.action.info("[fulfill_order] order ",Order_id," fulfilled");
 			.print("------------------>Order ID: ",Order_id, " fulfilled");	
 	    }
@@ -117,6 +120,7 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
     	{
     		occp.logger.action.warn("[fulfill_order] Variables unbounded (order_id: ",Order_id,", user_id: ",User_id,")");		
     	}
+    	.print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- fulfill_order ACTION OK");
 	.
 
 +!terminate(fulfill_order, Context, Assignment) 

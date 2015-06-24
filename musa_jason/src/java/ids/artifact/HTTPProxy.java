@@ -14,26 +14,25 @@
 
 package ids.artifact;
 
+import http.Connection;
+import http.ServerOCCP;
+
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import cartago.*;
+import cartago.Artifact;
+import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 
 public class HTTPProxy extends Artifact 
 {
 	private boolean debug = false;
 	private int conn_id_counter = 0;
-	private Server server = null;
+	
+//	private Server server = null;
+	private ServerOCCP server = null;
+	
 	private java.util.Date date = new java.util.Date();
 	private Hashtable<String,Connection> open_connections;
 
@@ -50,6 +49,14 @@ public class HTTPProxy extends Artifact
 		{
 			if (debug) System.out.println("server is ready");
 			server.run();
+			
+			for (String key : server.getParams().keySet())
+			{
+				String value = server.getParams().get(key);
+				signal("http_param",server.getConnection().getId(), key, value);
+			}
+			
+			signal("http_request", server.getConnection().getId(),server.getConnection().getSession(),server.getConnection().getAgent(),server.getConnection().getService(),server.getConnection().getUser(),server.getConnection().getRole() );
 		} 
 		else 
 			if (debug) System.out.println("server is not ready");
@@ -61,7 +68,11 @@ public class HTTPProxy extends Artifact
 			result.set("ok");
 		} else {		
 			try {
-				server = new Server();
+				
+				server = new ServerOCCP(generate_id());
+//				server = new Server(generate_id());
+
+				
 				if (debug) System.out.println("server created");
 				result.set("ok");
 			} catch (IOException e) {
@@ -100,6 +111,7 @@ public class HTTPProxy extends Artifact
 	 * 
 	 * @author luca
 	 */
+	/*
 	private class Server 
 	{
 		private int port = 2004;		
@@ -122,6 +134,8 @@ public class HTTPProxy extends Artifact
 				if (debug) System.out.println("waiting for request...");
 				connection  = providerSocket.accept();		
 				Connection conn = new Connection(connection);
+				conn.readParams();
+				
 				if (debug) System.out.println("connection established");
 				open_connections.put( conn.getId().toString() , conn );
 				
@@ -146,15 +160,61 @@ public class HTTPProxy extends Artifact
 				if (debug) System.out.println("Error with connection");
 				if (debug) ioException.printStackTrace();
 			}
-			
 		}
-		
-	}
+	}*/
+	
+	/*
+	private class ServerOCCP
+	{
+		private int port = 2004;		
+		private ServerSocket providerSocket = null;
+
+		public ServerOCCP() throws IOException {
+			providerSocket = new ServerSocket(port);
+			if (debug) System.out.println("Opened the connection on "+providerSocket.getInetAddress().getHostAddress());
+		}
+
+		public void run() 
+		{
+			if (providerSocket==null) 
+				return;
+			
+			Socket connection = null;
+
+			try 
+			{			
+				if (debug) System.out.println("waiting for request...");
+				connection  = providerSocket.accept();		
+				OCCP_Connection conn = null;
+				try 
+				{
+					conn = new OCCP_Connection(connection);
+					conn.setId(generate_id());
+				} 
+				catch (Exception e) {e.printStackTrace();}
+				if (debug) System.out.println("connection established");
+
+				//open_connections.put( conn.getId().toString() , conn );
+				signal("http_param",conn.getId(), "idOrder", conn.getIdOrdine());
+				signal("http_param",conn.getId(), "idUser", conn.getIdUtente());
+				signal("http_param",conn.getId(), "mailUser", conn.getMail());
+				signal("http_param",conn.getId(), "user_message", "");
+				
+				signal("http_request",conn.getId(),conn.getSession(),conn.getAgent(),conn.getService(),conn.getUser(),conn.getRole());
+			} 
+			catch (IOException ioException) 
+			{
+				if (debug) System.out.println("Error with connection");
+				if (debug) ioException.printStackTrace();
+			}
+		}
+	}*/
 	
 	/**
 	 * 
 	 * @author luca
 	 */
+	/*
 	private class Connection 
 	{
 		private int id;	
@@ -273,5 +333,5 @@ public class HTTPProxy extends Artifact
 			return param_table;
 		}
 
-	}
+	}*/
 }

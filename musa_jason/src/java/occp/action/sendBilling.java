@@ -48,19 +48,11 @@ public class sendBilling extends DefaultInternalAction
 	
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
-//		String ip_address 	= WorkflowProperties.get_ip_address();
-//		String port 		= WorkflowProperties.get_port();
-//		String database 	= "DemoOCCP";
-//		//String user 		= "occp_root";
-//		String db_user_str 		= "occp_root";
-//		String password 	= "root";
-		
 		String ip_address 	= MusaProperties.get_demo_db_ip();
 		String port 		= MusaProperties.get_demo_db_port();
 		String database 	= MusaProperties.get_demo_db_name();
 		String db_user_str	= MusaProperties.get_demo_db_user();
 		String password 	= MusaProperties.get_demo_db_userpass();
-		
 		
 		final String order_id 			= args[0].toString().replace("\"", "");
 		final String user_id 			= args[1].toString().replace("\"", "");

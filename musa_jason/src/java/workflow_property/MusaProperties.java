@@ -13,16 +13,15 @@ public class MusaProperties
 	private static String demo_db_port = "DEMO_DB_PORT";
 	private static String demo_db_name = "DEMO_DB_NAME";
 	
+	private static String demo_billing_tmp_folder = "DEMO_BILLING_TMP_FOLDER";
 	
 	public static String get_workflow_db_user()
 	{
-//		System.out.println("-> "+System.getenv(workflow_db_user));
 		return System.getenv(workflow_db_user);
 	}
 
 	public static String get_workflow_db_userpass()
 	{
-//		System.out.println("-> "+System.getenv(workflow_db_userpass));
 		return System.getenv(workflow_db_userpass);
 	}
 
@@ -66,7 +65,14 @@ public class MusaProperties
 		return System.getenv(demo_db_name);
 	}
 
-
-
+	public static String get_demo_billing_tmp_folder() 
+	{
+		String tmp_folder = System.getenv(demo_billing_tmp_folder);
+		
+		if( !tmp_folder.endsWith("/") )
+			tmp_folder = tmp_folder.concat("/");
+		
+		return tmp_folder;
+	}
 
 }

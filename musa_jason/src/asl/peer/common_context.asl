@@ -170,15 +170,21 @@
 		.my_name(Me);
 		!persist_statement_and_calculate_timestamp(Term,Project,Me,TimeStamp);
 		+statement(Department, Project, Term)[TimeStamp];
+		
+//		.print("----------------------------------------<<<<<<<< SONO QUI. MANDO A ",Members);
 		if(not .empty(Members))
 		{
 			.send(Members,tell,add_statement(Department, Project, Term, TimeStamp));
 		}
 		
+//		.print("----------------------------------------<<<<<<<< SONO QUI. HO INVIATO ADD_STATEMENT AGLI AGENTI");
+		
 	.
 @staff_register_a_statement[atomic]
 +!register_statement(Term,Context)
 	<-
+//		.my_name(Me);
+//		.print("----------------->",Me," delegating register statement for ",Term);
 		Context = project_context(Department , Project);
 		getDptManager(Department,Manager);
 		.send(Manager,tell,add_statement(Department, Project, Term));
@@ -198,6 +204,13 @@
 @staff_receive_a_statement[atomic]
 +add_statement(Department, Project, Term, TimeStamp)[source(Manager)]
 	<-
+	
+	
+//		.print("----------------------AGENT EMPLOYEE RECEIVED ", Term );
+		.my_name(Me);
+		!build_current_state_of_world(Context, World);
+//		.print("----------------------------------------<<<<<<<< ",Me," world-> ",World);
+		
 		.abolish( statement(Department, Project, Term) );
 		.abolish(add_statement(Department, Project, Term, TimeStamp));
 		+statement(Department, Project, Term)[TimeStamp];

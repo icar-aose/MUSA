@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+//DA ELIMINARE
 public class WorkflowProperties 
 {
 	//"run" o "jar"

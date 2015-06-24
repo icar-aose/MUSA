@@ -700,31 +700,15 @@
 		//Check if every variable has a corresponding assignment
 		!check_if_vars_are_assigned(Variables,AssignmentSet,BoundBool);
 		
-//		.print(Variables," have assignment in ",AssignmentSet,"? ",BoundBool);
-		
 		//If all variables are bounded
 		if (BoundBool)
 		{
 			//convert the input parametric condition to a simple formula using the input assignment set
 			!convert_parametric_to_simple_formula(ParamLogicFormula, Variables, AssignmentSet, LogicFormula);
-			
-//			LogicFormulaList = [LogicFormula|_];
-//			.print("------------> condition(",LogicFormula,") on ",World);
-//			!check_if_par_condition_addresses_accumulation(condition(LogicFormula), World, [], [], OutAssignment, Bool, _);
-			
-			!check_if_par_condition_addresses_accumulation(PCN, World, [], [], OutAssignment, Bool, _);
-			
-			
-			
-			//TODO non posso usarla qui perchè gli assignment non rendono PCN uguale al predicato atteso in
-			//World quando ci si trova in fase di esecuzione
-			 
-			//[]test the obtained simple formula in world  
-			//!test_logic_formula(LogicFormula, World, Bool);
+			!check_if_par_condition_addresses_accumulation(PCN, World, [], [], OutAssignment, Bool, _);			
 		} 
 		else 
 		{
-//			.print("VAR ",Variables," are not assigned");
 			Bool = false;
 		}		
 	.

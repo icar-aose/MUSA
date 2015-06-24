@@ -495,6 +495,11 @@
 		.print("OutCS: ",OutCS);
 	.
 
+/**
+ * [davide]
+ * 
+ * Unroll a solution item or a task to get its the commitment set.
+ */
 +!unroll_solution_to_get_commitment_set(Item, OutCS)
 	:
 		(Item = [Head|Tail] & Head = item(cs(CS),Acc,Ag,Score)) |
@@ -617,7 +622,6 @@
 	: CPSet=[] 
 	<- true .
 //----------------------
-//TODO INSERIRE LE NORME
 //TODO IMPORTANTE: ELIMINARE RIDONDANZE..
 //----------------------
 /*
@@ -843,6 +847,9 @@
 			!unroll_solution_to_get_commitment_set(InSolutions, InSolutionCommitmentSet);		
 			.union(InSolutionCommitmentSet, CommitmentSet, OverallCS);
  			!get_blacklisted_capability_list(OverallCS, BlacklistedCS);
+ 			
+ 			?blacklist_access(BA);
+ 			-+blacklist_access(BA+1);
  			!score_blacklisted_CS(BlacklistedCS,BlacklistScore);
  		}
 		else 					

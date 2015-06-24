@@ -211,6 +211,10 @@
 		else							{!invoke_project_capability(Capability, Context);}
 		
 		NewLifecycle = capability_lifecycle( Pack,Context,wait );
+
+		?frequency_perception_loop(Delay);
+		.wait(Delay);
+
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre,TaskPost,AssignmentList);
 		.println(Capability, " is wait");
 	.
@@ -224,6 +228,9 @@
 	<-
 		!retreat_project_capability(Capability, Context);
 		
+		?frequency_perception_loop(Delay);
+		.wait(Delay);
+		
 		NewLifecycle = capability_lifecycle( Pack,Context,check );
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre,TaskPost,AssignmentList);
 		.println(Capability, " is check");
@@ -236,6 +243,10 @@
 	<-
 		!retreat_project_capability(Capability, Context);
 		
+		?frequency_perception_loop(Delay);
+		.wait(Delay);
+		
+		
 		NewLifecycle = capability_lifecycle( Pack,Context,failure );
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre,TaskPost,AssignmentList);
 		-error(Capability,Context);
@@ -246,7 +257,7 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,wait )
 	<-
-		?frequency_perception_loop(Delay);
+		?frequency_short_perception_loop(Delay);
 		.wait(Delay);
 		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList);
 	.
@@ -257,9 +268,12 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,check )
 	<-
+		?frequency_perception_loop(Delay);
+		.wait(2*Delay);
+	
 		?capability_postcondition(Capability, PostCondition );
 		.my_name(Me);
-
+		
 		!check_condition_true_in_context(Capability, PostCondition, Context, AssignmentList, Bool);
 		
 		if (Bool) 
@@ -308,7 +322,6 @@
 		getDptManager(Department,Manager);		
 		.my_name(Me);
 		
-		
 		.send(Manager,tell,capability_failure(Capability, Me, Context));
 	.
 
@@ -321,7 +334,6 @@
 	<-
 		!build_current_state_of_world(Context, World);
 		UpdatedAccumulation = accumulation(World, par_world([],[]), assignment_list([]));		
-//		.print("#######################TESTING\n",Condition," ON\n",UpdatedAccumulation,"\n##############");
 
 		//Test the condition within the current world state
 		if(not .empty(AssignmentSet))	{!test_condition(Condition, AssignmentSet, UpdatedAccumulation, Bool);}

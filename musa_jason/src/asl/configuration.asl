@@ -14,6 +14,7 @@ frequency_periodic_update(10000).
 frequency_term_update(1000).
 
 frequency_perception_loop(1500).
+frequency_short_perception_loop(5000).
 frequency_long_perception_loop(15000).
 frequency_very_long_perception_loop(90000).
 
@@ -27,9 +28,9 @@ time_for_project_employment(2500).
 use_capability_failure_gui(false).
 
 //---
-blacklist_enabled(true).
+blacklist_enabled(false).
 blacklist_base_time(120000).
-blacklist_expiration(0,20,0).
+blacklist_expiration(0,20,0). //HH,MM,SS
 
 //---
 

@@ -47,7 +47,7 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 
 +!terminate(notify_order_unfeasibility, Context, Assignment) 
 	<- 
-		!register_statement(notify_order_unfeasibility(message),Context); 
+		!register_statement(notify_order_unfeasibility(message,email),Context); 
 	.
 //-------------------------------------
 //delete_order-------------------------

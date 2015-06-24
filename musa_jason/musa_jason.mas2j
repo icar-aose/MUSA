@@ -9,12 +9,11 @@ MAS musa_jason {
 		boss			boss_agent			agentArchClass c4jason.CAgentArch;		
 		fusion_agent 	wf_Fusion_Agent 	agentArchClass c4jason.CAgentArch;
 
-		
 		//----SIGMA----
 //		firefighter 	ids_firefighter 	agentArchClass c4jason.CAgentArch;
 //		worker_operator ids_worker_operator agentArchClass c4jason.CAgentArch;
 //		policeman		ids_policeman 		agentArchClass c4jason.CAgentArch;
-		
+		//-------------
 		
 		//----OCCP-----
 		proxy_agent 							agentArchClass c4jason.CAgentArch;
