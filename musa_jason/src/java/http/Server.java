@@ -39,21 +39,7 @@ public class Server
 			conn.setId(connection_id);
 			conn.readParams();
 			
-			if (debug) System.out.println("connection established");
-			//open_connections.put( conn.getId().toString() , conn );
-			
-			//Take parameters from the received JSON message
-//			HashMap<String,String> params = conn.getParam_table();
-//			Iterator<String> it = params.keySet().iterator();
-			//per ogni parametro
-//			while (it.hasNext()) 
-//			{
-//				String key = it.next();
-//				String value = params.get(key);
-//				signal("http_param",conn.getId(),key,value);
-//			}
-//			signal("http_request",conn.getId(),conn.getSession(),conn.getAgent(),conn.getService(),conn.getUser(),conn.getRole());
-			
+			if (debug) System.out.println("connection established");	
 		} 
 		catch (IOException ioException) 
 		{

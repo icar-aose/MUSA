@@ -839,18 +839,19 @@
 		!calculate_solutions_cardinality(InSolutions, InputSolutionCardinality);
 		
 		InputSolutionScore = InputSolutionCardinality*0.5;
-		.length(CS, CSCardinality);		//Calculate the cardinality of the solution
+		.length(CS, CSCardinality);									//Calculate the cardinality of the solution
 
  		if(BlacklistEnabled)	
  		{
- 			!unroll_solution_to_get_commitment_set(CS, CommitmentSet);
-			!unroll_solution_to_get_commitment_set(InSolutions, InSolutionCommitmentSet);		
-			.union(InSolutionCommitmentSet, CommitmentSet, OverallCS);
- 			!get_blacklisted_capability_list(OverallCS, BlacklistedCS);
+// 			!unroll_solution_to_get_commitment_set(CS, CommitmentSet);
+//			!unroll_solution_to_get_commitment_set(InSolutions, InSolutionCommitmentSet);		
+//			.union(InSolutionCommitmentSet, CommitmentSet, OverallCS);
+// 			!get_blacklisted_capability_list(OverallCS, BlacklistedCS);
+// 			!score_blacklisted_CS(BlacklistedCS,BlacklistScore);
  			
- 			?blacklist_access(BA);
- 			-+blacklist_access(BA+1);
- 			!score_blacklisted_CS(BlacklistedCS,BlacklistScore);
+ 			//!score_blacklisted_CS(CS, BlacklistScore);
+ 			
+ 			!get_blacklisted_cs_score(CS, BlacklistScore);
  		}
 		else 					
 		{
@@ -866,8 +867,61 @@
 		!unroll_metrics_on_accumulation_to_calculate_domain_score(Metrics,1/MSize,CS,Accumulation,DomainScore);
 		
 		Score = (2*GoalScore)+DomainScore;
-		if(VB=true){.println("[score_sequence_on_accumulation] Score: ",Score);}
+		
+		if(VB)
+		{
+			.println("[score_sequence_on_accumulation] Score: ",Score);
+			.println("[score_sequence_on_accumulation] Blacklist Score: ",BlacklistScore);
+		}
 	.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//il costo delle capability in blacklist viene calcolato prima della pianificazione
+//per motivi di efficienza.
++!get_blacklisted_cs_score(CS,Score)
+	:
+		CS 		= [Head|Tail] &
+		Head 	= task(_, _, _, cs(TaskCS), _, _) 
+	<-
+		!get_blacklisted_cs_score(TaskCS, Score);
+	.
++!get_blacklisted_cs_score(CS,Score)
+	:
+		CS 		= [Head|Tail] &
+		Head 	= commitment(Agent,Cap,_)
+	<-
+		!get_blacklisted_cs_score(Tail,ScoreRec);
+	
+		.send(Agent, askOne, capability_blacklist_cost(Cap, _), Reply);
+		
+		if (Reply \== false) 	
+		{
+			Reply 	= capability_blacklist_cost(Cap, HeadScore)[source(Agent)];
+			Score 	= ScoreRec + HeadScore;
+		}
+		else
+		{
+			Score 	= ScoreRec;
+		}
+	.
++!get_blacklisted_cs_score(CS,Score)
+	:
+		CS = []
+	<-
+		Score = 0;
+	.
+
+
+
+
+
 
 
 +!unroll_metrics_on_accumulation_to_calculate_domain_score(Metrics,Weight,CS,Accumulation,DomainScore)
@@ -1094,32 +1148,29 @@
 		{
 			//Ask for collaboration 
 			!ask_for_collaborations(Members, contribute_to_solution(Accumulation), RemoteCommitmentSet);
-			.concat(LocalCommitmentSet, RemoteCommitmentSet, CommitmentSet);
-			
+			.concat(LocalCommitmentSet, RemoteCommitmentSet, CommitmentSet);	
 		}
-		if(VB=true) {.println("[ask_for_hypotetical_capabilities]selected capabilities:",CommitmentSet);}
+		if(VB) {.println("[ask_for_hypotetical_capabilities]selected capabilities:",CommitmentSet);}
 
-
-		if(BlacklistEnabled)
-		{
-			.my_name(Me);
-			.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
-			
-			if (.empty(Members))	
-			{
-				BlacklistedCS = LocalBlacklistedCommitmentSet
-			}
-			else					
-			{
-				!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
-				.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
-			}
-			
-			getDatabaseSystemCurrentTimeStamp(DBCurrentTimeStampStr);
-			.term2string(DBCurrentTimeStamp,DBCurrentTimeStampStr);
-			
-			!update_capability_blacklist(BlacklistedCS, DBCurrentTimeStamp, Context);
-		}
+		
+//		if(BlacklistEnabled)
+//		{
+//			.my_name(Me);
+//			.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
+//			
+//			if (.empty(Members))	
+//			{
+//				BlacklistedCS = LocalBlacklistedCommitmentSet
+//			}
+//			else					
+//			{
+//				!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
+//				.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
+//			}
+//			
+//			!numeric_timestamp(CurrentTimeStamp);
+//			!update_capability_blacklist(BlacklistedCS, CurrentTimeStamp, Context);
+//		}
 		
 		//Costruisco lista di task
 		!build_task_list_from_commitment_set(CommitmentSet, TaskSet);
@@ -1177,7 +1228,30 @@
 		.print("Failed to get Capability '",Cap,"' post condition.");
 	. 
 
- 
+//#########################################################
+//		REQUEST FOR MONITOR CS
+//#########################################################
++collaboration_request(Token,MaxCounter,Request)[source(Manager)]
+	:
+		Request=monitor_capability_request(Accumulation)
+	<-
+		?orchestrate_verbose(VB);
+		if(VB=true){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
+		
+		.abolish( collaboration_request(Token,MaxCounter,Request) );
+		+max_time_for_collecting(Token,MaxCounter);
+		
+		.my_name(Me);
+		.findall(monitor_commitment(Me,Cap), agent_capability(Cap)[type(monitor)], MonitorCS);
+		
+		.print("#####COLLABORATION ANSWER: ",MonitorCS);
+		
+		.send(Manager,tell,collaboration_answer(Token,MonitorCS));
+		-max_time_for_collecting(Token,MaxCounter);
+	.
+//#########################################################
+//		REQUEST FOR CS
+//#########################################################
 +collaboration_request(Token,MaxCounter,Request)[source(Manager)]
 	:
 		Request=contribute_to_solution(Accumulation)
@@ -1191,8 +1265,10 @@
 		
 		.send(Manager,tell,collaboration_answer(Token,CommitmentSet));
 		-max_time_for_collecting(Token,MaxCounter);
-	.
-	
+	.	
+//#########################################################
+//		REQUEST FOR BLACKLISTED CS
+//#########################################################
 +collaboration_request(Token,MaxCounter,Request)[source(Manager)]
 	:
 		Request=blacklist_request
@@ -1205,7 +1281,6 @@
 		
 		.my_name(Me);
 		.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), BlacklistCS);
-		//!!!!
 		
 		.send(Manager,tell,collaboration_answer(Token,BlacklistCS));
 		-max_time_for_collecting(Token,MaxCounter);

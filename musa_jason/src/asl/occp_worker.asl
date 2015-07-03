@@ -8,10 +8,6 @@
 { include( "peer/act_as_server.asl" ) }
 { include( "search/collaborative_search_with_accumulation.asl" ) }
 
-
-//fail(place_order).
-
-
 http_interface(receive_order,request_result,"access_to_order","manager_quote_interface").
 
 my_user(luca, occp_user).
@@ -26,14 +22,28 @@ capability_evolution(receive_order,[add( received_order(order_id,user_id) )]).
 
 
 //---------------------------
+
 agent_capability(place_order)[type(parametric)].
 capability_parameters(place_order, [order_id,user_id]).
 capability_precondition(place_order, condition(true) ).
-//capability_postcondition(place_order, condition(order_placed(order, user)) ).
 capability_postcondition(place_order, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
-capability_cost(place_order,[10,4]).
-//capability_evolution(place_order,[add( done(order_placed) )]). 
+capability_cost(place_order,[10,4]). 
 capability_evolution(place_order,[add( order_placed(order_id,user_id) )]).
+
+
+//##################MONITOR - TODO
+//agent_capability(monitor_place_order)[type(monitor)].
+//capability_observed(place_order).
+//on_capability_cost_change(monitor_place_order, plan_name).
+//on_capability_failure(monitor_place_order, compensate_plan).
+//on_capability_resource_change(monitor_place_order, plan_name).
+//
+//capability_parameters(monitor_place_order, [order_id,user_id]).
+//capability_precondition(monitor_place_order, condition(true) ).
+//capability_postcondition(monitor_place_order, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
+//capability_cost(monitor_place_order,[10,4]). 
+//capability_evolution(monitor_place_order,[add( order_placed(order_id,user_id) )]).
+//##################
 
 
 agent_capability(place_order_alternative)[type(parametric)].
@@ -49,10 +59,8 @@ capability_precondition(place_order_alternative2, condition(true) ).
 capability_postcondition(place_order_alternative2, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
 capability_cost(place_order_alternative2,[12,3,6]).
 capability_evolution(place_order_alternative2,[add( order_placed(order_id,user_id) )]). 
- 
+
 //---------------------------
-
-
 
 agent_capability(set_user_data)[type(parametric)].
 capability_parameters(set_user_data, [user_id,user_email]).
@@ -80,26 +88,6 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 +!awake
 	<-
 		!awake_as_employee;
-
-//!debug_check_if_par_condition_addresses_accumulation_11;
-
-
-//		!debug_test_parametric_condition;
-
-//		!awake_as_head;
-//		!create_or_use_database_artifact(DBId);
-//		Department	= "p4_dept";
-//		Project		= "p4_dept2015422101812";
-//		Context 	= project_context(Department , Project);
-//		.print("Context: ",Context);
-//		Members 	= [worker];
-//		+manager_of(Department, Project, Members);
-//		//!register_data_value(par_message,messaggio_wella,Context);
-//		
-//		
-//		!debug_unroll_solution_to_set_goal_param_values_into_assignment_3;
-//		
-//		!debug_update_capability_blacklist_expiration(Context);
 	.
 
 +!register_page(receive_order, Context)
@@ -126,23 +114,19 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 	.
 //-------------------------------------
 //place_order--------------------------
++!action(place_order, Context, Assignment)  : fail(place_order) <- true.	
++!terminate(place_order, Context, Assignment)  : fail(place_order) <- true.
+
  +!prepare(place_order, Context, Assignment) 
 	<- 
 		true
-	.
-
-//+!action(place_order, Context, Assignment) 
-//	:
-//		fail(place_order)
-//	<- 
-//		true
-//	.		
+	.	
 +!action(place_order, Context, Assignment) 
 	<- 
 		.print("..................................................(place_order) placing order...");
 
-		!get_variable_value(Assignment, order_id, Order_id);
-		!get_variable_value(Assignment, user_id, User_id);
+		!get_variable_value(Assignment, Context, order_id, Order_id);
+		!get_variable_value(Assignment, Context, user_id, User_id);
 		
 		if(Order_id 	\== unbound 	& 
 		   User_id 		\== unbound)
@@ -157,42 +141,44 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
     	}
 
     	.print("[",place_order,"]ACTION TERMINATA CORRETTAMENTE");
+    	
+    	!register_statement(order_placed(order,user), Context);
 	.
 
 +!terminate(place_order, Context, Assignment)
-	: 
-		fail(place_order)
 	<- 
 		true
 	.
-+!terminate(place_order, Context, Assignment)
-	<- 
-		!register_statement(order_placed(order,user), Context);
-	.
+
+
 
 //-------------------------------------
 //place_order_alternative--------------
+	
++!action(place_order_alternative, Context, Assignment)  : fail(place_order) <- true.	
++!terminate(place_order_alternative, Context, Assignment)  : fail(place_order) <- true.
+
  +!prepare(place_order_alternative, Context, Assignment) 
 	<- 
-	true
+		true
 	.
 
 +!action(place_order_alternative, Context, Assignment) 
 	<- 
 		.print("..................................................(place_order_alternative) placing order...");
-	.
-+!terminate(place_order_alternative, Context, Assignment)
-	: 
-		fail(place_order_alternative)
-	<- 
-		true
+
+		!register_statement(order_placed(order,user), Context);
 	.
 +!terminate(place_order_alternative, Context, Assignment) 
 	<- 
-		!register_statement(order_placed(order,user), Context);
+		true
 	.
+
 //-------------------------------------
 //place_order_alternative2--------------
++!action(place_order_alternative2, Context, Assignment)  : fail(place_order) <- true.	
++!terminate(place_order_alternative2, Context, Assignment)  : fail(place_order) <- true.
+
  +!prepare(place_order_alternative2, Context, Assignment) 
 	<- 
 	true
@@ -201,17 +187,13 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 +!action(place_order_alternative2, Context, Assignment) 
 	<- 
 		.print("..................................................(place_order_alternative2) placing order...");
-	.
-+!terminate(place_order_alternative2, Context, Assignment)
-	: 
-		fail(place_order_alternative2)
-	<- 
-		true
+		!register_statement(order_placed(order,user), Context);
 	.
 +!terminate(place_order_alternative2, Context, Assignment) 
 	<- 
-		!register_statement(order_placed(order,user), Context);
+		true	
 	.
+
 //-------------------------------------
 
 
@@ -267,16 +249,18 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 //	    	occp.logger.action.warn("[check_order_feasibility] Variable unbounded (order_id: ",Order_id,")");
 //	    	!register_statement(order_status(refused), Context);
 //	    }
+		
+		//		!register_statement(order_status(refused), Context);
+		
+		.random(X);
+		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
+		else		{!register_statement(order_status(refused), Context);}
+		!register_statement(order_checked(order), Context);
 	.
 
 +!terminate(check_order_feasibility, Context, Assignment) 
 	<- 
-		.random(X);
-		
-		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
-		else		{!register_statement(order_status(refused), Context);}
-		
-		!register_statement(order_checked(order), Context);
+		true
 	.
 	
 //-------------------------------------
@@ -290,11 +274,12 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 	<- 
 		.print("..................................................(complete_transaction) finishing transaction...");
 		occp.logger.action.info("[complete_transaction] Completing transaction");
+		!register_statement(done(complete_transaction),Context);
 	.
 
 +!terminate(complete_transaction, Context) 
 	<- 
-		!register_statement(done(complete_transaction),Context); 
+		true 
 	.
 
 

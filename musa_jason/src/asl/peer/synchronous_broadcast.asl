@@ -33,8 +33,6 @@
 		
 		?get_max_counter(Token,MaxCounter);
 		
-		//.print("---->CollaboratorList: ",CollaboratorList);
-		
 		+wait_collaboration(Token);
 		.send(CollaboratorList, tell, collaboration_request(Token,MaxCounter-2,Predicate));	/* broadcast collaboration request */
 		+collaborators(Token,CollaboratorList);

@@ -10,7 +10,6 @@ import ids.database.JobTable;
 import ids.database.ProjectTable;
 import ids.database.RoleTable;
 import ids.database.StateTable;
-import ids.database.Table;
 import ids.database.UserTable;
 import ids.database.ValueTable;
 import ids.model.BlacklistEntity;
@@ -23,9 +22,6 @@ import ids.model.RoleEntity;
 import ids.model.StateEntity;
 import ids.model.UserEntity;
 import ids.model.ValueEntity;
-import jason.asSyntax.ASSyntax;
-import jason.asSyntax.ListTerm;
-import jason.asSyntax.ListTermImpl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -43,6 +39,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import workflow_property.MusaProperties;
 import cartago.Artifact;
 import cartago.INTERNAL_OPERATION;
@@ -51,16 +51,36 @@ import cartago.OpFeedbackParam;
 
 public class Database extends Artifact 
 {
-	private boolean debug = false;
+	private final boolean debug = false;
+	private final boolean printIPaddressesAtStartup = true;
 
 	void init() 
 	{
 	}
 	
 	
+	void printStartupMessageInfo(String localIPAddress)
+	{
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("~~~~~~~~~~~~~MUSA~~~~~~~~~~~~~");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("local ip address: "+localIPAddress);
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("workflow ip: "+MusaProperties.get_workflow_db_ip());
+		System.out.println("workflow port: "+MusaProperties.get_workflow_db_port());
+		System.out.println("workflow user: "+MusaProperties.get_workflow_db_user());
+		System.out.println("workflow pass: "+MusaProperties.get_workflow_db_userpass());
+		System.out.println("demo ip: "+MusaProperties.get_demo_db_ip());
+		System.out.println("demo port: "+MusaProperties.get_demo_db_port());
+		System.out.println("demo user: "+MusaProperties.get_demo_db_user());
+		System.out.println("demo pass: "+MusaProperties.get_demo_db_userpass());
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	}
+	
 	
 	@OPERATION
-	void updateFailureRate(String capabilityName){
+	void updateFailureRate(String capabilityName)
+	{
 		//faccio query ad DB per aggiornare il valore del campo failure_rate
 		
 		//TODO
@@ -162,10 +182,13 @@ public class Database extends Artifact
 	 * @author davide
 	 */
 	@OPERATION
-	void insertOrUpdateCapabilityIntoBlacklist(String capabilityName, String agent)
+	void insertOrUpdateCapabilityIntoBlacklist(String capabilityName, String failureTimestamp, String agent)
 	{
 		BlacklistTable tt 		= new BlacklistTable();
 		BlacklistEntity elem 	= null;
+
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss");
+		DateTime dt 				= formatter.parseDateTime(failureTimestamp);
 		
 		try 
 		{
@@ -181,6 +204,7 @@ public class Database extends Artifact
 				elem.setAgent(agent);
 				elem.setCapability(capabilityName);
 				elem.setFailure_rate(1);
+				elem.setUpdated(new Timestamp(dt.getMillis()));
 				
 				tt.insertElement(elem);
 			}
@@ -268,7 +292,6 @@ public class Database extends Artifact
 	@OPERATION
 	void checkIfCapabilityIsBlacklisted(String capabilityName, String agent, OpFeedbackParam result)
 	{
-//		System.out.println("Entering checkIfCapabilityIsBlacklisted");
 		BlacklistTable tt 		= new BlacklistTable();
 		BlacklistEntity elem 	= null;
 		
@@ -280,7 +303,6 @@ public class Database extends Artifact
 			else				{result.set(false);}
 		} 
 		catch (SQLException e) {e.printStackTrace();}
-//		System.out.println("Exiting checkIfCapabilityIsBlacklisted");
 	}
 	
 	/**
@@ -365,10 +387,7 @@ public class Database extends Artifact
 			} 
 			catch (SQLException e) {e.printStackTrace();}
 		}
-				
-//		Calendar calendar = Calendar.getInstance();
-//		calendar.setTime(TS);
-//		String formatted = String.format("ts(%d,%d,%d,%d,%d,%d)", calendar.get(calendar.YEAR), calendar.get(calendar.MONTH), calendar.get(calendar.DAY_OF_MONTH), calendar.get(calendar.HOUR_OF_DAY), calendar.get(calendar.MINUTE), calendar.get(calendar.SECOND));
+
 		result.set(convertTimeStamp(TS));
 	}
 
@@ -391,32 +410,13 @@ public class Database extends Artifact
 	}
 	
 	@OPERATION
-	void updateLocalHost(/*String address*/) 
+	void updateLocalHost() 
 	{
-		
 		String address = null;
-		try {
-			address = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e1) {
-			e1.printStackTrace();
-		}
+		try	 								{address = InetAddress.getLocalHost().getHostAddress();} 
+		catch (UnknownHostException e1) 	{e1.printStackTrace();}
 		
-		
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("~~~~~~~~~~~~~MUSA~~~~~~~~~~~~~");
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("local ip address: "+address);
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("workflow ip: "+MusaProperties.get_workflow_db_ip());
-		System.out.println("workflow port: "+MusaProperties.get_workflow_db_port());
-		System.out.println("workflow user: "+MusaProperties.get_workflow_db_user());
-		System.out.println("workflow pass: "+MusaProperties.get_workflow_db_userpass());
-		System.out.println("demo ip: "+MusaProperties.get_demo_db_ip());
-		System.out.println("demo port: "+MusaProperties.get_demo_db_port());
-		System.out.println("demo user: "+MusaProperties.get_demo_db_user());
-		System.out.println("demo pass: "+MusaProperties.get_demo_db_userpass());
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			
+		if(printIPaddressesAtStartup) printStartupMessageInfo(address);
 		
 		IPAddressTable ip_address_table = new IPAddressTable();
 		try {
@@ -791,45 +791,26 @@ public class Database extends Artifact
 	}
 
 	
-	private String convertTStoDatabase(String predicate ) {
-		// ts(YY,MM,DD,HH,M,SS)
-		// '2013-07-17 10:11:42'
-		
-		return null;
-	}
-	
-	private String convertTimeStamp(Timestamp t) {
-//		int year = (1900+t.getYear());
+	private String convertTimeStamp(Timestamp t) 
+	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("ts(");
-//		stringBuilder.append(year);
-//		stringBuilder.append(",");
-//		stringBuilder.append(t.getMonth());
-//		stringBuilder.append(",");
-//		stringBuilder.append(t.getDate());
-//		stringBuilder.append(",");
-//		stringBuilder.append(t.getHours());
-//		stringBuilder.append(",");
-//		stringBuilder.append(t.getMinutes());
-//		stringBuilder.append(",");
-//		stringBuilder.append(t.getSeconds());
-//		stringBuilder.append(")");
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(t);
-		stringBuilder.append(calendar.get(calendar.YEAR));
-		stringBuilder.append(",");
-		stringBuilder.append(calendar.get(calendar.MONTH+1));
-		stringBuilder.append(",");
-		stringBuilder.append(calendar.get(calendar.DAY_OF_MONTH));
-		stringBuilder.append(",");
-		stringBuilder.append(calendar.get(calendar.HOUR_OF_DAY));
-		stringBuilder.append(",");
-		stringBuilder.append(calendar.get(calendar.MINUTE));
-		stringBuilder.append(",");
-		stringBuilder.append(calendar.get(calendar.SECOND));
-		stringBuilder.append(")");
 		
+		stringBuilder.append(calendar.get(Calendar.YEAR));
+		stringBuilder.append(",");
+		stringBuilder.append(calendar.get(Calendar.MONTH)+1);
+		stringBuilder.append(",");
+		stringBuilder.append(calendar.get(Calendar.DAY_OF_MONTH));
+		stringBuilder.append(",");
+		stringBuilder.append(calendar.get(Calendar.HOUR_OF_DAY));
+		stringBuilder.append(",");
+		stringBuilder.append(calendar.get(Calendar.MINUTE));
+		stringBuilder.append(",");
+		stringBuilder.append(calendar.get(Calendar.SECOND));
+		stringBuilder.append(")");
 		String ts = stringBuilder.toString();
 		return ts;
 	}

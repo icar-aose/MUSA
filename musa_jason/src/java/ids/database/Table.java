@@ -2,9 +2,6 @@ package ids.database;
 
 import ids.model.Entity;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -24,11 +21,11 @@ import workflow_property.MusaProperties;
 
 
 public abstract class Table {
-	private static String ip_address = null;// "ids_workflow";//"workflow";
-	private static String port = null;// "ids_workflow";//"workflow";
-	private static String database = null; // "ids_workflow";//"workflow";
-	private static String user = null; // "ids_root";// "workflow";
-	private static String password = null; // "root";//"workflow";
+	private static String ip_address = null;
+	private static String port = null;
+	private static String database = null;
+	private static String user = null;
+	private static String password = null;
 
 	private static Connection connection = null;
 	
@@ -329,7 +326,6 @@ public abstract class Table {
 		LinkedList<Entity> results = new LinkedList<Entity>();
 		while (resultSet.next()) 
 		{
-			
 			Entity elem = fillEntity(resultSet);
 //			System.out.println("Elem: "+elem.toString());
 			results.add(elem);

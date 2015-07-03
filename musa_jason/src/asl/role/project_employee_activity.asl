@@ -13,27 +13,17 @@
  *
  ******************************************************************************/
 
-
-
 // ATTENZIONE
 // LE CAPABILITY POSSONO ESSERE ATTIVATE SOLO SE
 // LE PRECONDITION SONO VERE TENENDO CONTO DELL'EVENTUALE ASSIGNMENT (PARAMETRIC CONDITION)
 	
 +start_social_commitment(Context,Pack,Capability,TaskPre,TaskPost,AssignmentList)[source(Manager)]
 	<-
-		//occp.logger.action.info("Preparing capability ",Capability);
-//		.print("Preparing capability ",Capability);
-
-
-
-
 		//TODO E SE NON FOSSE PARAMETRICA???
 		!prepare(Capability, Context, AssignmentList);
 		
 		//.abolish( start_social_commitment(Context,Pack,Capability) );
 		.abolish( start_social_commitment(Context,Pack,Capability,TaskPre,TaskPost,AssignmentList) );
-		
-		
 		
 		Context = project_context(Department,ProjectName);
 		

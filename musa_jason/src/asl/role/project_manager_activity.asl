@@ -29,14 +29,14 @@
 		!build_goal_pack(SocialGoal,Pack);
 		!organize_solution(Context,Pack);
 	.
--!create_project(DepartmentName, ProjectName)
-	<-
-		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-		?frequency_long_perception_loop(Delay);
-		.wait(Delay);
-		!!create_project(DepartmentName,ProjectName);
-	.
+//-!create_project(DepartmentName, ProjectName)
+//	<-
+//		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+//		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+//		?frequency_long_perception_loop(Delay);
+//		.wait(Delay);
+//		!!create_project(DepartmentName,ProjectName);
+//	.
 
 /**
  * [davide]
@@ -47,11 +47,12 @@
  */
 +!read_blacklist_from_database(Context)
 	<-
+		?blacklist_verbose(BV);
 		Context 	= project_context(Department , Project);
 		getBlacklistedCapabilitySet(Project,String);
 		
 		.term2string(List,String);
-		.print("--------------->received ",List);
+		if(BV){.print("---------------> RECEIVED BLACKLISTED CS: ",List,"\n");}
 	.
 	
 /**
@@ -62,20 +63,24 @@
  * in its knowledge base the predicate capability_error(...) that will cause a
  * replanning of the project. 
  */ 
-+capability_failure(Capability, Agent, Context)
++capability_failure(Capability, Agent, FailureTimestamp, Context)
 	<-
 		?blacklist_enabled(BlacklistEnabled);
+//		?blacklist_verbose(BV);
+		BV = true;
 		
 		+capability_error(Context);
 		
+		FailureTimestamp = ts(Y,MO,D,H,M,S);
+		.concat(Y,"/",MO+1,"/",D," ",H,":",M,":",S, FailureTimestamp_java);
+		
 		if(BlacklistEnabled)
 		{
-			insertOrUpdateCapabilityIntoBlacklist(Capability, Agent);	
-			getBlacklistedCapabilityTimestamp(Capability, Agent, TSstr);
-			.term2string(TS,TSstr);
+			insertOrUpdateCapabilityIntoBlacklist(Capability, FailureTimestamp_java, Agent);	
 
-			.print("[BLACKLIST] Capability [",Capability,"] Added/Updated in blacklist @",TS);
-			.send(Agent, tell, capability_blacklist(Me, Capability, TS));
+			if(BV){.print("[BLACKLIST] Capability [",Capability,"] Added/Updated in blacklist @",FailureTimestamp);}
+			
+			.send(Agent, tell, capability_blacklist(Me, Capability, FailureTimestamp));
 		}
 		.abolish( capability_failure(Capability, Agent, Context) );
 	.
@@ -96,24 +101,36 @@
 		
 		if(BlacklistEnabled)	
 		{
-			!read_blacklist_from_database(Context);
+			!read_blacklist_from_database(Context); // da sistemare
 				
 			//Keep the timestamp of when the solution planning is starting  
-			getDatabaseSystemCurrentTimeStamp(NowStr);
-			.term2string(Now,NowStr);
+			.abolish(orchestration_start_at(_));
+			!numeric_timestamp(Now);
 			+orchestration_start_at(Now);
+			.print("#########");
+			.print("NOW:",Now);
+			.print("#########");
 			
-			.abolish( blacklist_access(_) );
-			+blacklist_access(0);
+			//--------------------------------------------------------------
+			.findall(commitment(Me,Cap,_), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
+			
+			if (.empty(Members))	
+			{
+				BlacklistedCS = LocalBlacklistedCommitmentSet
+			}
+			else					
+			{
+				!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
+				.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
+			}
+
+			!score_blacklisted_CS(BlacklistedCS, OutScore);
+			//--------------------------------------------------------------
 		}
 		
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
 		//TODO per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
 		
-		if(BlacklistEnabled)	
-		{
-			-orchestration_start_at(Now);
-		}
 		
 		Context = project_context(DepartmentName,ProjectName);
 		
@@ -518,8 +535,16 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,Solution,terminating )
 	<-
+		
+		.drop_intention( capability_achievement_lifecycle(_,capability_lifecycle( _,Context,_ ),_,_,_) );
+		
+		
+		
 		.println("The project is correctly terminated");
-		occp.logger.action.info("The project (",Project,") is correctly terminated");
+//		occp.logger.action.info("The project (",Project,") is correctly terminated");
+
+		
+
 		
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 		!social_terminate_the_project(Context,Solution);

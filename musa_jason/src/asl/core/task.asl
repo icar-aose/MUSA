@@ -51,8 +51,6 @@
 	.
 
 
-
-
 /**
  * [davide]
  * 
@@ -120,8 +118,6 @@
 		
 		//Get the item with the higher score
 		!get_item_with_higher_score(OutItemsTmp, BestItemForCurrentGoal, BestScore);
-		
-//		.print("Best item for ",Head,"\n",BestItemForCurrentGoal);
 		
 		//Add the found item into the output item list
 		.union(BestItemForCurrentGoal, OutItemsRec, OutItems);

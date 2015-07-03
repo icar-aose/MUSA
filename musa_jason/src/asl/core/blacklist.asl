@@ -5,38 +5,84 @@
  * 
  * NOTE: CS is assumed to be a set of >only< blacklisted capability 
  */
-+!score_blacklisted_CS(CS,OutScore)
++!score_blacklisted_CS(CS, OutScore)
+	:
+		CS 		= [Head|Tail]					&
+		Head 	= task(_, _, _, cs(TaskCS), _, _ ) 
+	<-
+		!score_blacklisted_CS(TaskCS, OutScore);
+	.
++!score_blacklisted_CS(CS, OutScore)
 	:
 		CS 		= [Head|Tail]					&
 		Head 	= commitment(Agent,Cap,_)
 	<-
-		BV = false;
 		!score_blacklisted_CS(Tail,OutScoreRec);
+	
+		?blacklist_verbose(BV);
 		?orchestration_start_at(Orchestration_start_time);
 		
 		!get_remote_capability_blacklist(Head, Reply);
 		
-		if(Reply \== no_timestamp)
+		if(Reply \== no_timestamp)	
 		{
-			Capability_blacklist_timestamp = Reply;
-			!how_many_times_elapsed(Capability_blacklist_timestamp,Orchestration_start_time, Blacklist_time);
-			?blacklist_expiration(ExpHH,ExpMM,ExpSS);
-			!timestamp_add(Capability_blacklist_timestamp, duration(0,0,0,ExpHH,ExpMM,ExpSS), BlacklistTimeStampDelayed);
-			!how_many_times_elapsed(Capability_blacklist_timestamp, BlacklistTimeStampDelayed, Blacklist_max_time);
+			Failure_timestamp = Reply;
+			?blacklist_expiration(ExpHH, ExpMM, ExpSS);
+			!how_many_times_elapsed(ts(0,0,0,0,0,0), ts(0,0,0,ExpHH,ExpMM,ExpSS), TotalBlacklistTime);
+			
+			//Misuro quanto tempo è passato dall'inizio della pianificazione corrente al momento in cui è stata messa in blacklist la capability [Head]
+			!how_many_times_elapsed(Failure_timestamp, Orchestration_start_time, Past_in_blacklist_time);
+			
+			//aggiungo una certa quantita temporale (definita in configuration.asl) al timestamp della capability in blacklist
+			!timestamp_add(Failure_timestamp, duration(0,0,0,ExpHH,ExpMM,ExpSS), RemoveTimestamp);
+			
+			//misuro quanto tempo è passato dal momento in cui [Head] è stata messa in blacklist, allo stesso timestamp incrementato di una quantità predefinita
+			//Questa quantita indica quant'è il tempo massimo per cui la capability deve rimanere in blacklist.
+			!how_many_times_elapsed(Orchestration_start_time, RemoveTimestamp, Yet_to_finish_time);
 			
 			if(BV)
 			{			
 				.print("######################");
-				.print("Score for [",Cap,"]: ", (Blacklist_time/Blacklist_max_time));
-				.print("Blacklist_time for [",Cap,"]: ",Blacklist_time);
-				.print("Blacklist_max_time for [",Cap,"]: ",Blacklist_max_time);
-				.print("######################");
+				.print("Score for [",Cap,"] from agent [",Agent,"]: ", (Past_in_blacklist_time/Blacklist_max_time));
+				.print("orchestration started at ",Orchestration_start_time);
+				.print(Head," in blacklist since ",Failure_timestamp);
+				.print("Past in blacklist [",Cap,"]: ",Past_in_blacklist_time);
+				.print("yet to finish for [",Cap,"]: ",Yet_to_finish_time);
+				.print("RemoveTimestamp: ",RemoveTimestamp);
 			}
-			OutScore = OutScoreRec + (Blacklist_max_time/Blacklist_time); 	
-		
+			
+			//if(Blacklist_time >= Blacklist_max_time)
+			if (Yet_to_finish_time <= 0)
+			{
+				//remove the capability from the blacklist table into the database
+				removeCapabilityFromBlacklist(Cap, Agent);
+				
+				//tell the owner of the capability to remove it from the blacklist
+				.send(Agent, tell, remove_from_blacklist(Cap));
+				
+				if(BV){.print("[#############BLACKLIST#############] Capability [",Cap,"] blacklist period expired. Removing from blacklist.");}
+				
+				OutScore=0;
+			}
+			else
+			{
+				Score = Yet_to_finish_time/TotalBlacklistTime;
+				.send(Agent, tell, capability_blacklist_cost(Cap, Score));
+				
+				OutScore = OutScoreRec + Score;
+				if(BV)
+				{
+					.print("SCORE [",Cap,"]: ",Score);
+					.print("######################");
+				}
+			}	
+		}
+		else
+		{
+			OutScore = 0;
 		}
 	.
-+!score_blacklisted_CS(CS,OutScore)
++!score_blacklisted_CS(CS, OutScore)
 	:	CS 			= []
 	<-	OutScore 	= 0;
 	.
@@ -54,7 +100,6 @@
 		.print("CS: ",CS);
 		.print("BlacklistedCS: ",BlacklistedCS);
 	.
-
 /**
  * [davide]
  * 
@@ -86,86 +131,4 @@
 	:	CS 					= []
 	<-	BlacklistedCS 		= [];
 		BlacklistedCapName 	= [];
-	.
-
-/**
- * [davide]
- * 
- * DEBUG PLAN for +!update_capability_blacklist_expiration
- */
-+!debug_update_capability_blacklist_expiration(Context)
-	<-
-		CS = [commitment(worker,receive_order,_),commitment(worker,place_order,_), commitment(worker,place_order_alternative,_), commitment(worker,place_order_alternative2,_)];
-		
-		!get_blacklisted_capability_list(CS, BlacklistedCS);
-		.print("CS: ",CS);
-		.print("BlacklistedCS: ",BlacklistedCS);
-
-		.my_name(Me);
-		+capability_blacklist(Me, receive_order);
-		!register_statement(capability_blacklist(Me, receive_order), Context);
-		
-		.print("waiting....");
-		.wait(10000);
-		!update_capability_blacklist(CS,Context);
-		
-		.print("waiting....");
-		.wait(1000);
-		
-		!get_blacklisted_capability_list(CS, BlacklistedCS_2);
-		.print("BlacklistedCS: ",BlacklistedCS_2);
-	.
-
-/**
- * [davide]
- * 
- * Update the agents blacklist. For each commitment in CS, this plan check
- * if a capability is blacklisted, and if true, then check if its persistence 
- * period within the blacklist has expired. In this case, the capability is 
- * removed from the blacklist.
- * 
- * This is executed by the dpt manager.
- */
-+!update_capability_blacklist(CS, DBTimestamp, Context)
-	:
-		CS 		= [Head|Tail] 						&
-		Head 	= commitment(Agent,Capability,_)
-	<-
-		?blacklist_verbose(BV);
-		
-		//Recursive call
-		!update_capability_blacklist(Tail, DBTimestamp, Context);
-		
-		?capability_blacklist(Agent, Capability, TSblacklist);
-		
-		//get the blacklist expiration time
-		?blacklist_expiration(HDelay,MDelay,SDelay);
-		
-		//Add the expiration rate to the capability blacklist timestamp
-		!timestamp_add(TSblacklist, duration(0,0,0,HDelay,MDelay,SDelay), TimeStampDelayed);
-		
-		//Take the less recent timestamp
-		!pick_less_recent(TimeStampDelayed, DBTimestamp, LessRecentTS );
-		
-		LessRecentTS 		= ts(LESS_Y, LESS_MTH, LESS_DAY, LESS_H, LESS_M, LESS_S);
-		TimeStampDelayed	= ts(TS_Y, TS_MTH, TS_DAY, TS_H, TS_M, TS_S);
-		
-		//If the blacklist capability timestamp, to which the expiration rate has been added,
-		//if less recent than the current timestamp
-		if( LESS_Y==TS_Y 	& LESS_MTH==TS_MTH 		& LESS_DAY==TS_DAY	&
-			LESS_H==TS_H 	& LESS_M==TS_M			& LESS_S==TS_S ) 	
-		{ 
-			//tell the owner of the capability to remove it from the blacklist
-			.send( Agent, tell, abolish( capability_blacklist(Agent, Capability,_) ) );
-			
-			removeCapabilityFromBlacklist(Capability, Agent);
-			.send(Agent, tell, remove_from_blacklist(Capability));
-			
-			
-			if(BV){.print("[BLACKLIST] Capability [",Capability,"] blacklist period expired.");}
-		}
-	.
-+!update_capability_blacklist(CS, DBTimestamp, Context)
-	:
-		CS 		= []
 	.

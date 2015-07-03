@@ -38,7 +38,6 @@
 		{
 			Response = no_timestamp;
 		}
-//		Response = Reply;
 	.
 
 /**

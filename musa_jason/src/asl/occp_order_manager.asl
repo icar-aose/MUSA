@@ -13,9 +13,27 @@ capability_evolution(deliver_billing,[add( billing_delivered(billingData, theRec
 agent_capability(upload_billing_to_user_cloud)[type(parametric)].
 capability_parameters(upload_billing_to_user_cloud, [user_id]).
 capability_precondition(upload_billing_to_user_cloud, condition(true) ).
-capability_postcondition(upload_billing_to_user_cloud, condition(billing_uploaded(user_id)) ).
+capability_postcondition(upload_billing_to_user_cloud, par_condition([user_id], property(billing_uploaded,[user_id]))).//  condition(billing_uploaded(user_id)) ).
 capability_cost(upload_billing_to_user_cloud,0).
 capability_evolution(upload_billing_to_user_cloud,[add( billing_uploaded(user_id) )]).
+
+//---------------------------------------------------
+
+//agent_capability(upload_billing_to_dropbox)[type(parametric)].
+//capability_parameters(upload_billing_to_dropbox, [user_id,the_access_token]).
+//capability_precondition(upload_billing_to_dropbox, condition(true) ).
+//capability_postcondition(upload_billing_to_dropbox, condition(billing_uploaded_to_dropbox(user_id,the_access_token)) ).
+//capability_cost(upload_billing_to_dropbox,0).
+//capability_evolution(upload_billing_to_dropbox,[add( billing_uploaded_to_dropbox(user_id,the_access_token) )]).
+//
+//agent_capability(upload_billing_to_google_drive)[type(parametric)].
+//capability_parameters(upload_billing_to_google_drive, [user_id,user_email]).
+//capability_precondition(upload_billing_to_google_drive, condition(true) ).
+//capability_postcondition(upload_billing_to_google_drive, condition(billing_uploaded_to_gdrive(user_id,user_email)) ).
+//capability_cost(upload_billing_to_google_drive,0).
+//capability_evolution(upload_billing_to_google_drive,[add( billing_uploaded_to_gdrive(user_id,user_email) )]).
+
+//---------------------------------------------------
 
 agent_capability(fulfill_order)[type(parametric)].
 capability_parameters(fulfill_order, [order_id,user_id]).
@@ -44,12 +62,12 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
 		
 		.print("ASSIGNMENT FOR CAPABILITY ",deliver_billing," -------------------.-.-.-.-.-.-.-> ",Assignment);
 		
-		!get_variable_value(Assignment, order_id, Order_id);
-		!get_variable_value(Assignment, recipient, User_id);
-		!get_variable_value(Assignment, recipient_email, User_email);
+		!get_variable_value(Assignment, Context, order_id, Order_id);
+		!get_variable_value(Assignment, Context, recipient, User_id);
+		!get_variable_value(Assignment, Context, recipient_email, User_email);
 		
-		occp.logger.action.info("[deliver_billing] Delivering billing to user ",User_id);
-		
+//		occp.logger.action.info("[deliver_billing] Delivering billing to user ",User_id);
+//		
 		if(Order_id 	\== unbound 	& 
 		   User_id 		\== unbound 	&
 		   User_email 	\== unbound)
@@ -79,19 +97,58 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
 +!action(upload_billing_to_user_cloud, Context, Assignment) 
 	<- 
 		.print("..................................................(upload_billing_to_user_cloud) uploading billing to cloud.");
-		!get_variable_value(Assignment, user_id, User_id);
+		!get_variable_value(Assignment, Context, user_id, User_id);
 		occp.logger.action.info("[upload_billing_to_user_cloud] Uploading billing to user (",User_id,")cloud ");
 		
 //		occp.action.upload_billing_to_cloud("/tmp/billing.pdf", true, User_id);
 		occp.action.tad.upload_billing_to_cloudTAD;
-				
-		occp.logger.action.info("[upload_billing_to_user_cloud] Billing has been succesfully uploaded to user cloud");
+//		occp.logger.action.info("[upload_billing_to_user_cloud] Billing has been succesfully uploaded to user cloud");
 		.print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- upload_billing_to_user_cloud ACTION OK");
+		
 	.
 
 +!terminate(upload_billing_to_user_cloud, Context, Assignment) 
 	<- 
-		!register_statement(billing_uploaded(user),Context); 
+		 !register_statement(billing_uploaded(user),Context);
+	.
+//-------------------------------------
+//upload_billing_to_dropbox---------
+ +!prepare(upload_billing_to_dropbox, Context, Assignment) 
+	<- 
+		true 
+	.
+
++!action(upload_billing_to_dropbox, Context, Assignment) 
+	<-
+		!get_variable_value(Assignment, Context, user_id, User_id);
+		!get_variable_value(Assignment, Context, the_access_token, Access_Token);
+//		occp.action.upload_file_to_dropbox("/tmp/billing.pdf", User_id, Access_Token);
+		!register_statement(billing_uploaded_to_dropbox(user,access_token),Context);
+	.
+
++!terminate(upload_billing_to_dropbox, Context, Assignment) 
+	<- 
+		true 
+	.
+//-------------------------------------
+//upload_billing_to_google_drive-------
+ +!prepare(upload_billing_to_google_drive, Context, Assignment) 
+	<- 
+		true 
+	.
+
++!action(upload_billing_to_google_drive, Context, Assignment) 
+	<- 
+		!get_variable_value(Assignment, Context, user_id, User_id);
+		!get_variable_value(Assignment, Context, user_email, Email);
+//		occp.action.upload_file_to_googledrive("/tmp/billing.pdf", Email);
+	
+		!register_statement(billing_uploaded_to_gdrive(user,email),Context); 
+	.
+
++!terminate(upload_billing_to_google_drive, Context, Assignment) 
+	<- 
+		true
 	.
 //-------------------------------------
 //fulfill_order------------------------
@@ -105,8 +162,8 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
 		.print("..................................................(fulfill_order) fulfilling order.");
 		
 		
-		!get_variable_value(Assignment, order_id, Order_id);
-		!get_variable_value(Assignment, user_id, User_id);
+		!get_variable_value(Assignment, Context, order_id, Order_id);
+		!get_variable_value(Assignment, Context, user_id, User_id);
 		
 		if(Order_id 	\== unbound 	& 
 		   User_id 		\== unbound)
@@ -120,10 +177,12 @@ capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
     	{
     		occp.logger.action.warn("[fulfill_order] Variables unbounded (order_id: ",Order_id,", user_id: ",User_id,")");		
     	}
+    	!register_statement(fulfill_order(order,user),Context);
     	.print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- fulfill_order ACTION OK");
+    	
 	.
 
 +!terminate(fulfill_order, Context, Assignment) 
 	<- 
-		!register_statement(fulfill_order(order,user),Context); 
+		true 
 	.

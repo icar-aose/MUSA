@@ -34,7 +34,7 @@ agent_goal( condition(done(delimit_dangerous_area)),
 	
 
 /*NormBase */
-//{ include( "normBaseProva.asl" ) }
+//{ include( "normBase.asl" ) }
 
 	
 

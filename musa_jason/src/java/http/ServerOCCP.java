@@ -44,9 +44,9 @@ public class ServerOCCP
 			if (debug) System.out.println("connection established");
 
 			params.put("idOrder", String.format("%d", conn.getId()));
-			params.put("idUser", conn.getIdUtente());
-			params.put("mailUser", conn.getMail());
-			params.put("user_message", conn.getUserMessage());
+			params.put("idUser", ConnectionOCCP.getIdUtente());
+			params.put("mailUser", ConnectionOCCP.getMail());
+			params.put("user_message", ConnectionOCCP.getUserMessage());
 
 		} 
 		catch (IOException ioException) 

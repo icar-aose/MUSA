@@ -24,10 +24,10 @@
 	.
 +!awake : execution(test) 
 	<- 
-//		!start_proxy_server;
-		.wait(9000);
-		.print("---------------SIMULATING REQUEST---------------");
-		!simulate_quote_request;
+		!start_proxy_server;
+//		.wait(9000);
+//		.print("---------------SIMULATING REQUEST---------------");
+//		!simulate_quote_request;
 	.
 
 
@@ -46,9 +46,7 @@
 		
 		.println("start simulation");
 		
-		
 		// user load page for send quote_request
-		
 		/*Session = "doc_management_dept";
 		User = user("luca","customer");
 		DocNumber = 100;*/

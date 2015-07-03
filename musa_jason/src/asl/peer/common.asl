@@ -164,13 +164,13 @@ list_contains([H | T],Element)
 	<-
 		.date(YY,MO,DD);
 		.time(HH,MM,SS);
-		.concat("",YY,MO,DD,HH,MM,SS,TimeStamp);
+		.concat("",YY,MO+1,DD,HH,MM,SS,TimeStamp);
 	.
 +!numeric_timestamp(Now)
 	<-
 		.date(YY,MO,DD);
 		.time(HH,MM,SS);
-		Now = ts(YY,MO,DD,HH,MM,SS);
+		Now = ts(YY,MO+1,DD,HH,MM,SS);
 	.
 
 earlier(ts(YY,MO,DD,HH,MM,SS1),ts(YY,MO,DD,HH,MM,SS2)) :- SS1 < SS2.
@@ -205,7 +205,11 @@ earlier(ts(YY1,MO1,DD1,HH1,MM1,SS1),ts(YY2,MO2,DD2,HH2,MM2,SS2)) :-  YY1 < YY2.
 		TimeStampDelayed = ts(YY+YYd,MO+MOd,DD+DDd,HH+HHd,MM+MMd,SS+SSd);
 	.
 	
-/*[davide]*/
+/**
+ * [davide]
+ * 
+ * Returns the seconds elapsed between two timestamps.
+ */
 +!how_many_seconds_elapsed(TimeStampFrom,TimeStampTo,Out) 
 	: 
 		TimeStampFrom 	= ts(_,_,_,_,_,SS_from) &
@@ -213,7 +217,11 @@ earlier(ts(YY1,MO1,DD1,HH1,MM1,SS1),ts(YY2,MO2,DD2,HH2,MM2,SS2)) :-  YY1 < YY2.
 	<-
 		Out = SS_to - SS_from;
 	.
-/*[davide]*/
+/*
+ * [davide]
+ *
+ * Returns the minutes elapsed (in seconds) between two timestamps.
+ */
 +!how_many_minutes_elapsed(TimeStampFrom,TimeStampTo,Out) 
 	: 
 		TimeStampFrom 	= ts(_,_,_,_,MM_from,_) &
@@ -221,7 +229,11 @@ earlier(ts(YY1,MO1,DD1,HH1,MM1,SS1),ts(YY2,MO2,DD2,HH2,MM2,SS2)) :-  YY1 < YY2.
 	<-
 		Out = (MM_to - MM_from) * 60; 	//secondi
 	.
-/*[davide]*/
+/*
+ * [davide]
+ *
+ * Returns the hours elapsed (in seconds) between two timestamps. 
+ */
 +!how_many_hours_elapsed(TimeStampFrom,TimeStampTo,Out) 
 	: 
 		TimeStampFrom 	= ts(_,_,_,HH_from,_,_) &

@@ -3,7 +3,6 @@
  * Description: recover a project from the database
  * ----------------------------------------------------------------------------
  * Last Modifies:  
- * 	- [davide, (2015-3-4)]: cambio il formato della soluzione in !recover_project
  *
  * TODOs:
  * 
@@ -57,8 +56,6 @@
 		!build_current_state_of_world(PrjContext,WI);
 		!retrieve_assignment_from_context(PrjContext,AssignmentList);
 		
-		//TODO modifica (2015-3-4)
-		//Solution=item(cs(CS),evo([dummy_accumulation]),0);
 		Solution = item(cs(CS), accumulation( world(WI), par_world([],[]), assignment_list(AssignmentList) ), ag([]), 0);
 		
 		.print("~~~Recovering existing project from persistance~~~");

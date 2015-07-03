@@ -168,6 +168,8 @@
 		Accumulation 	= accumulation(world(WS),_,_)
 	<-
 		!test_logic_formula(LogicFormula, WS, Bool);
+
+//		!test_parametric_condition(Condition, AssignmentSet, Accumulation, Bool);
 	.
 +!test_condition(Condition,WorldStatement,Bool)
 	:

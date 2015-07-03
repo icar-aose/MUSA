@@ -40,22 +40,6 @@
 	<-	IDOut = []
 	.
 
-/*INUTILIZZATO
-+!get_merged_goal_Identifier(GoalsList, IDOut)
-	:
-		GoalsList = [Goal|Tail] &
-	   (Goal = agent_goal(_,_,_)[goalfused(ID),_] 				| Goal = social_goal(_,_,_)[goalfused(ID),_] 			|	
-		Goal = agent_goal(_,_,_,_)[goalfused(ID),_] 			| Goal = social_goal(_,_,_,_)[goalfused(ID),_]			|
-		Goal = agent_goal(_,_,_)[goalfused(ID),_,_] 			| Goal = social_goal(_,_,_)[goalfused(ID),_,_] 			|	
-		Goal = agent_goal(_,_,_,_)[goalfused(ID),_,_] 			| Goal = social_goal(_,_,_,_)[goalfused(ID),_,_])
-	<-
-		!get_merged_goal_Identifier(Tail, IDOutRec);
-		.concat(ID, IDOutRec, IDOut);
-	.
-+!get_merged_goal_Identifier(GoalsList, IDOut)
-	<-	IDOut = []
-	. */
-
 /**
  * [davide]
  * 

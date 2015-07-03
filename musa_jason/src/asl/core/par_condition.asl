@@ -134,7 +134,6 @@
 		!apply_unification_to_par_condition_formulae(Tail, AssignmentList, OutFormulaeTwo, UnifiedFormulaeRec);		//recursive call
 		
 		Head = property(Functor,Terms);
-		
 		!exists_assignment_for_property(Terms,AssignmentList,Found);
 		
 		if(Found=true)
@@ -201,16 +200,6 @@
 	:	Terms 		= []
 	<-	OutTerms 	= [];
 	.
-
-	
-//--------------------
-//--------------------
-/**TODO DA ELIMINARE... */
-//+?capability_parameters(CapName,VarList) <-	VarList = [];.
-//-?capability_parameters(CapName,VarList) <-	VarList = [];.
-//--------------------
-//--------------------
-
 
 /**
  * [davide]
@@ -675,7 +664,8 @@
 	:	TermsA = [] | TermsB = []
 	<-	OutAssignment = [];
 	.
-	
+
+		
 +!test_parametric_condition(PCN,AssignmentSet,World,Bool)
 	:
 		PCN 	= [Head|Tail] &

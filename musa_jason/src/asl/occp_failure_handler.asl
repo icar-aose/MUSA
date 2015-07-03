@@ -22,32 +22,34 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 
 +!awake
 	<-
-		!awake_as_employee;
-		
+		!awake_as_employee;		
 	.
 
 
 //-------------------------------------
 //notify_order_unfeasibility-----------
+
++!action(notify_order_unfeasibility, Context, Assignment)  		: fail(notify_order_unfeasibility) <- true.
++!terminate(notify_order_unfeasibility, Context, Assignment)  	: fail(notify_order_unfeasibility) <- true.
+
  +!prepare(notify_order_unfeasibility, Context, Assignment) 
 	<- 
 		true 
 	.
-
 +!action(notify_order_unfeasibility, Context, Assignment) 
 	<- 
 		.print("..................................................(notify_order_unfeasibility) NOTIFYING ERROR MESSAGE.");
 		.print("ASSIGNMENT FOR CAPABILITY ",notify_order_unfeasibility," -------------------.-.-.-.-.-.-.-> ",Assignment);
 		
-		!get_variable_value(Assignment, email_param, User_email);
+		!get_variable_value(Assignment, Context, email_param, User_email);
 		occp.action.sendMail(User_email,"Fallimento ordine","Gentile cliente,\nil suo ordine non puo\' essere evaso.\nSaluti,\nMUSA","MUSA");
 		
-		occp.logger.action.info("[notify_order_unfeasibility] Notifying error message to user");
+		!register_statement(notify_order_unfeasibility(message,email),Context); 
 	.
 
 +!terminate(notify_order_unfeasibility, Context, Assignment) 
 	<- 
-		!register_statement(notify_order_unfeasibility(message,email),Context); 
+		true
 	.
 //-------------------------------------
 //delete_order-------------------------
@@ -58,12 +60,12 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 
 +!action(delete_order, Context, Assignment) 
 	<- 
-		occp.logger.action.info("[delete_order] Deleting order");	
+		occp.logger.action.info("[delete_order] Deleting order");
+		!register_statement(order_deleted(order), Context);  	
 		.print("..................................................(delete_order) ORDER DELETED."); 
 	.
 
 +!terminate(delete_order, Context, Assignment) 
 	<- 
-//		!register_statement(done(delete_order),Context);
-		!register_statement(order_deleted(order), Context);  
+		true
 	.

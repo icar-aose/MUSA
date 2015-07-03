@@ -171,23 +171,25 @@
 		!persist_statement_and_calculate_timestamp(Term,Project,Me,TimeStamp);
 		+statement(Department, Project, Term)[TimeStamp];
 		
-//		.print("----------------------------------------<<<<<<<< SONO QUI. MANDO A ",Members);
 		if(not .empty(Members))
 		{
-			.send(Members,tell,add_statement(Department, Project, Term, TimeStamp));
+			.send(Members,tell,add_statement(Department, Project, Term, TimeStamp ));
 		}
-		
-//		.print("----------------------------------------<<<<<<<< SONO QUI. HO INVIATO ADD_STATEMENT AGLI AGENTI");
-		
 	.
+
 @staff_register_a_statement[atomic]
-+!register_statement(Term,Context)
++!register_statement(Term,Context)[source(Agent)]
 	<-
-//		.my_name(Me);
-//		.print("----------------->",Me," delegating register statement for ",Term);
 		Context = project_context(Department , Project);
+		
+		+statement(Department, Project, Term);
+		
 		getDptManager(Department,Manager);
-		.send(Manager,tell,add_statement(Department, Project, Term));
+		
+		//Tell the applicant agent to wait until the term is registered in context
+		.send(Agent, tell, wait_for_manager_to_register_statement(Term, Agent));
+		
+		.send(Manager,tell,add_statement(Department, Project, Term));		
 	.
 
 @manager_receive_a_statement[atomic]
@@ -204,17 +206,14 @@
 @staff_receive_a_statement[atomic]
 +add_statement(Department, Project, Term, TimeStamp)[source(Manager)]
 	<-
-	
-	
-//		.print("----------------------AGENT EMPLOYEE RECEIVED ", Term );
-		.my_name(Me);
 		!build_current_state_of_world(Context, World);
-//		.print("----------------------------------------<<<<<<<< ",Me," world-> ",World);
 		
 		.abolish( statement(Department, Project, Term) );
 		.abolish(add_statement(Department, Project, Term, TimeStamp));
 		+statement(Department, Project, Term)[TimeStamp];
 	.
+
+	
 +!register_statement(Term,Context) <- .println("error in registering a statement"); .
 
 /* private plan */

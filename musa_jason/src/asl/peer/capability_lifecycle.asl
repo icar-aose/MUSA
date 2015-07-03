@@ -6,11 +6,9 @@
  * 
  *
  * TODOs:
- * 	- il piano +!commit_to_goal_pack dovrà avere come parametro anche la lista delle norme appartenenti al task di riferimento
+ * 	- tutti i piani +!get_variable_value dovranno prendere come parametro in ingresso anche il contesto
  * 
  * Bugs:  
- * 	- devo ripristinare check_capability_precondition_in_context. In particolare, nel verificare se una capability può essere 
- 	  attivata devo verificare i predicati usando check_action_validity, che effettua un controllo sui timestamp
  *
  *
  **************************/
@@ -35,7 +33,7 @@
 +terminate_social_commitment(Context,Capability)
 	<-
 		.print("Terminating social commitment for capability ",Capability);
-		.drop_intention( capability_achievement_lifecycle(Capability,capability_lifecycle( _,Context,_ )) );
+		.drop_intention( capability_achievement_lifecycle(Capability,capability_lifecycle( _,Context,_ ),_,_,_) );
 		.abolish( terminate_social_commitment(Context,Capability) );
 	.
 
@@ -72,7 +70,7 @@
 		!check_condition_true_in_context(PreCondition, Context, PreBool);
 
 		//Is the pre-condition is satisfied, proceed checking the post-condition
-		if (PreBool=true) 
+		if (PreBool=true)
 		{			
 			!get_remote_capability_postcondition(commitment(Me, Capability, _), PostCondition);
 			!check_condition_true_in_context(PostCondition, Context, PostBool);		//Check if the pre-condition is true within the context
@@ -264,12 +262,24 @@
 //********************************
 //		CHECK STATE
 //********************************
+//+!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
+//	:
+//		Lifecycle = capability_lifecycle( Pack,Context,check )	&
+//		.my_name(Me) 											&
+//		wait_for_manager_to_register_statement(_, Me)
+//	<-
+//		.print("##########################waiting (CHECK)",Term);
+//		?frequency_perception_loop(Delay);
+//		.wait(Delay);
+//		
+//		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
+//	.
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,check )
 	<-
 		?frequency_perception_loop(Delay);
-		.wait(2*Delay);
+		.wait(Delay);
 	
 		?capability_postcondition(Capability, PostCondition );
 		.my_name(Me);
@@ -309,15 +319,12 @@
 		
 		if(.desire(capability_blacklist(Me,Capability,_)))
 		{
-			
-			
 			updateFailureRate(Capability);
 			//se l'operation ritorna false allora la capabiliy va rimossa dalla black list 
 		}
 		
 		//ANTONELLA END MODIFY
 		
-
 		NewLifecycle = capability_lifecycle( Pack,Context,ready );
 		!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre, TaskPost,AssignmentList);
 		.println(Capability, " is ready");
@@ -329,17 +336,27 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,failure )
 	<-
-		!communicate_failure(Capability,Lifecycle);
+		//Takes the exact time in which the capability has failed
+		!numeric_timestamp(FailureTimestamp);
+
+		//Communicate the capability failure to the dpt manager
+		!communicate_failure(Capability, FailureTimestamp, Lifecycle);
 	.
 
-+!communicate_failure(Capability,Lifecycle)
+/**
+ * Communicate the failure of a capability to the department manager.
+ * This plan is executed when a capability fails its execution (in other
+ * words, when its post-condition is not verified in context after its
+ * execution)
+ */
++!communicate_failure(Capability, FailureTimestamp, Lifecycle)
 	<-
 		Lifecycle 	= capability_lifecycle( Pack,Context,State );
 		Context 	= project_context(Department , Project);
 		getDptManager(Department,Manager);		
 		.my_name(Me);
 		
-		.send(Manager,tell,capability_failure(Capability, Me, Context));
+		.send(Manager,tell,capability_failure(Capability, Me, FailureTimestamp, Context));
 	.
 
 /**
@@ -350,6 +367,7 @@
 +!check_condition_true_in_context(Capability, Condition, Context, AssignmentSet, Bool)
 	<-
 		!build_current_state_of_world(Context, World);
+		
 		UpdatedAccumulation = accumulation(World, par_world([],[]), assignment_list([]));		
 
 		//Test the condition within the current world state
@@ -390,7 +408,7 @@
 		else 							{ Validity=false; }
 	.
 
-+!get_variable_value(VarList, Var, Value)
++!get_variable_value(VarList, Context, Var, Value)
 	:
 		VarList 	= [Head|Tail]					&
 		Head 		= assignment(VarName,VarVal)	&
@@ -398,19 +416,27 @@
 	<-
 		Value = VarVal;
 	.
-+!get_variable_value(VarList, Var, Value)
++!get_variable_value(VarList, Context, Var, Value)
 	:
 		VarList 	= [Head|Tail]					&
 		Head 		= assignment(VarName,VarVal)	&
 		VarName		\== Var
 	<-
-		!get_variable_value(Tail, Var, Value)
+		!get_variable_value(Tail, Context, Var, Value)
 	.
-+!get_variable_value(VarList, Var, Value)
++!get_variable_value(VarList, Context, Var, Value)
 	:	VarList = []
 	<-	Value 	= unbound;
 	.
-+!get_variable_value(VarList, Var, Value)
++!get_variable_value(VarList, Context, Var, Value)
+	<-
+		//check in context
+		!get_data_value(Var, DataValue, Context);	
+		
+		if(DataValue == null) 	{Value = unbound;}
+		else 					{Value = DataValue;}
+	.
++!get_variable_value(VarList, Context, Var, Value)
 	<-	Value 	= unbound;
 	.
 

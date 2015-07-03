@@ -56,6 +56,7 @@
 		}
 	.
 
+
 /**
  * Called from each agent. It checks if an agent has a capability which
  * execution generates a world state that will be used as start point for
@@ -219,7 +220,7 @@
 	
 /**
  * Activate the trigger capability, that is, the capability that 
- * creates starts the project organization.
+ * starts the project organization.
  */
 +!activate_dpt_monitor(Pack, DptContext)
 	:
@@ -235,8 +236,23 @@
 			
 		.my_name(Me);
 		.findall(commitment(Me,Capability,_), agent_capability(Capability), CS);	
+		
+		
+		//QUI
+		
+		
+		//assegna capability monitor
+		
+		
+		
+		
+		
+		
+		
+		
 		!unroll_parametric_cap_set_to_activate_project(TC, Pars, CS, DptContext);
 	.
+
 
 /**
  * [davide]
@@ -276,7 +292,7 @@
 		if(TC_Satisfied==true)
 		{
 			//If the trigger condition is satisfied, then the current capability is registered to the database.
-			!!register_capability(CapabilityName,DptContext);			
+			!!register_capability(CapabilityName, DptContext);			
 		}
 		
 		!unroll_parametric_cap_set_to_activate_project(TC, GoalParams, Tail, DptContext);			//Recall the plan with the remaining capabilities.

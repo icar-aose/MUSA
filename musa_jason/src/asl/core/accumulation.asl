@@ -362,36 +362,20 @@
 	<-
 		?accumulation_verbose(VB);
 
-
-		//Step 1 -> Assemble the par_condition from both the accumulation state and the input condition CN
+//Step 1 -> Assemble the par_condition from both the accumulation state and the input condition CN
 		!assemble_par_condition_from_accumulation(accumulation(world([]), par_world(Vars, PWS), _), PA);
 		
 		//Convert CN, the input condition, to a par_condition CNI_tmp
 		!convert_simple_condition_to_par_condition(CN, CNI_tmp);			
 		CNI_tmp = par_condition(CNI_tmp_Vars, PC_Properties);
-//		.print("CNI_tmp: ",CNI_tmp);
-		
+//		
 		//TODO In realtà il !get_assignment_from_par_list sarebbe inutile perche gli assignment ottenuti dalla parlist del goal da testare sono  già inclusi in InAssignment.
 		!get_assignment_from_par_list(GoalParams, GoalAssignmentList);
 		
-		//Filter the properties within the generated par_condition, by keeping only those which terms have an assignment
-		//in the assignment list
-		
 		//potrei piuttosto verificare banalmente l'intersezione (vuota o no)
 		!get_var_list_from_assignment_list(GoalAssignmentList, GoalVars);
-		
-		
-//		!filter_effective_parametric_par_condition(PC_Properties, GoalVars, PC_Properties_filtered, EffectiveVars);
-		
-//		CNI = par_condition(CNI_tmp_Vars,PC_Properties_filtered);
-		
-//		.print("FILTERED CNI: ",CNI_tmp);
-		
-		//Step 2 -> find for a substitution that makes the two par_condition identicals.
-//		!find_substitution_for_par_condition(CNI, PA, Vars, InAssignment, OutAssignment, Success);
 
 		.union(GoalVars,Vars,AllVars);
-//		!find_substitution_for_par_condition(CNI_tmp, PA, Vars, InAssignment, OutAssignment, Success);
 		!find_substitution_for_par_condition(CNI_tmp, PA, AllVars, InAssignment, OutAssignment, Success);
 		
 		if(VB=true)
@@ -422,7 +406,6 @@
 			AccII = accumulation(world(WII), par_world(VarList, PWII), _);
 			//Step 4 -> Test the condition within the dummy accumulation state (where the found assignment have been applied).
 			
-//			.print("--->.-.-.-.-.-TESTING ",CN,"\non ",WII);
 			!test_condition(CN, WII, Bool);
 			
 			if(VB=true){.print("[check_if_par_condition_addresses_accumulation] ----->TEST_CONDITION: ",Bool);}
@@ -446,16 +429,11 @@
 		//Passo1 -> Converto lo stato di accumulazione in ingresso in una par_condition
 		!assemble_par_condition_from_accumulation(Acc, PA);
 		
-		//Prendi le par_condition per cui vi è almeno un assignment nella lista degli assignment in ingresso
-//		!filter_effective_parametric_par_condition(PCNproperties, GoalParams, CNI, _);
-		
 		//Passo2
 		!find_substitution_for_par_condition(CN, PA, InAssignment, OutAssignment, Success);
 		
 		if(Success=true)
 		{
-			
-//			.print("[",Success,"]HO TROVATO UNA SOSTITUZIONE TRA ",CN," E ",PA);
 			//Passo3
 			!apply_substitution_to_Accumulation(Acc ,OutAssignment, AccII);
 			
