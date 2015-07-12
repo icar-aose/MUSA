@@ -18,13 +18,12 @@ capability_postcondition(delete_order, par_condition([order_id], property(order_
 capability_cost(delete_order,0).
 capability_evolution(delete_order,[add( order_deleted(order_id) )]).
  
-!awake.
+//!awake.
 
 +!awake
 	<-
 		!awake_as_employee;		
 	.
-
 
 //-------------------------------------
 //notify_order_unfeasibility-----------
@@ -41,8 +40,10 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 		.print("..................................................(notify_order_unfeasibility) NOTIFYING ERROR MESSAGE.");
 		.print("ASSIGNMENT FOR CAPABILITY ",notify_order_unfeasibility," -------------------.-.-.-.-.-.-.-> ",Assignment);
 		
+		!get_variable_value(Assignment, Context, notification_message, NotificationMessage);
 		!get_variable_value(Assignment, Context, email_param, User_email);
-		occp.action.sendMail(User_email,"Fallimento ordine","Gentile cliente,\nil suo ordine non puo\' essere evaso.\nSaluti,\nMUSA","MUSA");
+		
+//		occp.action.sendMail(User_email,"~~~",NotificationMessage,"MUSA");
 		
 		!register_statement(notify_order_unfeasibility(message,email),Context); 
 	.

@@ -11,24 +11,21 @@ import java.io.FileInputStream;
 
 import calendar.CalendarQuickstart;
 
-import com.google.api.client.util.DateTime;
-
 public class insertGoogleCalendarEvent extends DefaultInternalAction 
 {
     @Override
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
     {
+//    	String event_name 	= args[0].toString();
+//    	String description 	= args[1].toString();
+    	String event_name = "Evento musa";
+    	String description = "Ehila, come va?";
+    	
     	//Create a new google calendar object 
 		CalendarQuickstart aa = new CalendarQuickstart();
 		
 		//Set the file path to the secret key related to the application
 		aa.set_app_secret_key_json_file(new FileInputStream("/home/davide/musa_google_application_keys.json"));
-		
-		//Create and insert the event
-		String event_name 		= "Product delivery";
-		String location 		= "test street, 10";
-		String description 		= "Delivery of the product I ordered";
-		DateTime event_date 	=  new DateTime("2015-10-24T17:00:00-07:00");
 		
 		aa.insertNewEvent(event_name, description);
 		

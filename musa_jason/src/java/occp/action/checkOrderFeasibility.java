@@ -34,11 +34,11 @@ public class checkOrderFeasibility extends DefaultInternalAction
 		String user 		= "occp_root";
 		String password 	= "root";*/
 		
-		String ip_address 	= MusaProperties.get_demo_db_ip();
-		String port 		= MusaProperties.get_demo_db_port();
-		String database 	= MusaProperties.get_demo_db_name();
-		String user 		= MusaProperties.get_demo_db_user();
-		String password 	= MusaProperties.get_demo_db_userpass();
+		String ip_address 	= MusaProperties.getDemo_db_ip();
+		String port 		= MusaProperties.getWorkflow_db_port();
+		String database 	= MusaProperties.getDemo_db_name();
+		String user 		= MusaProperties.getDemo_db_user();
+		String password 	= MusaProperties.getDemo_db_userpass();
 		
 		String order_id 	= args[0].toString().replace("\"", "");
 		OrderTable orders 						= new OrderTable(ip_address, port, database, user, password);

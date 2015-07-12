@@ -20,7 +20,6 @@
  */
 +!create_project(DepartmentName,ProjectName)
 	<-	
-		
 		Context = project_context(DepartmentName,ProjectName);
 		.delete("_dept",DepartmentName,SocialGoalName);
 		.term2string(SocialGoal,SocialGoalName);
@@ -101,37 +100,14 @@
 		
 		if(BlacklistEnabled)	
 		{
-			!read_blacklist_from_database(Context); // da sistemare
-				
-			//Keep the timestamp of when the solution planning is starting  
-			.abolish(orchestration_start_at(_));
-			!numeric_timestamp(Now);
-			+orchestration_start_at(Now);
-			.print("#########");
-			.print("NOW:",Now);
-			.print("#########");
-			
-			//--------------------------------------------------------------
-			.findall(commitment(Me,Cap,_), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
-			
-			if (.empty(Members))	
-			{
-				BlacklistedCS = LocalBlacklistedCommitmentSet
-			}
-			else					
-			{
-				!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
-				.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
-			}
-
-			!score_blacklisted_CS(BlacklistedCS, OutScore);
-			//--------------------------------------------------------------
+			!prepare_blacklist(Context, Members, BlacklistScore)
 		}
 		
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
-		//TODO per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
 		
-		
+		//##############
+		//#####TODO##### per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
+		//##############
 		Context = project_context(DepartmentName,ProjectName);
 		
 		if(	TheSolution \== no_solution)
@@ -168,7 +144,39 @@
 			!!organize_solution(Context, Pack);
 		}
 	.		
-	
+
+/**
+ * [davide]
+ * 
+ * Read the blacklist from the database and score these capabilities.
+ * Also, the dpt manager keep in its B.B. the current timestamp used
+ * for updating the blacklist.
+ */
++!prepare_blacklist(Context, Members, BlacklistScore)
+	<-
+		.my_name(Me);
+		!read_blacklist_from_database(Context); // da sistemare
+			
+		//Keep the timestamp of when the solution planning is starting  
+		.abolish(orchestration_start_at(_));
+		!numeric_timestamp(Now);
+		+orchestration_start_at(Now);
+		
+		.findall(commitment(Me,Cap,_), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
+		
+		if (.empty(Members))	
+		{
+			BlacklistedCS = LocalBlacklistedCommitmentSet
+		}
+		else					
+		{
+			!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
+			.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
+		}
+
+		!score_blacklisted_CS(BlacklistedCS, BlacklistScore);
+	.
+
 /**
  * [davide]
  * 
@@ -538,13 +546,8 @@
 		
 		.drop_intention( capability_achievement_lifecycle(_,capability_lifecycle( _,Context,_ ),_,_,_) );
 		
-		
-		
 		.println("The project is correctly terminated");
-//		occp.logger.action.info("The project (",Project,") is correctly terminated");
-
-		
-
+		occp.logger.action.info("The project (",Project,") is correctly terminated");
 		
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 		!social_terminate_the_project(Context,Solution);
@@ -725,9 +728,12 @@
 
 +!unroll_solution_to_inform_social_commitment_and_extract_members(CS,ParentCS,Context,Pack,Members)
 	:	CS 		= []
-	<-	Members	= []//Out = []
+	<-	Members	= []
 	.
 
+/**
+ * Suspend the social commitment
+ */
 +!suspend_social_commitment(SocialGoal,Solution,Context)
 	:
 		Context 	= project_context(Department , Project) 	&
@@ -735,12 +741,15 @@
 	<- 
 		.drop_intention( agent_monitoring(_,_,Context) );
 		.all_names(AllAgents);
+		
 		!send_suspend_to_each_agent(CS, AllAgents);
 	.
-+!send_suspend_to_each_agent(CS,AllAgents)
-	:	CS = []
-	<-	true
-	.
+
+/**
+ * Communicate all agents to stop their capability lifecycles. This
+ * plan is activated when a solution has been correctly terminated or
+ * a capability failure occurred. 
+ */
 +!send_suspend_to_each_agent(CS,AllAgents)
 	:
 		CS = cs(InnerCS)
@@ -762,10 +771,10 @@
 	<-
 		if (.member(Agent,AllAgents)) 
 		{
-			.send(Agent,tell,terminate_social_commitment(Context,Capability));
+			.send(Agent, tell, terminate_social_commitment(Context,Capability));
 		}
 	.
-
-
-
-
++!send_suspend_to_each_agent(CS,AllAgents)
+	:	CS = []
+	<-	true
+	.

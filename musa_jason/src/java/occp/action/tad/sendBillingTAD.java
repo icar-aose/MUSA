@@ -34,21 +34,23 @@ import billing_pdf.Billing;
 
 public class sendBillingTAD extends DefaultInternalAction
 {
-	private static String BILLING_PATH 		= MusaProperties.get_demo_billing_tmp_folder() + "billing.pdf";
+//	private static String BILLING_PATH 		= MusaProperties.get_demo_billing_tmp_folder() + "billing.pdf";
 	private static String sender_username 		= "musa.customer.service@gmail.com";
 	private static String sender_password 		= "pippopluto";
 	private static String message_body_text 	= "Dear customer,\n\nyour order has been accepted. Enclosed, you'll find the billing related to your order.\n\nSincerely,\nMUSA";
 	private static String message_subject 		= "MUSA ~~~ Your order has been accepted!";
 	private static String logo_fname = "";
 	
+	private String billing_filename = "";
+	
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
+		billing_filename 				= args[0].toString().replace("\"", "");
+		final String user_email 		= args[1].toString().replace("\"", "");		
 		final String order_id 			= ConnectionOCCP.getIdOrdine();
-		final String user_id 			= ConnectionOCCP.getIdUtente();
-//		final String user_email 		= OCCP_Connection.getMail();
-		final String user_email 		= args[0].toString().replace("\"", "");
 		final JSONArray product_details 	= ConnectionOCCP.getProductMessage();
-		final Billing b = new Billing(BILLING_PATH);		
+		
+		final Billing b = new Billing(billing_filename);		
 		//Format the user name for the billing
 		String user_name = String.format("%s %s", ConnectionOCCP.getNome(), ConnectionOCCP.getCognome());
 		
@@ -79,7 +81,7 @@ public class sendBillingTAD extends DefaultInternalAction
 		//Create the billing
 		b.populate_document();
 		
-		musa_logger.get_instance().info("Billing created at " + BILLING_PATH);
+		musa_logger.get_instance().info("Billing created at " + billing_filename);
 		musa_logger.get_instance().info("Sending billing e-mail");
 		
 		//Send the billing to the user email
@@ -140,9 +142,9 @@ public class sendBillingTAD extends DefaultInternalAction
 
 			// Part two is attachment
 			messageBodyPart = new MimeBodyPart();
-			DataSource source = new FileDataSource(BILLING_PATH);
+			DataSource source = new FileDataSource(billing_filename);
 			messageBodyPart.setDataHandler(new DataHandler(source));
-			messageBodyPart.setFileName(BILLING_PATH);
+			messageBodyPart.setFileName(billing_filename);
 			multipart.addBodyPart(messageBodyPart);
 
 			// Send the complete message parts

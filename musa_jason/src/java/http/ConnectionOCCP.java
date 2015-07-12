@@ -206,6 +206,10 @@ public class ConnectionOCCP extends Connection
 	{
 		return param_table.get("indirizzo_spedizione");
 	}
-
+	
+	public static String getDropboxAccessToken()
+	{
+		return param_table.get("accesstoken");
+	}
 	
 }

@@ -37,7 +37,8 @@ public class Specification extends Entity {
         return belief_base;
     }
     
-    public List getGoalBeliefList() {
+    public List getGoalBeliefList() 
+    {
         LinkedList belief_base = new LinkedList();
         
         Iterator<AbstractGoalEntity> it = goals.getGoals().iterator();

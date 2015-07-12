@@ -1,4 +1,4 @@
-{ include( "normBase.asl" ) }
+//{ include( "normBase.asl" ) }
 {include( "goalFusion/goalfusion.asl") }
 {include( "configuration.asl") }
 

@@ -46,28 +46,45 @@ capability_evolution(place_order,[add( order_placed(order_id,user_id) )]).
 //##################
 
 
-agent_capability(place_order_alternative)[type(parametric)].
-capability_parameters(place_order_alternative, [order_id,user_id]).
-capability_precondition(place_order_alternative, condition(true) ).
-capability_postcondition(place_order_alternative, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
-capability_cost(place_order_alternative,[12,3]).
-capability_evolution(place_order_alternative,[add( order_placed(order_id,user_id) )]). 
-
-agent_capability(place_order_alternative2)[type(parametric)].
-capability_parameters(place_order_alternative2, [order_id,user_id]).
-capability_precondition(place_order_alternative2, condition(true) ).
-capability_postcondition(place_order_alternative2, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
-capability_cost(place_order_alternative2,[12,3,6]).
-capability_evolution(place_order_alternative2,[add( order_placed(order_id,user_id) )]). 
+//agent_capability(place_order_alternative)[type(parametric)].
+//capability_parameters(place_order_alternative, [order_id,user_id]).
+//capability_precondition(place_order_alternative, condition(true) ).
+//capability_postcondition(place_order_alternative, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
+//capability_cost(place_order_alternative,[12,3]).
+//capability_evolution(place_order_alternative,[add( order_placed(order_id,user_id) )]). 
+//
+//agent_capability(place_order_alternative2)[type(parametric)].
+//capability_parameters(place_order_alternative2, [order_id,user_id]).
+//capability_precondition(place_order_alternative2, condition(true) ).
+//capability_postcondition(place_order_alternative2, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
+//capability_cost(place_order_alternative2,[12,3,6]).
+//capability_evolution(place_order_alternative2,[add( order_placed(order_id,user_id) )]). 
 
 //---------------------------
 
-agent_capability(set_user_data)[type(parametric)].
-capability_parameters(set_user_data, [user_id,user_email]).
-capability_precondition(set_user_data, condition(true) ).
-capability_postcondition(set_user_data, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
-capability_cost(set_user_data,[0]).
-capability_evolution(set_user_data,[add( set_user_data(user_id,user_email) )]). 
+//agent_capability(set_user_data)[type(parametric)].
+//capability_parameters(set_user_data, [user_id,user_email]).
+//capability_precondition(set_user_data, condition(true) ).
+//capability_postcondition(set_user_data, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
+//capability_cost(set_user_data,[0]).
+//capability_evolution(set_user_data,[add( set_user_data(user_id,user_email) )]). 
+
+
+
+agent_capability(set_user_data_step1)[type(parametric)].
+capability_parameters(set_user_data_step1, [user_id,user_email]).
+capability_precondition(set_user_data_step1, condition(true) ).
+capability_postcondition(set_user_data_step1, par_condition([user_id,user_email], property(set_user_data_step1,[user_id,user_email])) ).
+capability_cost(set_user_data_step1,[0]).
+capability_evolution(set_user_data_step1,[add( set_user_data_step1(user_id,user_email) )]). 
+
+agent_capability(set_user_data_step2)[type(parametric)].
+capability_parameters(set_user_data_step2, [user_id,user_email]).
+capability_precondition(set_user_data_step2, par_condition([user_id,user_email], property(set_user_data_step1,[user_id,user_email])) ).
+capability_postcondition(set_user_data_step2, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
+capability_cost(set_user_data_step2,[0]).
+capability_evolution(set_user_data_step2,[add( set_user_data(user_id,user_email) )]). 
+
 
 agent_capability(check_order_feasibility)[type(parametric)].
 capability_parameters(check_order_feasibility, [order_id]).
@@ -83,11 +100,11 @@ capability_postcondition(complete_transaction, condition( done(complete_transact
 capability_cost(complete_transaction,[0]).
 capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
-!awake.
+//!awake.
 
 +!awake
 	<-
-		!awake_as_employee;
+		!awake_as_employee;		
 	.
 
 +!register_page(receive_order, Context)
@@ -96,6 +113,46 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		.print(".-.-.-.-.-> registering capability receive_order");
 		!standard_register_HTTP_page(receive_order, "Receive order ", Context );
 	.
+
+
+
+//set_user_data------------------------
+ +!prepare(set_user_data_step1, Context, Assignment) 
+	<- 
+		true 
+	.
+
++!action(set_user_data_step1, Context, Assignment) 
+	<- 
+		.print("..................................................(set_user_data_step1) setting user data...");		
+		occp.logger.action.info("[set_user_data_step1] Setting user data");
+	.
+
++!terminate(set_user_data_step1, Context, Assignment) 
+	<- 
+		!register_statement(set_user_data_step1(user,email),Context);
+	.
+//set_user_data------------------------
+ +!prepare(set_user_data_step2, Context, Assignment) 
+	<- 
+		true 
+	.
+
++!action(set_user_data_step2, Context, Assignment) 
+	<- 
+		.print("..................................................(set_user_data_step2) setting user data...");
+		
+		occp.logger.action.info("[set_user_data_step2] Setting user data");
+		
+	.
+
++!terminate(set_user_data_step2, Context, Assignment) 
+	<- 
+		!register_statement(set_user_data(user,email),Context);
+	.
+
+
+
 
 //receive_order------------------------
  +!prepare(receive_order, Context, Assignment) 
@@ -208,12 +265,12 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		.print("..................................................(set_user_data) setting user data...");
 		
 		occp.logger.action.info("[set_user_data] Setting user data");
-		
+		!register_statement(set_user_data(user,email),Context);
 	.
 
 +!terminate(set_user_data, Context, Assignment) 
 	<- 
-		!register_statement(set_user_data(user,email),Context);
+		true
 	.
 //-------------------------------------
 //check_order_feasibility--------------
@@ -227,34 +284,13 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		.print("..................................................(check_order_feasibility) checking order feasibility...");
 		occp.logger.action.info("[check_order_feasibility] Checking order feasibility");
 
-//		!get_variable_value(Assignment, order_id, Order_id);
-//		
-//		if(Order_id \== unbound)
-//	    {
-//	    	occp.action.checkOrderFeasibility(Order_id, Success);
-//		
-//			if(Success==true)
-//			{
-//				occp.logger.action.info("[check_order_feasibility] Order ",Order_id," is feasible.");
-//				!register_statement(order_status(accepted), Context);
-//			}
-//			else
-//			{
-//				occp.logger.action.info("[check_order_feasibility] Order ",Order_id," is NOT feasible.");
-//				!register_statement(order_status(refused), Context);
-//			}
-//	    }
-//	    else
-//	    {
-//	    	occp.logger.action.warn("[check_order_feasibility] Variable unbounded (order_id: ",Order_id,")");
-//	    	!register_statement(order_status(refused), Context);
-//	    }
-		
-		//		!register_statement(order_status(refused), Context);
-		
-		.random(X);
-		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
-		else		{!register_statement(order_status(refused), Context);}
+//		.random(X);
+//		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
+//		else		{!register_statement(order_status(refused), Context);}
+
+
+		!register_statement(order_status(accepted), Context);
+
 		!register_statement(order_checked(order), Context);
 	.
 
@@ -281,5 +317,3 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 	<- 
 		true 
 	.
-
-

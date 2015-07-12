@@ -148,6 +148,19 @@
 		.print("success: ",Success);
 		.print("OutputAssignment: ",OutAssignment);
 	.
++!debug_unify_par_condition_3
+	<-	
+		
+		!find_substitution_for_par_condition( par_condition([user_id,user_email],property(set_user_data_step1,[user_id,user_email])),
+							  				  par_condition([user_id,user_email],property(set_user_data_step1,[user_id,user_email])),
+											  [],
+											  OutAssignment,
+											  Success);
+		
+		.print("success: ",Success);
+		.print("OutputAssignment: ",OutAssignment);
+	.
+	
 /**-----------------------------------------------------------------------------------------------------*/
 
 +!debug_unroll_par_condition_formula_1

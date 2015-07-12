@@ -33,7 +33,7 @@
 +terminate_social_commitment(Context,Capability)
 	<-
 		.print("Terminating social commitment for capability ",Capability);
-		.drop_intention( capability_achievement_lifecycle(Capability,capability_lifecycle( _,Context,_ ),_,_,_) );
+		.drop_intention( capability_achievement_lifecycle(Capability, capability_lifecycle( _,Context,_ ), _, _, _) );
 		.abolish( terminate_social_commitment(Context,Capability) );
 	.
 
@@ -61,19 +61,23 @@
  * check the action validity, that is, a check on the timestamp of the
  * conditions.
  */
-+!check_capability_precondition_in_context(Capability,Context,Validity)
++!check_capability_precondition_in_context(Capability,Context,AssignmentList,Validity)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,ready )
 	<-
 		.my_name(Me);
 		!get_remote_capability_precondition( commitment(Me, Capability, _), PreCondition );
-		!check_condition_true_in_context(PreCondition, Context, PreBool);
+		
+		
+		!check_condition_true_in_context(Capability, PreCondition, Context, AssignmentList, PreBool);
+//		!check_condition_true_in_context(PreCondition, Context, PreBool);
 
 		//Is the pre-condition is satisfied, proceed checking the post-condition
 		if (PreBool=true)
 		{			
 			!get_remote_capability_postcondition(commitment(Me, Capability, _), PostCondition);
-			!check_condition_true_in_context(PostCondition, Context, PostBool);		//Check if the pre-condition is true within the context
+//			!check_condition_true_in_context(PostCondition, Context, PostBool);		//Check if the pre-condition is true within the context
+			!check_condition_true_in_context(Capability, PostCondition, Context, AssignmentList, PostBool);
 		} 
 		else {PostBool=false;}
 		
@@ -91,13 +95,15 @@
  * the action validity, that is, a check on the timestamp of the
  * conditions.
  */
-+!check_task_conditions_in_context(PreCondition, PostCondition, Context, Validity)
++!check_task_conditions_in_context(PreCondition, PostCondition, Context, AssignmentList, Validity)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,ready )
 	<-
-		!check_condition_true_in_context(PreCondition, Context, PreBool);
+		!check_condition_true_in_context(_, PreCondition, Context, AssignmentList, PreBool);
+//		!check_condition_true_in_context(PreCondition, Context, PreBool);
+		
 		//Is the pre-condition is satisfied, proceed checking the post-condition
-		if (PreBool=true) 					{!check_condition_true_in_context(PostCondition, Context, PostBool);} 
+		if (PreBool=true) 					{!check_condition_true_in_context(_, PostCondition, Context, AssignmentList, PostBool);}//{!check_condition_true_in_context(PostCondition, Context, PostBool);} 
 		else 								{PostBool=false;}
 		
 		if (PreBool=true & PostBool=false) 	{Validity=true;}
@@ -171,8 +177,8 @@
 	<-
 		.my_name(Me);
 		!get_remote_capability_precondition(commitment(Me,Capability,_), PreCondition);
-		!check_task_conditions_in_context(TaskPre, TaskPost, Context, ValidityTaskPre);
-		!check_capability_precondition_in_context(Capability, Context, ValidityPre);
+		!check_task_conditions_in_context(TaskPre, TaskPost, Context, AssignmentList, ValidityTaskPre);
+		!check_capability_precondition_in_context(Capability, Context, AssignmentList, ValidityPre);
 		
 		.eval(Validity, ValidityPre & ValidityTaskPre /*[TODO] & NormValidity*/);
 		if(Validity=true)
@@ -259,21 +265,6 @@
 		.wait(Delay);
 		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList);
 	.
-//********************************
-//		CHECK STATE
-//********************************
-//+!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
-//	:
-//		Lifecycle = capability_lifecycle( Pack,Context,check )	&
-//		.my_name(Me) 											&
-//		wait_for_manager_to_register_statement(_, Me)
-//	<-
-//		.print("##########################waiting (CHECK)",Term);
-//		?frequency_perception_loop(Delay);
-//		.wait(Delay);
-//		
-//		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
-//	.
 +!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList)
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,check )
@@ -369,9 +360,12 @@
 		!build_current_state_of_world(Context, World);
 		
 		UpdatedAccumulation = accumulation(World, par_world([],[]), assignment_list([]));		
-
+		
 		//Test the condition within the current world state
-		if(not .empty(AssignmentSet))	{!test_condition(Condition, AssignmentSet, UpdatedAccumulation, Bool);}
+		if(not .empty(AssignmentSet))	
+		{
+			!test_condition(Condition, AssignmentSet, UpdatedAccumulation, Bool);
+		}
 		else							{!test_condition(Condition, UpdatedAccumulation, Bool);}
 	.
 //TODO da eliminare.....

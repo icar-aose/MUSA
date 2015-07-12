@@ -48,23 +48,28 @@
 		SG=social_goal(STC,SFS,As)[goal(SG_ID),pack(SGName),parlist(SGpar)];
 		
 		.findall(MT,agent_metric(MT)[pack(SGName)],Metrics);
-		.findall(agent_goal(TC1,FS1,A1), agent_goal(TC1,FS1,A1), AgentGoals);		
 		
-		!assign_annotations(AgentGoals,AgentGoalsWannotations);
+		.findall(agent_goal(TC1,FS1,A1), agent_goal(TC1,FS1,A1), AgentGoals_1);
+		.findall(agent_goal(TC2,FS2), agent_goal(TC2,FS2), AgentGoals_2);
+		
+		.union(AgentGoals_1,AgentGoals_2,AgentGoals);		
+		
+		!assign_annotations(AgentGoals, AgentGoalsWannotations);
+		
 		Pack=pack(SG,AgentGoalsWannotations,[],Metrics);
 	.
 //QUESTO È NUOVO
--!build_goal_pack(SGName,Pack)
-	<-
-		?social_goal(STC,SFS,As)[goalfused(SG_ID),pack(SGName),parlist(SGpar)];
-		SG=social_goal(STC,SFS,As)[goalfused(SG_ID),pack(SGName),parlist(SGpar)];
-		
-		.findall(MT,agent_metric(MT)[pack(SGName)],Metrics);
-		.findall(agent_goal(TC1,FS1,A1),agent_goal(TC1,FS1,A1),			AgentGoals);		
-		
-		!assign_annotations(AgentGoals,AgentGoalsWannotations);
-		Pack=pack(SG,AgentGoalsWannotations,[],Metrics);
-	.
+//-!build_goal_pack(SGName,Pack)
+//	<-
+//		?social_goal(STC,SFS,As)[goalfused(SG_ID),pack(SGName),parlist(SGpar)];
+//		SG=social_goal(STC,SFS,As)[goalfused(SG_ID),pack(SGName),parlist(SGpar)];
+//		
+//		.findall(MT,agent_metric(MT)[pack(SGName)],Metrics);
+//		.findall(agent_goal(TC1,FS1,A1),agent_goal(TC1,FS1,A1),			AgentGoals);		
+//		
+//		!assign_annotations(AgentGoals,AgentGoalsWannotations);
+//		Pack=pack(SG,AgentGoalsWannotations,[],Metrics);
+//	.
 
 
 	

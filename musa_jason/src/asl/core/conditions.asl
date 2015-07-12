@@ -69,7 +69,19 @@
 		Accumulation 	= accumulation(world(WS), par_world(Vars,PWS), assignment_list(AssignmentList))
 	<-
 		//!check_if_condition_triggers_on_accumulation(GoalCondition, Accumulation, InputAssignment, OutAssignment, Goal_is_satisfied, Percent)
-		!check_if_condition_triggers_on_accumulation(Condition, Accumulation, [], _, _, Percent);
+//		.print("####################");
+//		.print("#################### RUNNNING check_if_par_condition_addresses_accumulation (",Condition,",",Accumulation,")");
+		
+		
+		!check_if_par_condition_addresses_accumulation(Condition, Accumulation, [], [], OutAssignment, Bool, _);		
+		
+		
+			
+//		.print("#################### elaborate_condition_truth_percent (",Condition,",",Accumulation,") is ",Bool);
+//		.print("####################");
+		if(Bool) 	{Percent=1;}
+		else		{Percent=0;}
+		//!check_if_condition_triggers_on_accumulation(Condition, Accumulation, [], _, _, Percent);
 	. 
 
 +!elaborate_logic_formula_truth_percent(LogicFormula,World,Percent)

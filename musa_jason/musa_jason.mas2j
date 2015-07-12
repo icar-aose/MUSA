@@ -7,7 +7,7 @@ MAS musa_jason {
 	agents:
 
 		boss			boss_agent			agentArchClass c4jason.CAgentArch;		
-		fusion_agent 	wf_Fusion_Agent 	agentArchClass c4jason.CAgentArch;
+//		fusion_agent 	wf_Fusion_Agent 	agentArchClass c4jason.CAgentArch;
 
 		//----SIGMA----
 //		firefighter 	ids_firefighter 	agentArchClass c4jason.CAgentArch;
@@ -18,8 +18,8 @@ MAS musa_jason {
 		//----OCCP-----
 		proxy_agent 							agentArchClass c4jason.CAgentArch;
 		worker 			occp_worker 			agentArchClass c4jason.CAgentArch;
-		order_manager 	occp_order_manager 		agentArchClass c4jason.CAgentArch;
-   		failure_handler occp_failure_handler 	agentArchClass c4jason.CAgentArch;
+//		order_manager 	occp_order_manager 		agentArchClass c4jason.CAgentArch;
+//   		failure_handler occp_failure_handler 	agentArchClass c4jason.CAgentArch;
 		//-------------
 		
 		//----IDS-----
@@ -34,6 +34,7 @@ MAS musa_jason {
 				"cartago.jar";
 				"c4jason.jar";
 				"lib/joda-time-2.3.jar";
+				"lib/miglayout-4.0.jar";
 
 	aslSourcePath:
 		"src/asl";

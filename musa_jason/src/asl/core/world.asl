@@ -155,10 +155,11 @@
  +!normalize_world_statement(WS, NormalizedWS)
 	:
 		WS=[Head|Tail] &
-		(Head = true | Head = false)
+		(Head == true | Head == false)
 	<-
 		!normalize_world_statement(Tail, NormalizedWSTwo);
-		.concat( Head, NormalizedWSTwo, NormalizedWS );
+		.concat( [], NormalizedWSTwo, NormalizedWS );
+//		.concat( [Head], NormalizedWSTwo, NormalizedWS );
 	.
 +!normalize_world_statement(WS, NormalizedWS)
 	:
@@ -166,7 +167,6 @@
 	<-
 		!normalize_world_statement(Tail, NormalizedWSTwo);
 		
-		//st.normalize_nested_predicate(Head, Functor, Terms);
 		st.normalize_predicate(Head, Functor, Terms);
 		.concat( [property(Functor,Terms)], NormalizedWSTwo, NormalizedWS );
 	.

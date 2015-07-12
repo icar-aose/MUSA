@@ -23,6 +23,7 @@ import ids.model.StateEntity;
 import ids.model.UserEntity;
 import ids.model.ValueEntity;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
@@ -58,6 +59,39 @@ public class Database extends Artifact
 	{
 	}
 	
+	/**
+	 * Load the default database configuration (from ~./musa/config.properties),
+	 * if the configuration file exists.
+	 */
+	@OPERATION
+	void loadDefaultDatabaseConfiguration(OpFeedbackParam<Boolean> success)
+	{
+		String currentUsersHomeDir 	= System.getProperty("user.home");
+		String musa_tmp_folder 		= currentUsersHomeDir + File.separator + ".musa";
+		String config_filename 		= musa_tmp_folder+File.separator+"config.properties";
+		File config_file 			= new File(config_filename);
+		
+		if(config_file.exists())
+		{
+			MusaConfigGUIArtifact.setDBfromConfigFile(config_filename);			
+			success.set(true);
+		}
+		else
+		{
+			System.out.println("No db config found at ~./musa/config.properties\nSetting default MUSA db configuration...");
+			success.set(false);
+		}
+	}
+	
+	@OPERATION
+	void set_default_database(String User, String port, String pass, String dbName, String database_ip)
+	{
+		MusaProperties.setWorkflow_db_user(User);
+		MusaProperties.setWorkflow_db_port(port);
+		MusaProperties.setWorkflow_db_userpass(pass);
+		MusaProperties.setWorkflow_db_name(dbName);
+		MusaProperties.setWorkflow_db_ip(database_ip);
+	}
 	
 	void printStartupMessageInfo(String localIPAddress)
 	{
@@ -66,14 +100,14 @@ public class Database extends Artifact
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		System.out.println("local ip address: "+localIPAddress);
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("workflow ip: "+MusaProperties.get_workflow_db_ip());
-		System.out.println("workflow port: "+MusaProperties.get_workflow_db_port());
-		System.out.println("workflow user: "+MusaProperties.get_workflow_db_user());
-		System.out.println("workflow pass: "+MusaProperties.get_workflow_db_userpass());
-		System.out.println("demo ip: "+MusaProperties.get_demo_db_ip());
-		System.out.println("demo port: "+MusaProperties.get_demo_db_port());
-		System.out.println("demo user: "+MusaProperties.get_demo_db_user());
-		System.out.println("demo pass: "+MusaProperties.get_demo_db_userpass());
+		System.out.println("workflow ip: "+MusaProperties.getWorkflow_db_ip());
+		System.out.println("workflow port: "+MusaProperties.getWorkflow_db_port());
+		System.out.println("workflow user: "+MusaProperties.getWorkflow_db_user());
+		System.out.println("workflow pass: "+MusaProperties.getWorkflow_db_userpass());
+		System.out.println("demo ip: "+MusaProperties.getDemo_db_ip());
+		System.out.println("demo port: "+MusaProperties.getDemo_db_port());
+		System.out.println("demo user: "+MusaProperties.getDemo_db_user());
+		System.out.println("demo pass: "+MusaProperties.getDemo_db_userpass());
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 	
@@ -358,11 +392,11 @@ public class Database extends Artifact
 	{
 		Timestamp TS = null;
 		Connection connection = null;
-		String ip_address 	= MusaProperties.get_workflow_db_ip();
-		String port 		= MusaProperties.get_workflow_db_port();
-		String database 	= MusaProperties.get_workflow_db_name();
-		String user 		= MusaProperties.get_workflow_db_user();
-		String password 	= MusaProperties.get_workflow_db_userpass();
+		String ip_address 	= MusaProperties.getWorkflow_db_ip();
+		String port 		= MusaProperties.getWorkflow_db_port();
+		String database 	= MusaProperties.getWorkflow_db_name();
+		String user 		= MusaProperties.getWorkflow_db_user();
+		String password 	= MusaProperties.getWorkflow_db_userpass();
 		
 		if (ip_address!=null && port!= null && user!=null && password != null) 
 		{

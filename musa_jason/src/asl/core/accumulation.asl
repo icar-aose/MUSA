@@ -66,7 +66,7 @@
 		!apply_accu_evolution_operator([Head],Accumulation,AccuNext);			//Get the updated accumulation state 
 		!check_accumulation_equal(Accumulation,AccuNext,CompareBool);			//Test A=A'
 		
-		if(VB=true)
+		if(VB)
 		{
 			.print("----------");
 			.print("[filter_capabilities_that_create_a_new_world_in_accumulation] Applying cap: ",Capability);
@@ -100,8 +100,11 @@
 	&	Head			= commitment(Me, Capability, HeadPercent)
 	<-
 		!get_remote_capability_precondition(Head, PRE);
+		
 		!elaborate_condition_truth_percent(PRE,Accumulation,ConditionTruthPercent);
+		
 		!filter_capabilities_that_triggers_on_accumulation(Tail,Accumulation,FilteredTail);
+		
 		!concatene_capability_if_percent_not_zero(FilteredTail,Head,ConditionTruthPercent,OutCapabilities);
 	.
 +!filter_capabilities_that_triggers_on_accumulation(InCapabilities,Accumulation,OutCapabilities)
@@ -147,7 +150,7 @@
 +!check_if_goal_pack_is_satisfied_in_accumulation(Social,AgentGoalList,Accumulation,InputAssignment, GoalPackSatisfied, AssignmentList)
 	<-
 		?orchestrate_verbose(VB);
-		if(VB=true) 
+		if(VB) 
 		{
 			.print("[check_if_goal_pack_is_satisfied_in_accumulation] Accumulation state: ",Accumulation);
 			.print("[check_if_goal_pack_is_satisfied_in_accumulation] (Social) goal: ",Social); 
@@ -195,7 +198,7 @@
 		!get_goal_FS([Goal], 	[FS|_]);
 		!get_goal_Pars([Goal], 	Pars);
 		
-		if(VB=true)
+		if(VB)
 		{
 			.print("[check_if_goal_is_satisfied_in_accumulation] Testing Goal: ",Goal);
 		 	.print("[check_if_goal_is_satisfied_in_accumulation] GOAL TC:",TC);
@@ -215,7 +218,7 @@
 		.eval(SatisfiedBool, TC_Satisfied & FS_Satisfied); 
 		.union(OutAssignmentTC, OutAssignmentFS, AssignmentList);
 		
-		if(VB=true)	
+		if(VB)	
 		{	
 			.println("[check_if_goal_is_satisfied_in_accumulation] TC Satisfied:",TC_Satisfied);
 			.println("[check_if_goal_is_satisfied_in_accumulation] FS Satisfied:",FS_Satisfied);
@@ -275,9 +278,13 @@
 		.intersection(VarList,Vars,UnionVarList);						//The output variables list is given by the intersection set
 																		//between [Vars] list and the just calculated [VarList] list. 
 		!normalize_world_statement(WS, NormalizedWS);					//Normalize WS
-		.union(NormalizedWS,PWS,PAstatement);							//Calculate the final property set
+		
+		.union(NormalizedWS, PWS, PAstatement);							//Calculate the final property set
 		//PA=par_condition(UnionVarList,and(PAstatement));				//Assemble the output par_condition
+		
 		PA=par_condition(UnionVarList,PAstatement);
+		
+//		.print("-.-.-..-.-.PA: ",PA,"\n\n");
 	.
  
 /**
@@ -378,7 +385,7 @@
 		.union(GoalVars,Vars,AllVars);
 		!find_substitution_for_par_condition(CNI_tmp, PA, AllVars, InAssignment, OutAssignment, Success);
 		
-		if(VB=true)
+		if(VB)
 		{
 			.print("-----------------------------------------------");
 			.print("[check_if_par_condition_addresses_accumulation] FIND_SUBSTITUTION SUCCESS: ",Success);
@@ -397,7 +404,7 @@
 			
 			!apply_substitution_to_Accumulation(Acc ,AssignmentList, AccII);
 			
-			if(VB=true)
+			if(VB)
 			{
 				.print("[check_if_par_condition_addresses_accumulation](PASSO 3) Accumulation nuovo: ",AccII);
 				.print("-----------------------------------------------");
@@ -408,7 +415,7 @@
 			
 			!test_condition(CN, WII, Bool);
 			
-			if(VB=true){.print("[check_if_par_condition_addresses_accumulation] ----->TEST_CONDITION: ",Bool);}
+			if(VB){.print("[check_if_par_condition_addresses_accumulation] ----->TEST_CONDITION: ",Bool);}
 			
 			//Now test the goal condition only on the non-parametric part of the accumulation state, where are contained the
 			//predicates just unified with the found assignment.
@@ -431,6 +438,8 @@
 		
 		//Passo2
 		!find_substitution_for_par_condition(CN, PA, InAssignment, OutAssignment, Success);
+		
+		
 		
 		if(Success=true)
 		{

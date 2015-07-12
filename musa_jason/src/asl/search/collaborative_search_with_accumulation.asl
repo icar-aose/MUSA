@@ -282,11 +282,6 @@
 						 ag([]),
 						 0 );
 			
-//			!unroll_solution_to_get_commitment_set(TaskSet, CommitmentSet);
-//			!get_blacklisted_capability_list(CommitmentSet, BlacklistedCS);
-//			.print("BlacklistedCS: ",BlacklistedCS);
-//	 		.length(BlacklistedCS, BlacklistedCSCardinality);
-//			
 			!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet,[], Item , Pack, MaxDepth, []);
 			!orchestrate_search_with_accumulation([],MaxSolution,Pack,Members,MaxDepth,Steps, OutSol);		
 			
@@ -319,7 +314,7 @@
 			StackItem = item(_,Accumulation,ag(AddressedGoal), Score);			
 			!get_commitment_from_stack_item(StackItem, CS);												//CS = item+task		
 			
-			if(VB=true){
+			if(VB){
 			.print("[orchestrate_search_with_accumulation] STACK ITEM: ",StackItem,"\n");
 			.print("[orchestrate_search_with_accumulation] Accumulation state: ",Accumulation);
 			}
@@ -331,9 +326,9 @@
 			//Input assignment!!!!
 			!check_if_goal_pack_is_satisfied_in_accumulation(Social,AgentGoalList,Accumulation,[],GoalPackSatisfied, OutAssignmentList);
 			
-			if(VB=true){.print("[orchestrate_search_with_accumulation] Found assignment ",OutAssignmentList,"for (social) goal ",Social);}
+			if(VB){.print("[orchestrate_search_with_accumulation] Found assignment ",OutAssignmentList,"for (social) goal ",Social);}
 			
-			if (GoalPackSatisfied=true) 
+			if (GoalPackSatisfied) 
 			{	
 				//Concatenate Item and InSolutions into a new list
 				!set_assignment_for_new_solution(StackItem, OutAssignmentList, OutTaskSet);
@@ -348,7 +343,7 @@
 				
 				NewSolutions = [item(cs(NewSolutionTaskAndCS),Accumulation,ag(AgentGoalList),Score)]; 
 				
-				if(VB=true){.print("[orchestrate_search_with_accumulation] Goal Pack satisfied. Found solution(s): ",NewSolutions,"\n\n")};
+				if(VB){.print("[orchestrate_search_with_accumulation] Goal Pack satisfied. Found solution(s): ",NewSolutions,"\n\n")};
 				.length(NewSolutionTaskAndCS, SolSize);
 				
 				if (MaxSolution-SolSize > 0) 	{!orchestrate_search_with_accumulation(NewSolutions_tmp,MaxSolution,Pack,Members,MaxDepth,Steps+1,OutSolutions);} 
@@ -356,14 +351,12 @@
 			} 
 			else 
 			{				
-				.length(CS,Len); 
+				.length(CS, Len); 
 				if (Len <= MaxDepth) 
 				{
 					!ask_for_hypotetical_capabilities(Members, Accumulation, TaskSet);
 					
-					//NOTE May the found capabilities be filtered here by the agent roles?
-					
-					if(VB=true){.print("[orchestrate_search_with_accumulation] FOUND TASK SET: ",TaskSet," DOVREBBE ANDARE CON ",OutAssignmentList);}
+					if(VB){.print("[orchestrate_search_with_accumulation] FOUND TASK SET: ",TaskSet," DOVREBBE ANDARE CON ",OutAssignmentList);}
 					
 					//Update the stack by adding a new solution which contains the found task set 
 					!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet, InSolutions, StackItem, Pack, MaxDepth, OutAssignmentList);	
@@ -529,8 +522,7 @@
 	<-
 		OutCS=[];
 	. 	
-
-
+	
 /*
  * [davide]
  * 
@@ -581,7 +573,7 @@
 		TC2 = condition(TC2Pred);
 		.difference([TC1Pred],[TC2Pred],TCdiff);
 		
-		if(VB=true){.print("-------------------->TCDiff(",TC1,",",TC2,"):",TCdiff);}
+		if(VB){.print("-------------------->TCDiff(",TC1,",",TC2,"):",TCdiff);}
 		
 		if ( .empty( Diff ) ) { EqBool=true } else { EqBool = false }		
 	.
@@ -610,23 +602,13 @@
 					cs([ commitment(administrator,two_way_decide,0,[assign(path1,one),assign(path2,two)]) ])
 				   );	
 	.
-/**
- * [luca]
- * 
- * TODO [...]
- * 
- * CPSet -> lista di commitment(Me, Capability, HeadPercent)
- * 
- */
-+!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,Item,Pack,MaxDepth,AssignmentList) 
-	: CPSet=[] 
-	<- true .
-//----------------------
-//TODO IMPORTANTE: ELIMINARE RIDONDANZE..
-//----------------------
+
+
 /*
  * Questo piano viene chiamato quando un item non soddisfa una soluzione presa dallo stack (cioè StackItem non soddisfa il goal pack) 
  * e vengono trovate delle capability (CPSet) in forma di task che creano un nuovo stato di accumulazione.
+ * 
+ * Ogni capability viene unita a StackItem in una nuova soluzione e aggiunta allo stack.
  * 
  * -> i task generati, messi sullo stack, NON hanno assignment. Questi vengono trovati nel piano chiamante !orchestrate_search
  * 
@@ -637,94 +619,77 @@
 		CPSet 	= [Head|Tail] &
 		Head 	= task(TC, FS, TaskEvo, cs(CS), _, norms(Norms))			//I task set trovati mediante il piano !ask_for_hypotetical_capabilities non contengono assignment		
 	<-
-		?orchestrate_verbose(VB);
-		Pack 			= pack(Social,AgentGoals,Norms,Metrics);
-		StackItem		= item(_, Accumulation, ag(AddressedItemGoal), ScoreOld);
-		Accumulation 	= accumulation(_,_,assignment_list(OldAssignment));
-		
-		!get_commitment_from_stack_item(StackItem, CSold);								//Retrieve the commitment list from the stack item			
-		!unroll_solution_to_get_commitment_set([Head], TaskCommitmentSet);				//Unroll the item to get the commitment set
-		!apply_accu_evolution_operator(TaskCommitmentSet, Accumulation, AccuNext);		//apply the evolution plans related to the commitments
-		
-		if(VB=true){	.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] ITEM: ",StackItem);
-						.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] accumulation state: ",Accumulation);
-						.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] STACK ITEM CAPABILITIES: ",CSold);
-						.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] NEW ACCUMULATION STATE:",AccuNext);}
-		
-		//Merge the old and the new commitment set. The old commitment set is not related to the input solutions.
-		.union(CSold, CS, CSnew);							 
-		
-		//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made).
-		!unroll_agent_goals_to_get_addressed_goals(AgentGoals,AccuNext,OldAssignment,AddressedGoal, _);		
- 		!score_sequence_on_accumulation(CSnew, InSolutions, AccuNext, Pack, AddressedGoal, MaxDepth, OldAssignment, NewScore);	//Measure the zz
- 		
-		if(VB=true)
-		{
-			.print("------> NEW SCORE (score(CS)) ------> ",NewScore);	
-			.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation]Old assignment list: ",OldAssignment);
-			.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation]New assignment list: ",AssignmentList,"\n\n");
-		}
-		
-		//Concatenate old and new assignment sets
-		.union(OldAssignment, AssignmentList, NewAssignment);
-		if(VB=true){.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] NEW ACCUMULATION STATE: ",AccuNext);}
-		AccuNext 	= accumulation(AccunextW, AccunextPW, _);
-		
-		!unroll_capabilities_to_get_evolution_plans(CSnew, TaskEvoPlans);				//Unroll the commitment set to get their evolution plans
- 		!unroll_solution_to_get_commitment_set(CSnew, TaskCS);							//Unroll the task to get the inner commitment set
-	   	!get_goal_TC([Social], [TaskTC|_]);					
-		!get_goal_FS([Social], [TaskFS|_]);
-	   	!create_new_task(TaskTC,TaskFS,TaskEvoPlans,TaskCS,NewAssignment,[],NewTask);	//Create a new task
-		insertItem(cs([NewTask]),														//Put the new task into the solution stack
-				   accumulation(AccunextW, AccunextPW, assignment_list(NewAssignment)), 
-				   ag(AddressedGoal), 
-				   NewScore);
-		
+		!unroll_capabilities_to_update_stack_and_score_on_accumulation(CS, InSolutions, StackItem, Pack, MaxDepth, AssignmentList);
+//		?orchestrate_verbose(VB);
+//		Pack 			= pack(Social,AgentGoals,Norms,Metrics);
+//		StackItem		= item(_, Accumulation, ag(AddressedItemGoal), ScoreOld);
+//		Accumulation 	= accumulation(_,_,assignment_list(OldAssignment));
+//					
+//		!unroll_solution_to_get_commitment_set(StackItem, 	CSonStack);
+//		!unroll_solution_to_get_commitment_set([Head], 		TaskCommitmentSet);				//Unroll the item to get the commitment set
+//		.union(CSonStack, TaskCommitmentSet, CSnew);
+//		
+//		!apply_accu_evolution_operator(CSnew, Accumulation, AccuNext);
+//		
+//		//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made).
+//		!unroll_agent_goals_to_get_addressed_goals(AgentGoals,AccuNext,OldAssignment,AddressedGoal, _);		
+// 		!score_sequence_on_accumulation(CSnew, InSolutions, AccuNext, Pack, AddressedGoal, MaxDepth, OldAssignment, NewScore);	//Measure the zz
+// 		
+//		//Concatenate old and new assignment sets
+//		.union(OldAssignment, AssignmentList, NewAssignment);
+//		AccuNext 	= accumulation(AccunextW, AccunextPW, _);
+//		
+//		!unroll_capabilities_to_get_evolution_plans(CSnew, TaskEvoPlans);				//Unroll the commitment set to get their evolution plans
+// 		!unroll_solution_to_get_commitment_set(CSnew, TaskCS);							//Unroll the task to get the inner commitment set
+//	   	!get_goal_TC([Social], [TaskTC|_]);					
+//		!get_goal_FS([Social], [TaskFS|_]);
+//	   	!create_new_task(TaskTC,TaskFS,TaskEvoPlans,TaskCS,NewAssignment,[],NewTask);	//Create a new task
+//		insertItem(cs([NewTask]),														//Put the new task into the solution stack
+//				   accumulation(AccunextW, AccunextPW, assignment_list(NewAssignment)), 
+//				   ag(AddressedGoal), 
+//				   NewScore);
+
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);		//Recursive call	
 	.	
 	
-/*
- * E' utile?
- */
-+!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,Item,Pack,MaxDepth,AssignmentList)
++!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,StackItem,Pack,MaxDepth,AssignmentList)
 	:
-		CPSet=[ Head | Tail ]									
-	&	Head = commitment(Me, Capability, HeadPercent)		//Capability da aggiungere
+		CPSet		= [ Head | Tail ]									
+	&	Head 		= commitment(Me, Capability, HeadPercent)		//Capability da aggiungere alla soluzione (Item)
 	&	HeadPercent > 0
 	<-
-		?orchestrate_verbose(VB);
-		Pack 			= pack(Social,AgentGoalList,Norms,Metrics);
-		Item 			= item(cs(CSold), Accumulation, ag(AddressedItemGoal), ScoreOld);
-		Accumulation 	= accumulation(_,_,assignment_list(OldAssignment));	
 		
-		if(VB=true){.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] ITEM: ",Item);
-					.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] accumulation state: ",Accumulation);
-					.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] CURRENT CAPABILITY: ",Capability);}		
+		Pack 			= pack(Social,AgentGoalList,Norms,Metrics);
+		StackItem 		= item(cs(CSold), Accumulation, ag(AddressedItemGoal), ScoreOld);
+		Accumulation 	= accumulation(_,_,assignment_list(OldAssignment));	
 		
 		//Get the capability evolution plan and apply it to the accumulation state
 		!apply_accu_evolution_operator([Head], Accumulation, AccuNext);		
 		
-		if(VB=true){.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] EVO PLAN: ",Evo_Plan);
-					.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] NEW ACCUMULATION STATE:",AccuNext);}
+		!unroll_solution_to_get_commitment_set(CSold, 	CSinItem);
+		.union(CSinItem,[Head],CSnew);																//Merge the input commitment with the old commitment set
 		
-		//Merge the input commitment with the old commitment set 
-		.union(CSold,[Head],CSnew);
-
-		//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made). 
-		!unroll_agent_goals_to_get_addressed_goals(AddressedItemGoal,AccuNext,OldAssignment,AddressedGoal, _);
+		!unroll_agent_goals_to_get_addressed_goals(AgentGoalList,AccuNext,OldAssignment,AddressedGoal, _); 				//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made). 
 		!score_sequence_on_accumulation(CSnew,InSolutions,AccuNext,Pack,AddressedGoal,MaxDepth,OldAssignment, NewScore);
-		if(VB=true)
-		{
-			.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] Old assignment list: ",OldAssignment);
-			.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] New assignment list: ",AssignmentList,"\n\n");
-			.print("[unroll_capabilities_to_update_stack_and_score_on_accumulation] NEW ACCUMULATION STATE: ",AccuNext);
-		}
 		
 		.union(OldAssignment, AssignmentList, NewAssignment);																				//Concatenate old and new assignment sets
-		AccuNext = accumulation(AccunextW, AccunextPW, _);																					//Get W and PW from the new accumulation state
-		insertItem(cs(CSnew), accumulation(AccunextW, AccunextPW, assignment_list(NewAssignment)), ag(AddressedGoal), NewScore);			//Insert the new item into the stack		
-		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,Item,Pack,MaxDepth, AssignmentList);							//Recursive call on next capability			
+		AccuNext = accumulation(AccunextW, AccunextPW, _);	
+		
+		!get_goal_TC([Social], [TaskTC|_]);					
+		!get_goal_FS([Social], [TaskFS|_]);
+		
+		!unroll_capabilities_to_get_evolution_plans(CSnew, TaskEvoPlans);
+	   	!create_new_task(TaskTC,TaskFS,TaskEvoPlans,CSnew,NewAssignment,[],NewTask);	//Create a new task
+		
+		insertItem(cs([NewTask]), 
+				   accumulation(AccunextW, AccunextPW, assignment_list(NewAssignment)), 
+				   ag(AddressedGoal), 
+				   NewScore);			//Insert the new item into the stack
+		
+		//recursive call
+		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);							//Recursive call on next capability			
 	.
++!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,Item,Pack,MaxDepth,AssignmentList) : CPSet=[].
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -768,7 +733,7 @@
 		
 		if(HeadSatisfied=true)										//if current goal has been addressed
 		{
-			if(VB=true)
+			if(VB)
 			{
 				.print("[unroll_agent_goals_to_get_addressed_goals] Head (satisfied): ",Head);
 				.print("[unroll_agent_goals_to_get_addressed_goals] Tail: ",Tail);	
@@ -826,7 +791,7 @@
 		?orchestrate_verbose(VB);
 		?blacklist_enabled(BlacklistEnabled);
 		
-		if(VB=true)
+		if(VB)
 		{
 			.println("[score_sequence_on_accumulation] focus for scoring on ",CS);
 			.println("[score_sequence_on_accumulation] AddressedGoal: ",AddressedGoal);
@@ -1015,6 +980,13 @@
 	<-
 		!apply_accu_evolution_operator(TaskCS,Accumulation,UpdatedAccumulation);	
 	.
+/**
+ * [davide]
+ * 
+ * Appy the evolution plans of all the capability in CS into the given 
+ * Accumulation state. The resulting accumulation state is unified with
+ * UpdatedAccumulation
+ */
  +!apply_accu_evolution_operator(CS,Accumulation,UpdatedAccumulation)
 	:
 		CS=[Head|Tail] & 
@@ -1058,6 +1030,60 @@
 			!convert_parametric_to_simple_formula(Head,[],[],SimpleFormula);
 			.union(WS, [SimpleFormula], NewWSStatementSet);
 			UpdatedAccumulation = accumulation(world(NewWSStatementSet), par_world(Vars, PWS), assignment_list(AssignmentSet));
+		}
+	.
+/**
+ * [davide]
+ * 
+ * Handles evolution plans composed of multiple statement, for example:
+ * 
+ * [add( f(x) ),add( g(y) ),add( q(t) )]
+ */
++!apply_accu_evolution_operator(Capability, Operator,Accumulation,UpdatedAccumulationOut)
+	:
+		Operator = [HeadOp|TailOps]
+	<-
+		!apply_accu_evolution_operator(Capability, TailOps, Accumulation, UpdatedAccumulationRec);
+		!apply_accu_evolution_operator(Capability, HeadOp, UpdatedAccumulationRec, UpdatedAccumulationOut);	
+	.
++!apply_accu_evolution_operator(Capability, Operator,Accumulation,UpdatedAccumulation)
+	:
+		Operator = []
+	<-
+		UpdatedAccumulation = Accumulation;
+	.
+/**
+ * [davide]
+ * 
+ * Handle remove([STATEMENT]) evolution plans.
+ */
++!apply_accu_evolution_operator(Capability, Operator,Accumulation,UpdatedAccumulation)
+	:
+		Operator 		= remove(Statement)																&
+		Accumulation 	= accumulation(world(WS),par_world(Vars,PWS),assignment_list(AssignmentSet))
+	<-
+
+		if(.member(Statement, WS))
+		{
+			.difference(WS, [Statement], NewWS);
+			UpdatedAccumulation = accumulation(world(NewWS), par_world(Vars, PWS), assignment_list(AssignmentSet));
+		}
+		else
+		{
+			//Statement is parametric
+			!normalize_world_statement([Statement], [NormalizedStatement|_]);
+			!search_for_property_with_the_same_functor(NormalizedStatement, PWS, FoundProperty, Bool);
+			
+			if(Bool)
+			{
+				.difference(PWS, [FoundProperty], NewPWS);
+				UpdatedAccumulation = accumulation(world(WS), par_world(Vars, NewPWS), assignment_list(AssignmentSet));
+			}
+			else
+			{
+				UpdatedAccumulation = Accumulation;
+			}
+			
 		}
 	.
 -!apply_accu_evolution_operator(Capability, Operator,Accumulation,UpdatedAccumulation)
@@ -1137,7 +1163,7 @@
 		!select_hypotetical_capabilities(Accumulation, LocalCommitmentSet);
 		
 		
-		if(VB=true) {.println("[ask_for_hypotetical_capabilities]Accumulation state ",Accumulation);
+		if(VB) {.println("[ask_for_hypotetical_capabilities]Accumulation state ",Accumulation);
 					 .println("[ask_for_hypotetical_capabilities]LocalCommitmentSet:",LocalCommitmentSet);}
 		
 		if (.empty(Members)) 
@@ -1236,7 +1262,7 @@
 		Request=monitor_capability_request(Accumulation)
 	<-
 		?orchestrate_verbose(VB);
-		if(VB=true){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
+		if(VB){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
 		
 		.abolish( collaboration_request(Token,MaxCounter,Request) );
 		+max_time_for_collecting(Token,MaxCounter);
@@ -1257,7 +1283,7 @@
 		Request=contribute_to_solution(Accumulation)
 	<-
 		?orchestrate_verbose(VB);
-		if(VB=true){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
+		if(VB){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
 		
 		.abolish( collaboration_request(Token,MaxCounter,Request) );
 		+max_time_for_collecting(Token,MaxCounter);
@@ -1274,7 +1300,7 @@
 		Request=blacklist_request
 	<-
 		?orchestrate_verbose(VB);
-		if(VB=true){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
+		if(VB){.println("[+collaboration_request]",collaboration_request(Token,MaxCounter,Request));}
 		
 		.abolish( collaboration_request(Token,MaxCounter,Request) );
 		+max_time_for_collecting(Token,MaxCounter);
@@ -1333,6 +1359,8 @@
 		
 		.union(AllSimpleCapabilities, AllParCapabilities, AllCapabilities_tmp);													//ALLcapabilities
 		.union(OutFilteredCapabilities, AllCapabilities_tmp, AllCapabilities);
+		
+		
 		
 		!filter_capabilities_that_triggers_on_accumulation(AllCapabilities, Accumulation, CapabilitiesThatTriggersAcc);
 		!filter_capabilities_that_create_a_new_world_in_accumulation(CapabilitiesThatTriggersAcc, Accumulation, CommitmentSet);

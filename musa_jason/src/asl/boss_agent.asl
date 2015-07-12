@@ -14,13 +14,39 @@
 { include( "role/department_head_activity.asl" ) }
 { include( "role/department_manager_activity.asl" ) }
 
-//!awake.
+!awake_musa.
 
 
-+!awake 
+
++!awake_musa
+	:
+		execution(deployment)
 	<-
-		//CARICAMENTO DELLA GOAL BASE DA FILE. COMMENTARE SE SI USA LA GUI PER LA GOAL INJECTION
-		action.loadGoalBase("src/asl/goalBaseSigma.asl",GoalList);
+//		?proxy(ProxyAgent);
+//		.send(ProxyAgent, achieve, awake);
+		
+		.broadcast(achieve, awake);
+		!awake_boss;
+	.
++!awake_musa
+	:
+		execution(standalone)
+	<-
+		?use_gui(V);
+		if(V)
+		{
+			makeArtifact("AddNewGoalGUI", "ids.artifact.MusaConfigGUIArtifact", [], GuiID);
+			loadDefaultDatabaseConfiguration;													//Load the default db configuration
+			+using_artifact("addNewGoalGUI", GuiID);											//add the ID to the belief base
+			focus(GuiID);																		//focus the GUI artifact
+		}
+	.
+	
++!awake_musa
+	:
+		execution(test)
+	<-
+		action.loadGoalBase("src/asl/goalBase.asl",GoalList);
 		.length(GoalList,Len);
 		for (.range(I,0,Len-1))
 		{
@@ -29,11 +55,16 @@
 			+T;
 			.broadcast(tell,T);	
 		}
-		//-----------------------------------------
 		
+		.broadcast(achieve, awake);
+		!awake_boss;
 		
-		
-		//-----------------------------------------
+	.
+
+
++!awake_with_cap_failure_gui
+	
+	<-
 		//GUI per il fallimento delle capability
 		?use_capability_failure_gui(UseFailureGUI);
 		if(UseFailureGUI)
@@ -45,46 +76,30 @@
 			.print("CS: ",CS);
 			.print("starting musa...");			
 		}
-		//-----------------------------------------
-
-		//GUI PER LA GOAL INJECTION
-		?use_gui(V);
-		if(V=true)
-		{
-			makeArtifact("AddNewGoalGUI", "ids.artifact.AddGoalGUIArtifact", [], GuiID);		//Create the GUI artifact for submitting new goal
-			+using_artifact("addNewGoalGUI", GuiID);											//adHd the ID to the belief base
-			focus(GuiID);																		//focus the GUI artifact
-		}
-		//-----------------------------------------
+	.
 	
+/**
+ * [davide]
+ * 
+ * This event is triggered when user starts MUSA from the
+ * configuration GUI. This plan awake all the agents.
+ */
++awake_boss
+	<-
+		!!awake_boss;
+		.broadcast(achieve, awake);
+		-awake_boss;
+	.
++!awake_boss
+	<-
 		!awake_as_head; 		/* in peer/department_head_activity.asl */		
 		!check_social_goal;
-		
-		//GUI PER INJECTION VIA WEB
-//		makeArtifact("GoalServer", "ids.artifact.GoalServer", [], GoalServerID);
-//		focus(GoalServerID);
-//		connect(Result);
-//		run_server;
 	.
 
 +!check_social_goal 
 	<-
-		.wait(500);
-		
+		.wait(500);	
 		!create_department_foreach_social_goal;
-		
-		/*
-		if(not .empty(SocialGoals))
-		{
-			!create_department_foreach_social_goal;
-		}
-		else
-		{
-			.print("No social goal found. Idle...");
-			?frequency_long_perception_loop(Delay);
-			.wait(5000);
-			!check_social_goal;
-		} */
 	.
 
 
@@ -98,7 +113,6 @@
 			//prima di creare un dipartimento si deve effettuare il parsing della descrizione
 			//del goal inserito. Questo e' possibile cambiando opportunamente i metodi presenti
 			//nella classe [ids.goalspec.loadFromFile]
-			
 			
 			if(not created_dpt(StringSG))
 			{
@@ -114,32 +128,56 @@
 		.concat(StringSG, "_dept", DeptName);			// Unifies DeptName with "[StringSG]_dept"	
 		createDepartment(DeptName, StringSG);			// Create a department for the social goal SG (in Organization artifact)
 	.	
-	
+
 /**
  * [davide]
- * This event is triggered after injecting all the goals within a pack. It creates the department for the social goal.
+ * 
+ * This event is triggered when user submit a jason goal pack
+ * from the configuration GUI.
  */
-+createDepartmentForInjectedGoalPack(PackName)
++injectJasonGoals
 	<-
-		!create_department_for_social_goal(PackName);
-		occp.logger.action.info("Department for Pack ",PackName, "has been created.");
-		-createDepartmentForInjectedGoalPack(PackName);
+		getInjectedJasonGoals(GoalList);
+		!injectJasonPack(GoalList);
+		.abolish(injectJasonGoals);
+	.
+
+/**
+ * [davide]
+ * 
+ * Inject a jason goal pack
+ */
++!injectJasonPack(Pack)
+	<-
+		.length(Pack,Len);
+		for (.range(I,0,Len-1))
+		{
+			.nth(I,Pack,T);
+		  	.print("loaded: ",T);	
+			+T;
+			.broadcast(tell,T);	
+		}
 	.
 
 /**
  * [davide]
  * Event triggered when a goal pack has to be injected. It injects a goal with the specified name, pack and description. 
  */
-+goalToInject(Name, Pack, Description)
++goalToInject(Name, Pack, Description,GoalParams)
 	:
 		not goal_injected(Name,Pack,_)
 	<-
-		!doGoalInjection(Name, Pack, Description);
+		!doGoalInjection(Name, Pack, Description,GoalParams);
 		.print("Goal ",Name," injected correctly!");
 		-goalToInject(Name,Pack,Description);
+		
+		//forzo a ricreare il goalpack
+		.abolish(created_dpt(_)); //ATTENZIONE!!!
+		.print("Creo dipartimento...");
+		!check_social_goal;
 	.
 	
-+goalToInject(Name, Pack, Description)
++goalToInject(Name, Pack, Description,GoalParams)
 	:
 		.findall(gi(N,P), goal_injected(Name,Pack,Description), GoalList) 	&
 		.length(GoalList, L) 												&
@@ -153,35 +191,24 @@
  * [davide]
  * Inject a goal.
  */
-+!doGoalInjection(Name, Pack, Description)
++!doGoalInjection(Name, Pack, Description, GoalParams)
 	<- 
-		ids.goalspec.loadFromFile(Description);				//Parse the goal
-		+goal_injected(Name, Pack, Description);			//Keep a mental note about the goal
-		occp.logger.action.info("Goal injected: ",Description);
-		.broadcast(tell, new_goal(Description) );			//Tell the customers that a new goal has been injected						
+		ids.goalspec.loadFromFile(Name, Pack, Description, GoalParams);				//Parse the goal
+		+goal_injected(Name, Pack, Description, GoalParams);			//Keep a mental note about the goal
+		occp.logger.action.info("Goal injected: ",Description,",",GoalParams);
+		.broadcast(tell, new_goal(Name, Pack, Description,GoalParams) );			//Tell the customers that a new goal has been injected						
 	.
 	
 -!doGoalInjection(Name, Pack, Description)
 	<-
 		.print("[ERROR] Failed to inject goal '",Description,"'");
 	.
-	
-/**
- * [davide]
- * Event triggered when boss agent receives a new goal to be submitted to the employees.
- */
-+submitGoalToDB
-	<-  
-		newGoalToSubmitToDatabase_Data(Name, Pack, Description);			//Take the new goal data
-		submitGoalToDatabase(Name, Pack, Description);						//Submit the new goal into the database
-		+submittedToDB(Name);												//Keep a mental note about the goal
-		-submitGoalToDB;
-	.
-	
-	
-	
-	
-	
+
+
+
+//#####################################################
+//PIANI RELATIVI AL FALLIMENTO MANUALE DELLE CAPABILITY 
+//#####################################################
 /**
  * [davide]
  * 

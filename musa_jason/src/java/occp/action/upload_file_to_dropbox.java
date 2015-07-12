@@ -25,10 +25,11 @@ public class upload_file_to_dropbox extends DefaultInternalAction
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
     {
     	String fname 		= args[0].toString().replace("\"", "");
-		String user_id 		= args[1].toString().replace("\"", "");
-		String access_token = args[2].toString().replace("\"", "");
+		String access_token = args[1].toString().replace("\"", "");
 		
-        return upload_to_dropbox(fname, access_token);
+		upload_to_dropbox(fname, access_token);
+		
+        return true;
     }
     
     private boolean upload_to_dropbox(String fname, String access_token) throws IOException, DbxException, SQLException 
@@ -36,9 +37,9 @@ public class upload_file_to_dropbox extends DefaultInternalAction
 		Dropbox dp 			= new Dropbox(APP_KEY, APP_SECRET);
 		
 		//If access token is not supplied, show a web page where the user have to authenticate.
-		if(access_token.isEmpty())		return false;
-		else							dp.do_authentication(access_token);
+		if(access_token.isEmpty())		{return false;}
+		else							{dp.do_authentication(access_token);}
 		
-		return dp.uploadFile(fname)==null;
+		return dp.uploadFile(fname) == null;
 	}
 }

@@ -34,18 +34,18 @@ public class Stack extends Artifact {
 		System.out.println(focus4.getCS());
 	}*/
 	
-	void init() {
-		stack=new TreeSet<StackItem>(new Comparator<StackItem>() {
-			public int compare(StackItem arg0, StackItem arg1) {
+	void init() 
+	{
+		stack=new TreeSet<StackItem>(new Comparator<StackItem>() 
+		{
+			public int compare(StackItem arg0, StackItem arg1) 
+			{
 				StackItem item0 = (StackItem) arg0;
 				StackItem item1 = (StackItem) arg1;
 				
-				if (item0.score < item1.score) {
-					return -1;
-				}
-				if (item0.score > item1.score) {
-					return 1;
-				}
+				if (item0.score < item1.score) 	{return -1;}
+				if (item0.score > item1.score) 	{return 1;}
+				
 				return 0;
 			}
 		});
@@ -69,7 +69,8 @@ public class Stack extends Artifact {
 		item.setGoals(goals);
 		item.setScore(score);
 		
-		stack.add(item);
+		if(stack.add(item))		System.out.println("INSERT: "+cs);
+		else					System.out.println("CANNOT INSERT: "+cs);
 	}
 	
 	@OPERATION void pickItem(OpFeedbackParam<StackItem> item) {
@@ -79,7 +80,6 @@ public class Stack extends Artifact {
 
 	@OPERATION void stackSize(OpFeedbackParam<Integer> number) {
 		int size = stack.size();
-		
 		number.set(new Integer(size));
 	}
 	
@@ -92,6 +92,16 @@ public class Stack extends Artifact {
 		//System.out.println("size: "+stack.size());
 
 		return higher;
+	}
+	
+	public String toString() 
+	{
+		for(StackItem item : stack)
+		{
+			System.out.println(item.toString());
+		}
+		
+		return null;
 	}
 	
 	
@@ -123,6 +133,12 @@ public class Stack extends Artifact {
 		
 		public String getCS() {
 			return cs;
+		}
+		
+		public String toString()
+		{
+			return "("+cs+")";
+			
 		}
 
 		public void setCS(String cs) {

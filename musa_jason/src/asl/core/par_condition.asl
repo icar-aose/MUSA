@@ -14,7 +14,7 @@
  ******************************************************************************/
 
 { include( "core/world.asl" ) }
-
+{ include( "debug/par_condition_debug.asl") }
 
 /**
  * [davide]
@@ -347,8 +347,7 @@
  * [davide]
  * 
  * Given two par_condition, search for a unification that makes the par_conditions identical. 
- * 
- * Le par_condition sono srotolate!
+ * par_conditions must be unrolled, that is, they must not have and, or or neg composite properties.
  */
 +!find_substitution_for_par_condition(ParConditionA, ParConditionB, InputAssignment, OutAssignment, Success)
  	:
@@ -372,11 +371,12 @@
  * [davide]
  * 
  * Given two par_condition, search for a unification that makes the par_conditions identical. 
- * 
- * Le par_condition sono srotolate!
+ * par_conditions must be unrolled, that is, they must not have and, or or neg composite properties.
  * 
  * Questo piano differisce dal presente in quanto vengono considerate la variabili in comune tra par_condition e stato
  * di accumulazione. 
+ * 
+ * 
  */
 +!find_substitution_for_par_condition(ParConditionA, ParConditionB, InputVars, InputAssignment, OutAssignment, Success)
  	:
@@ -415,51 +415,38 @@
 	:
 		PropertiesA = [Head|Tail] & .list(PropertiesB)
 	<-	
-		!search_for_property_with_the_same_functor(Head, PropertiesB, Out_property, Found);
+		!search_for_property_with_the_same_functor(Head, PropertiesB, Property_with_same_functor_as_Head, Found);
 		
-		if(Found=true)
+		if(Found)
 		{
-			Head 			= property(_,VH);																										//Take the terms of property A
-			Out_property 	= property(_,VO);																										//Take the terms of property B
-			!create_substitution_for_properties(VH,VO,Par_condition_A_vars,Par_condition_B_vars,InAssignment,OutAssignment_A, SuccessSubstA);		//Create a substitution A->B
-			!create_substitution_for_properties(VO,VH,Par_condition_B_vars,Par_condition_A_vars,InAssignment,OutAssignment_B, SuccessSubstB);		//Create a substitution B->A
-			
-			if(.eval(SuccessSubstitution, (SuccessSubstA & SuccessSubstB)))
-			{
-				.concat(OutAssignment_A, OutAssignment_B, OutAssignment);																			//Concatenate the resulting assignment list
-				Assignment = OutAssignment;
-			}
-			else
-			{
-				Assignment = [];
-			}
+			Head 								= property(Functor_A, FormulaA);								//Take the terms of property A
+			Property_with_same_functor_as_Head 	= property(Functor_B, FormulaB);								//Take the terms of property B
+
+			!create_substitution_for_properties(FormulaA, FormulaB, Par_condition_A_vars, Par_condition_B_vars, InAssignment, AssignmentFound, SuccessSubstA);
+
+			if(SuccessSubstA)	{Assignment = AssignmentFound;}
+			else				{Assignment = [];}
 		}
-		else
-		{
-			Assignment = [];
-		}
+		else					{Assignment = [];}
+		
+		//recursive call
 		!do_find_substitution_for_par_condition(Tail, PropertiesB, Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentTwo, SuccessRec);
+		
 		.eval(Success, SuccessSubstitution & SuccessRec);
 		.concat(OutAssignmentTwo, Assignment, OutAssignmentList);
 	.
 	
 +!do_find_substitution_for_par_condition(PropertiesA, PropertiesB, Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentList, Success)
-	:
-		PropertiesA = property(F,T) & .list(PropertiesB)
-	<-	
-		!do_find_substitution_for_par_condition([PropertiesA], PropertiesB, Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentList, Success)
+	:	PropertiesA = property(F,T) & .list(PropertiesB)
+	<-	!do_find_substitution_for_par_condition([PropertiesA], PropertiesB, Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentList, Success)
 	.
-
 +!do_find_substitution_for_par_condition(PropertiesA, PropertiesB, Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentList, Success)
-	:
-		PropertiesA = property(F,T) & not .list(PropertiesB)
-	<-	
-		!do_find_substitution_for_par_condition([PropertiesA], [PropertiesB], Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentList, Success)
+	:	PropertiesA = property(F,T) & not .list(PropertiesB)
+	<-	!do_find_substitution_for_par_condition([PropertiesA], [PropertiesB], Par_condition_A_vars, Par_condition_B_vars, InAssignment, OutAssignmentList, Success)
 	.
-	
 +!do_find_substitution_for_par_condition(PropertiesA, PropertiesB, Par_condition_A_vars, Par_condition_B_vars,InAssignment, OutAssignmentList, Success)
-	:	PropertiesA = []
-	<-	OutAssignmentList = [];
+	:	PropertiesA 		= []
+	<-	OutAssignmentList 	= [];
 	.
 	
 /**
@@ -602,61 +589,66 @@
 		?verbose_par_condition(VB);
 		if( not .member(Head, VarA) & not .member(HeadB, VarB) )									//both terms are costant
 		{
-			A			= [];
-			SuccessLocal= false;																	//return an error
+			if(Head==HeadB)
+			{
+				//Terms A and B are equal. In this case we have an identity substitution.
+				A = [assignment(Head,HeadB)];
+				SuccessLocal= true;	
+			}
+			else
+			{
+				A			= [];
+				SuccessLocal= false;
+			}
 		}
 		else
 		{
 			if( .member(Head, VarA) & .member(HeadB, VarB) )										//both terms are variables
 			{
-				if(VB=true){.print("[create_substitution_for_properties] Both terms are vars. TermsA: ",TermsA," TermsB: ",TermsB);}
-				!check_if_assignment_list_contains(Head,	InAssignment, AssignmentA, BoolAssA);		//Check if var A has been already unified
-				!check_if_assignment_list_contains(HeadB, 	InAssignment, AssignmentB, BoolAssB);		//Check if var B has been already unified
+				if(VB){.print("[create_substitution_for_properties] Both terms are vars. TermsA: ",TermsA," TermsB: ",TermsB);}
+				!check_if_assignment_list_contains(Head,	InAssignment, AssignmentForA, ExistsAssignmentForA);		//Check if var A has been already unified (that is, an assignment for A already exists)
+				!check_if_assignment_list_contains(HeadB, 	InAssignment, AssignmentForB, ExistsAssignmentForB);		//Check if var B has been already unified (that is, an assignment for B already exists)
 				
-				if(BoolAssA = true & BoolAssB = false)												
+				if(ExistsAssignmentForA == true & ExistsAssignmentForB == false)												
 				{
-					AssignmentA = assignment(_,ValA);												
+					AssignmentForA = assignment(_,ValA);												
 					A = [assignment(HeadB,ValA)];
 				}
 				else
 				{
-					if(BoolAssA = false & BoolAssB = true)
+					if(ExistsAssignmentForA == false & ExistsAssignmentForB == true)
 					{
-						AssignmentB = assignment(_,ValB);
+						AssignmentForB = assignment(_,ValB);
 						A = [assignment(Head,ValB)];
 					}
 					else
 					{
-						A = [assignment(Head,HeadB)];
+						A = [assignment(Head,HeadB)];					//Both A and B doesn't have an assignment. So, Create a new assignment.
 					}
 				}
+				SuccessLocal = true;
 			}
 			else
 			{
-				if( .member(Head, VarA) & not .member(HeadB, VarB) )
-				{
-					A = [assignment(Head,HeadB)];							//Create an assignment
-					SuccessLocal=true;
-				}
-				else
-				{
-					A = [];
-				}
+				if( .member(Head, VarA) & not .member(HeadB, VarB) )	{A = [assignment(Head,HeadB)];}			//A is variable, B is not variable
+				else													{A = [assignment(HeadB,Head)];}			//A is not variable, B is variable
+				SuccessLocal=true;
 			}
 		}
 		!create_substitution_for_properties(Tail,TailB,VarA,VarB,InAssignment, OutAssignmentRec, SuccessRec);		//Recursive call on the rest of terms in termsA
 		
 		.eval(Success,SuccessLocal & SuccessRec);
 		
-		if(VB=true)
+		if(VB)
 		{
 			.print("[create_substitution_for_properties] Created assignment A: ",A," between terms ",TermsA," and ",TermsB);
 			.print("[create_substitution_for_properties] InAssignment? ",InAssignment);
 		}
 		if(not .member(A,InAssignment))
 		{
-			if(Head\==HeadB) 	{.concat(OutAssignmentRec,A,OutAssignment);}
-			else				{.concat(OutAssignmentRec,[],OutAssignment);}	
+			.union(OutAssignmentRec, A, OutAssignment);
+//			if(Head\==HeadB) 	{.concat(OutAssignmentRec,A,OutAssignment);}
+//			else				{.concat(OutAssignmentRec,[],OutAssignment);}	
 		}
 	.
 
@@ -694,7 +686,7 @@
 		if (BoundBool)
 		{
 			//convert the input parametric condition to a simple formula using the input assignment set
-			!convert_parametric_to_simple_formula(ParamLogicFormula, Variables, AssignmentSet, LogicFormula);
+//			!convert_parametric_to_simple_formula(ParamLogicFormula, Variables, AssignmentSet, LogicFormula);
 			!check_if_par_condition_addresses_accumulation(PCN, World, [], [], OutAssignment, Bool, _);			
 		} 
 		else 

@@ -9,6 +9,58 @@
  * Bugs:  
  *
  **************************/
+ 
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[goal(G),pack(P),parlist(PAR)];
+	.
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[pack(P),parlist(PAR)];
+	.
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[goal(G),pack(P),parlist(PAR)];
+	.
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[goal(G),pack(P)];
+	.
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[parlist(PAR)];
+	.
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[goal(G)];
+	.
+
++!assign_annotations(AgentGoals,AgentGoalsWannotations)
+	:
+		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS)
+	<-
+		?agent_goal(TC,FS)[pack(P)];
+	.
+
+//--------
 
 +!assign_annotations(AgentGoals,AgentGoalsWannotations)
 	:

@@ -172,6 +172,7 @@
 		Head 	= task(TC,FS,Evo,cs(TaskCommitmentSet),TaskAssignment,_)
 	<-
 		!set_assignment_for_task_set(Tail,AssignmentList,OutTaskSetRec);									//Recursive call
+		
 		!get_assignment_for_commitment_set(TaskCommitmentSet, AssignmentList, OutTaskAssignment);			//Retrieve the assignment for the current task commitment set
 		!create_new_task(TC,FS,Evo,TaskCommitmentSet,OutTaskAssignment,[],NewTask);	//TODO Norme qui		//Assemble the task
 		.union([NewTask], OutTaskSetRec, OutTaskSet);														//Unify the task into the output task list

@@ -35,25 +35,25 @@ import jason.asSyntax.parser.ParseException;
 public class loadFromFile extends DefaultInternalAction 
 {
 
-	public static void main(String [ ] args) {
-		
-        loadFromFile loader = new loadFromFile();
-        
-        File file = loader.selectFile();
-        FileInputStream fis = null;
-        try {
-			fis = new FileInputStream(file);
-	        List<String> belief_base = loader.generateGoalBeliefsFromFile( fis ); //par.toString() );
-	        Iterator<String> it = belief_base.iterator();
-			while (it.hasNext()) {
-				String belief = it.next();
-				System.out.println("loaded: "+belief);
-			}	
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();	
-		}
-	}
+//	public static void main(String [ ] args) {
+//		
+//        loadFromFile loader = new loadFromFile();
+//        
+//        File file = loader.selectFile();
+//        FileInputStream fis = null;
+//        try {
+//			fis = new FileInputStream(file);
+//	        List<String> belief_base = loader.generateGoalBeliefsFromFile( fis ); //par.toString() );
+//	        Iterator<String> it = belief_base.iterator();
+//			while (it.hasNext()) {
+//				String belief = it.next();
+//				System.out.println("loaded: "+belief);
+//			}	
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();	
+//		}
+//	}
 
 	 /**
      * Execute this internal action.
@@ -65,25 +65,29 @@ public class loadFromFile extends DefaultInternalAction
     @Override
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
     {	
-    	String par = ((StringTerm) args[0]).getString();
-
+    	String goalPack= ((StringTerm) args[0]).getString();
+    	String goalName= ((StringTerm) args[1]).getString();
+    	String goalDescriptionOrPathToGoalBase 	= ((StringTerm) args[2]).getString();
+    	String goalParams 						= ((StringTerm) args[3]).getString();
+    	
+    	System.out.println("PARAM LIST: "+goalParams);
     	try
     	{
-    		FileSystems.getDefault().getPath(par, "");
+    		FileSystems.getDefault().getPath(goalDescriptionOrPathToGoalBase, "");
     		
     		//args[0] is a valid file path, so proceed parsing its content.
-    		executeForFile( ts, par );
+    		executeForFile( ts, goalName, goalPack, goalDescriptionOrPathToGoalBase, goalParams );
 
     	}
     	catch (FileNotFoundException e) 
     	{
     		//The specified string is not a valid path. Maybe it's a description of a goal that has been added by user
-    		executeForString( ts, par );
+    		executeForString( ts, goalName, goalPack, goalDescriptionOrPathToGoalBase, goalParams );
 		}
     	catch(InvalidPathException e)
     	{
     		//The specified string is not a valid path. Maybe it's a description of a goal that has been added by user
-    		executeForString( ts, par );
+    		executeForString( ts, goalName, goalPack, goalDescriptionOrPathToGoalBase, goalParams );
     	}
     	
     	return true;
@@ -99,7 +103,7 @@ public class loadFromFile extends DefaultInternalAction
      * @throws RevisionFailedException 
      * @throws Exception
      */
-    private void executeForFile(TransitionSystem ts, String filePath) throws FileNotFoundException, ParseException, RevisionFailedException
+    private void executeForFile(TransitionSystem ts, String goalName, String goalPack, String filePath, String Params) throws FileNotFoundException, ParseException, RevisionFailedException
     {
     	File file = new File( filePath );
         FileInputStream fis = null;
@@ -110,9 +114,17 @@ public class loadFromFile extends DefaultInternalAction
         Iterator<String> it = belief_base.iterator();
 		while (it.hasNext()) 
 		{
+			//goal(process0),pack(p4)
+			
 			String belief = it.next();
 			//System.out.println("load: "+belief);
 			Literal bel = ASSyntax.parseLiteral(belief);
+			
+			String name = String.format("goal(%s)", goalName);
+			String pack = String.format("pack(%s)", goalPack);
+			bel.addAnnot(ASSyntax.parseLiteral(name));
+			bel.addAnnot(ASSyntax.parseLiteral(pack));
+			bel.addAnnot(ASSyntax.parseLiteral(Params));
     		ts.getAg().addBel(bel);
 		}	
     }
@@ -125,7 +137,7 @@ public class loadFromFile extends DefaultInternalAction
      * @throws ParseException
      * @throws RevisionFailedException
      */
-    private void executeForString(TransitionSystem ts, String belief) throws ParseException, RevisionFailedException
+    private void executeForString(TransitionSystem ts, String goalName, String goalPack, String belief, String Params) throws ParseException, RevisionFailedException
     {
     	List<String> belief_base = generateGoalBeliefsFromString( belief );
         
@@ -133,9 +145,14 @@ public class loadFromFile extends DefaultInternalAction
 		while ( it.hasNext() ) 
 		{
 			String b = it.next();
-			//System.out.println("load: "+b);
+			System.out.println("load: "+b);
 			Literal bel = ASSyntax.parseLiteral(b);
 			
+			String name = String.format("goal(%s)", goalName);
+			String pack = String.format("pack(%s)", goalPack);
+			bel.addAnnot(ASSyntax.parseLiteral(name));
+			bel.addAnnot(ASSyntax.parseLiteral(pack));
+			bel.addAnnot(ASSyntax.parseLiteral(Params));			
     		ts.getAg().addBel(bel);
 		}		
     }
@@ -179,13 +196,10 @@ public class loadFromFile extends DefaultInternalAction
 			Specification entity = (Specification) loader.visit(tree);
 			result = entity.getBeliefList();
 			
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
+		catch (UnsupportedEncodingException e) 	{e.printStackTrace();} 
+		catch (IOException e) 					{e.printStackTrace();}
+		
     	return result;
     }
 

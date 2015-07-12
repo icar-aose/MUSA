@@ -1,4 +1,4 @@
-/**************************/
+///**************************/
 // RESPONSIBILITIES:
 // 
 /* Last Modifies:
@@ -14,22 +14,49 @@
 { include( "configuration.asl" ) }
 { include( "peer/common.asl" ) }
 
-!awake.
+//!awake_test.
+//!awake_occp.
 
 /* Plans */
 
-+!awake : execution(deployment) 
++!awake 
+	: 
+		execution(deployment) 
+	<- 
+		makeArtifact("proxy_server","occp.http.GoalServer",[],Id); 
+		focus(Id);
+		
+		!connect_proxy;
+		run_server;
+	.
++!awake 
+	: 
+		execution(standalone) 
 	<- 
 		!start_proxy_server;
 	.
-+!awake : execution(test) 
++!awake 
+	: 
+		execution(test) 
 	<- 
-		!start_proxy_server;
-//		.wait(9000);
-//		.print("---------------SIMULATING REQUEST---------------");
-//		!simulate_quote_request;
+		?simulated_request_delay(Delay);
+		.wait(Delay);
+		!simulate_quote_request;
 	.
 
+/**
+ * This event is triggered when a jason goal pack is remotely 
+ * injected into MUSA system from the web GUI.
+ */	
++remote_goal_pack_injected
+	<-
+		get_received_goals(RemoteGoalPack);
+		?boss(BossAgent);
+		
+		.print("Received remote goal pack: ",RemoteGoalPack,"\n\n\n\n");
+		.print("Sending to: ",BossAgent);
+		.send(BossAgent, achieve, injectJasonPack(RemoteGoalPack));	
+	.
 
 /*
  * SIMULATE USER INTERACTION SCENARIO

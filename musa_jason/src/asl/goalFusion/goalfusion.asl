@@ -1,8 +1,3 @@
-
-
-
-
-
 // Agent goalfusion in project normeEWF
 
 /* Initial beliefs and rules */

@@ -40,11 +40,11 @@ public class upload_billing_to_cloud extends DefaultInternalAction
 	
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
-		String ip_address 	= MusaProperties.get_demo_db_ip();
-		String port 		= MusaProperties.get_demo_db_port();
-		String database 	= MusaProperties.get_demo_db_name();
-		String user 		= MusaProperties.get_demo_db_user();
-		String password 	= MusaProperties.get_demo_db_userpass();
+		String ip_address 	= MusaProperties.getDemo_db_ip();
+		String port 		= MusaProperties.getWorkflow_db_port();
+		String database 	= MusaProperties.getDemo_db_name();
+		String user 		= MusaProperties.getDemo_db_user();
+		String password 	= MusaProperties.getDemo_db_userpass();
 		
 		String fname 				= args[0].toString().replace("\"", "");
 		String user_id 				= args[2].toString().replace("\"", "");

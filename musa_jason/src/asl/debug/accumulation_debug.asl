@@ -14,6 +14,17 @@
 		!filter_capabilities_that_create_a_new_world_in_accumulation(IN,Acc,OutCapabilities);
 		.print("Out cap: ",OutCapabilities);
 	.
++!debug_filter_capabilities_that_create_a_new_world_in_accumulation_1
+	<-
+		.my_name(Me);
+		InCap = [commitment(Me, complete_transaction, 0)];
+		.print("InCap: ",InCap);
+		Accumulation 	= accumulation(world([done(complete_transaction)]),par_world([],[]),assignment_list([]));
+		
+		!filter_capabilities_that_create_a_new_world_in_accumulation(InCap,Accumulation,OutCapabilities);
+		.print("--OutCapabilities: ",OutCapabilities);
+			
+	.
 	
 /**
  * [davide]
@@ -205,14 +216,30 @@
 		.print("Satisfied: ",Satisfied,"\nPercent: ",Percent);
 		.print("Out assignment: ",OutAssignment);
 	.
-	
-	
-	
++!debug_check_if_par_condition_addresses_accumulation_16
+	<-
+		CN = par_condition([user_id,user_email],property(set_user_data_step1,[user_id,user_email]));
+		Acc = accumulation(world([]),  par_world([user_email,user_id],[property(set_user_data_step1,[user_id,user_email])]),  assignment_list([])    );
 
-	
+		!check_if_par_condition_addresses_accumulation(CN, Acc, [], [], OutAssignment, Bool, HeadPercent);
+		.print("CN: ",CN);
+		.print("Acc: ",Acc);
+		.print("Assignment: ",OutAssignment);
+		.print("Bool: ",Bool);
+	.
 
 
++!debug_check_if_par_condition_addresses_accumulation_17
+	<-
+		CN = par_condition([user_email],property(set_user_data_step1,[user_id,user_email]));
+		Acc = accumulation(world([]),  par_world([user_email],[property(set_user_data_step1,[user_id,user_email])]),  assignment_list([])    );
 
+		!check_if_par_condition_addresses_accumulation(CN, Acc, [], [], OutAssignment, Bool, HeadPercent);
+		.print("CN: ",CN);
+		.print("Acc: ",Acc);
+		.print("Assignment: ",OutAssignment);
+		.print("Bool: ",Bool);
+	.
 
 
 +!debug_filter_par_world_to_keep_only_parametric_condition

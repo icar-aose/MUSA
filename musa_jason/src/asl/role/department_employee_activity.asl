@@ -25,7 +25,7 @@
 { include( "role/project_employee_activity.asl" )}
 { include( "role/project_manager_activity.asl" )}
 { include( "search/collaborative_search_with_accumulation.asl" )}
-{ include( "ids_goals.asl" ) }
+
 { include( "peer/check_commitment.asl" )}
 
 
@@ -89,9 +89,9 @@
  * injected into the system from the goal injection GUI.
  * 
  */
-+new_goal(Description)[source(X)]
++new_goal(Name, Pack, Description,GoalParams)[source(X)]
 	<-
-		ids.goalspec.loadFromFile(Description);
+		ids.goalspec.loadFromFile(Name, Pack, Description,GoalParams);
 	.
 
 /**

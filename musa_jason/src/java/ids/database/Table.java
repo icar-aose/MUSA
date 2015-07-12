@@ -90,11 +90,11 @@ public abstract class Table {
 	
 	private void configure()
 	{
-		ip_address 	= MusaProperties.get_workflow_db_ip();
-		port 		= MusaProperties.get_workflow_db_port();
-		database 	= MusaProperties.get_workflow_db_name();
-		user 		= MusaProperties.get_workflow_db_user();
-		password 	= MusaProperties.get_workflow_db_userpass();
+		ip_address 	= MusaProperties.getWorkflow_db_ip();
+		port 		= MusaProperties.getWorkflow_db_port();
+		database 	= MusaProperties.getWorkflow_db_name();
+		user 		= MusaProperties.getWorkflow_db_user();
+		password 	= MusaProperties.getWorkflow_db_userpass();
 	}
 	
 	private void configure(InputStream stream) {
