@@ -33,7 +33,7 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 
  +!prepare(notify_order_unfeasibility, Context, Assignment) 
 	<- 
-		true 
+		true
 	.
 +!action(notify_order_unfeasibility, Context, Assignment) 
 	<- 
@@ -56,14 +56,15 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 //delete_order-------------------------
  +!prepare(delete_order, Context, Assignment) 
 	<- 
-		true 
+		true
 	.
 
 +!action(delete_order, Context, Assignment) 
 	<- 
 		occp.logger.action.info("[delete_order] Deleting order");
-		!register_statement(order_deleted(order), Context);  	
-		.print("..................................................(delete_order) ORDER DELETED."); 
+		.print("..................................................(delete_order) ORDER DELETED.");
+		
+		!register_statement(order_deleted(order), Context);
 	.
 
 +!terminate(delete_order, Context, Assignment) 

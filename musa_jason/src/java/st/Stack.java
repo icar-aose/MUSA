@@ -34,6 +34,8 @@ public class Stack extends Artifact {
 		System.out.println(focus4.getCS());
 	}*/
 	
+	private boolean debug = false;
+	
 	void init() 
 	{
 		stack=new TreeSet<StackItem>(new Comparator<StackItem>() 
@@ -43,7 +45,7 @@ public class Stack extends Artifact {
 				StackItem item0 = (StackItem) arg0;
 				StackItem item1 = (StackItem) arg1;
 				
-				if (item0.score < item1.score) 	{return -1;}
+				if (item0.score <= item1.score) 	{return -1;}
 				if (item0.score > item1.score) 	{return 1;}
 				
 				return 0;
@@ -69,38 +71,49 @@ public class Stack extends Artifact {
 		item.setGoals(goals);
 		item.setScore(score);
 		
-		if(stack.add(item))		System.out.println("INSERT: "+cs);
-		else					System.out.println("CANNOT INSERT: "+cs);
+		stack.add(item);
+		
+//		if(stack.add(item))		System.out.println("INSERT: "+cs);
+//		else					System.out.println("CANNOT INSERT: "+cs);
 	}
 	
-	@OPERATION void pickItem(OpFeedbackParam<StackItem> item) {
+	@OPERATION void pickItem(OpFeedbackParam<StackItem> item) 
+	{
 		StackItem higher = removeHigher();
 		item.set(higher);
 	}
 
-	@OPERATION void stackSize(OpFeedbackParam<Integer> number) {
+	@OPERATION void stackSize(OpFeedbackParam<Integer> number) 
+	{
 		int size = stack.size();
 		number.set(new Integer(size));
 	}
 	
-	public StackItem removeHigher() {
-		//System.out.println("size: "+stack.size());
-		StackItem higher = stack.last();
+	public StackItem removeHigher() 
+	{
+		StackItem higher = stack.pollLast();
 		
-		stack.remove( higher );
+		if(debug) System.out.println("PICKED: "+higher.toString());
+		if(debug) stackLog();
 		
-		//System.out.println("size: "+stack.size());
-
 		return higher;
 	}
 	
+	@OPERATION
+	void stackLog()
+	{
+		toString();
+	}
+	
+	
 	public String toString() 
 	{
+		System.out.println("start-------------------");
 		for(StackItem item : stack)
 		{
 			System.out.println(item.toString());
 		}
-		
+		System.out.println("end---------------------");
 		return null;
 	}
 	
@@ -137,7 +150,8 @@ public class Stack extends Artifact {
 		
 		public String toString()
 		{
-			return "("+cs+")";
+//			return "("+cs+")";
+			return "("+cs+","+score+")";
 			
 		}
 

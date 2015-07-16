@@ -1,6 +1,5 @@
 package occp.action.tad;
 
-import http.ConnectionOCCP;
 import jason.asSemantics.DefaultInternalAction;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
@@ -24,12 +23,12 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import occp.http.OCCPRequestParser;
 import occp.logger.musa_logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import workflow_property.MusaProperties;
 import billing_pdf.Billing;
 
 public class sendBillingTAD extends DefaultInternalAction
@@ -47,12 +46,12 @@ public class sendBillingTAD extends DefaultInternalAction
 	{
 		billing_filename 				= args[0].toString().replace("\"", "");
 		final String user_email 		= args[1].toString().replace("\"", "");		
-		final String order_id 			= ConnectionOCCP.getIdOrdine();
-		final JSONArray product_details 	= ConnectionOCCP.getProductMessage();
+		final String order_id 			= OCCPRequestParser.getIdOrdine();
+		final JSONArray product_details = OCCPRequestParser.getProductMessage();
 		
 		final Billing b = new Billing(billing_filename);		
 		//Format the user name for the billing
-		String user_name = String.format("%s %s", ConnectionOCCP.getNome(), ConnectionOCCP.getCognome());
+		String user_name = String.format("%s %s", OCCPRequestParser.getNome(), OCCPRequestParser.getCognome());
 		
 		//Set the billing properties
 		b.set_billing_header_title("Billing");
@@ -75,7 +74,7 @@ public class sendBillingTAD extends DefaultInternalAction
 			/*INUTILIZZATA*/String tipologia 		= data.getString("tipologia") != null ? data.getString("tipologia") : "";
 			
 			//Append a product entry into the PDF billing
-			b.add_billing_entry(ConnectionOCCP.getDataCreazioneOrdine(), nome_prodotto, quantita , prezzo );
+			b.add_billing_entry(OCCPRequestParser.getDataCreazioneOrdine(), nome_prodotto, quantita , prezzo );
 		}
 		
 		//Create the billing

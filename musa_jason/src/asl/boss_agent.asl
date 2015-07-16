@@ -2,9 +2,7 @@
 /*
 * Last Modifies:
  * 
- * Todo (davide):
- * - controllare se un goal e' stato gia inserito nel database
- * - inserire un bottone nella GUI per rimuovere un goal selezionato
+ * TODO:
  * 
  * Bugs:  
  * 
@@ -16,15 +14,10 @@
 
 !awake_musa.
 
-
-
 +!awake_musa
 	:
 		execution(deployment)
 	<-
-//		?proxy(ProxyAgent);
-//		.send(ProxyAgent, achieve, awake);
-		
 		.broadcast(achieve, awake);
 		!awake_boss;
 	.
@@ -32,21 +25,34 @@
 	:
 		execution(standalone)
 	<-
+		
 		?use_gui(V);
 		if(V)
 		{
 			makeArtifact("AddNewGoalGUI", "ids.artifact.MusaConfigGUIArtifact", [], GuiID);
-			loadDefaultDatabaseConfiguration;													//Load the default db configuration
+			loadDefaultDatabaseConfiguration(Success);													//Load the default db configuration
 			+using_artifact("addNewGoalGUI", GuiID);											//add the ID to the belief base
 			focus(GuiID);																		//focus the GUI artifact
+			
+			if(not Success)
+			{
+				?default_db_user(User);
+				?default_db_port(Port);
+				?default_db_password(Pass);
+				?default_db_database(DbName);
+				?default_db_ip(Ip);
+				loadHardCodedDatabaseConfiguration(User, Port, Pass, DbName, Ip);
+			}
+			
+			.broadcast(achieve, awake);
+			!awake_boss;
 		}
 	.
-	
 +!awake_musa
 	:
 		execution(test)
 	<-
-		action.loadGoalBase("src/asl/goalBase.asl",GoalList);
+		action.loadGoalBase("src/asl/defaultGoalPack.asl",GoalList);
 		.length(GoalList,Len);
 		for (.range(I,0,Len-1))
 		{
@@ -58,10 +64,12 @@
 		
 		.broadcast(achieve, awake);
 		!awake_boss;
-		
 	.
-
-
++!awake_musa
+	<-
+		.print("No execution profile specified. Aborting");
+	.
+//DEPRECATA
 +!awake_with_cap_failure_gui
 	
 	<-
@@ -78,22 +86,33 @@
 		}
 	.
 	
+	
++addNewAgent(AgName, Path)
+	<-
+		.create_agent(AgName, Path);
+		.print("Agent ",AgName," added");
+		.abolish( addNewAgent(AgName, Path) );
+	.	
+	
+
 /**
  * [davide]
  * 
  * This event is triggered when user starts MUSA from the
- * configuration GUI. This plan awake all the agents.
+ * configuration GUI, selecting 'Start MUSA' button. This 
+ * plan awake all the agents.
  */
 +awake_boss
 	<-
-		!!awake_boss;
-		.broadcast(achieve, awake);
+		!!awake_boss;					//Awake the boss
+		.broadcast(achieve, awake);		//Awake all the agents
 		-awake_boss;
 	.
 +!awake_boss
 	<-
 		!awake_as_head; 		/* in peer/department_head_activity.asl */		
 		!check_social_goal;
+//		+musa_status(ready);
 	.
 
 +!check_social_goal 
@@ -105,7 +124,11 @@
 
 +!create_department_foreach_social_goal
 	<-
-		.findall(SGName,social_goal(TC,FS,A)[pack(SGName)],SocialGoals);
+		.findall(SGName,social_goal(TC,FS,A)[pack(SGName)],SocialGoals_1);
+		.findall(SGName,social_goal(TC,FS)[pack(SGName)],SocialGoals_2);
+		
+		.union(SocialGoals_1,SocialGoals_2,SocialGoals);
+		
 		.println("Goal Packs: ",SocialGoals," injected");
 
 		for ( .member(SG, SocialGoals) ) 			// For each social goal SG within the social goal list SocialGoals
@@ -139,6 +162,23 @@
 	<-
 		getInjectedJasonGoals(GoalList);
 		!injectJasonPack(GoalList);
+		
+		if( execution(deployment) )
+		{
+//			.abolish(created_dpt(_));
+			!check_social_goal;
+			
+			?proxy(ProxyAgent);
+			.send(ProxyAgent, achieve, simulate_occp_request);
+		}
+		if( execution(standalone) )
+		{
+			!check_social_goal;
+			
+//			?proxy(ProxyAgent);
+//			.send(ProxyAgent, achieve, simulate_occp_request);
+		}
+		
 		.abolish(injectJasonGoals);
 	.
 
@@ -156,27 +196,28 @@
 		  	.print("loaded: ",T);	
 			+T;
 			.broadcast(tell,T);	
-		}
+		}		
 	.
 
 /**
  * [davide]
- * Event triggered when a goal pack has to be injected. It injects a goal with the specified name, pack and description. 
+ * 
+ * Event triggered when a goal pack has to be injected. It injects 
+ * a goal with the specified name, pack and description (GoalSPEC). 
  */
 +goalToInject(Name, Pack, Description,GoalParams)
 	:
 		not goal_injected(Name,Pack,_)
 	<-
-		!doGoalInjection(Name, Pack, Description,GoalParams);
+		!doGoalInjection(Name, Pack, Description, GoalParams);
 		.print("Goal ",Name," injected correctly!");
 		-goalToInject(Name,Pack,Description);
 		
-		//forzo a ricreare il goalpack
-		.abolish(created_dpt(_)); //ATTENZIONE!!!
-		.print("Creo dipartimento...");
+//		.abolish(created_dpt(_)); //ATTENZIONE!!!
+//		.print("Creo dipartimento...");
+		.abolish( goalToInject(Name, Pack, Description,GoalParams) );
 		!check_social_goal;
 	.
-	
 +goalToInject(Name, Pack, Description,GoalParams)
 	:
 		.findall(gi(N,P), goal_injected(Name,Pack,Description), GoalList) 	&
@@ -189,12 +230,26 @@
 	
 /**
  * [davide]
- * Inject a goal.
+ * This event is triggered after injecting all the goals within a pack. It creates the department for the social goal.
+ */
++createDepartmentForInjectedGoalPack(PackName)
+	<-
+		!create_department_for_social_goal(PackName);
+		occp.logger.action.info("Department for Pack ",PackName, "has been created.");
+		
+		.abolish( createDepartmentForInjectedGoalPack(PackName) );
+//		-createDepartmentForInjectedGoalPack(PackName);
+	.
+	
+/**
+ * [davide]
+ * Inject a goal (GoalSPEC).
  */
 +!doGoalInjection(Name, Pack, Description, GoalParams)
 	<- 
 		ids.goalspec.loadFromFile(Name, Pack, Description, GoalParams);				//Parse the goal
-		+goal_injected(Name, Pack, Description, GoalParams);			//Keep a mental note about the goal
+		+goal_injected(Name, Pack, Description, GoalParams);						//Keep a mental note about the goal
+		
 		occp.logger.action.info("Goal injected: ",Description,",",GoalParams);
 		.broadcast(tell, new_goal(Name, Pack, Description,GoalParams) );			//Tell the customers that a new goal has been injected						
 	.
@@ -204,74 +259,58 @@
 		.print("[ERROR] Failed to inject goal '",Description,"'");
 	.
 
-
-
-//#####################################################
-//PIANI RELATIVI AL FALLIMENTO MANUALE DELLE CAPABILITY 
-//#####################################################
-/**
- * [davide]
- * 
- * Plan triggered when the failure GUI is activated. Boss agent gather all
- * the avaible capabilities and put them into the gui's combobox control.
- * From the gui, user can choose a capability and decide if to make it
- * fails or not.
- */
-+!get_all_capabilities(CS)
++submitCapabilityFailure(CapName)[source(proxy_agent)]
 	<-
-		.broadcast(tell, request_for_capability_set);
-		.wait(3000);
-		.findall(commitment(Ag,Cap,HeadPercent), commitment(Ag,Cap,HeadPercent), CapSet);
-		
-		for(.member(Commitment,CapSet))
-		{
-			.print("member: ",Commitment);			
-			Commitment = commitment(AgentName,CapName,_);
-			addCapabilityToFailureGUI(AgentName, CapName);
-		}
-		
-	.
-	
-+!wait_for_response
-	<-
-		.findall(Ag, agent_response(Ag), AgSet);
-		.all_names(AllAgents);
-
-		!check_if_agent_is_in_set(AgSet, AllAgents, Bool);
-		
-		if(Bool == false)
-		{
-			.wait(500);
-			.print("Non ho ancora ricevuto tutte le risposte....");
-			!!wait_for_response;
-		}
-	.
-+!check_if_agent_is_in_set(Agent, AGset, Bool)
-	:
-		Agent = [Head|Tail]
-	<-
-		!check_if_agent_is_in_set(Tail, AGset, BoolRec);
-		
-		if(.member(Head,AGset))	{.eval(Bool,true & BoolRec);}
-		else					{.eval(Bool,false & BoolRec);}
-	.
-+!check_if_agent_is_in_set(Agent, AGset, Bool)
-	:	Agent = []
-	<-	Bool = true;
-	.
-	
-/**
- * Event triggered when the submit button into the capability 
- * failure GUI is clicked. 
- */
-+submitCapabilityFailure
-	<-
-		getFailureCapabilityInfo(Ag,Cap,Failure);
-		
-		.print("Submit for ",Cap);
-		
+		.print("Set ",CapName," to Failure state");
 		.all_names(Members);
-		.send(Members, tell, capability_failure_state(Ag,Cap,Failure));
+		!submitCapabilityFailureToMember(CapName, Members);
+		.abolish( submitCapabilityFailure(CapName) );
 	.
 
++!submitCapabilityFailureToMember(CapName, Members)
+	:
+		Members = []
+	.
++!submitCapabilityFailureToMember(CapNameStr, Members)
+	:
+		Members = [Head|Tail]
+	<-
+		!submitCapabilityFailureToMember(CapNameStr, Tail);
+		
+		.term2string(CapName, CapNameStr);
+		.send(Head,askOne, agent_capability(CapName), Reply);
+		
+		if(Reply \== null)
+		{
+			.send(Head, tell, fail(CapName));
+		}
+	.
+
++request_for_agent_capability(Agent)
+	<-
+		.send(Agent, tell, request_for_capability_set);
+		.abolish(request_for_agent_capability);
+	.
 	
+	
++agent_capability_set(CS)[source(Agent)]
+	<-
+		.term2string(CS,CSstr);
+		set_cs_into_configuration_gui(CSstr);
+		.abolish(agent_capability_set(_));
+	.
+
++start_musa_organization(ParamListString)
+	<-
+		.term2string(ParamList,ParamListString);
+		?proxy(ProxyAgent);
+		.send(ProxyAgent, achieve, simulate_occp_request(ParamList));
+		.abolish( start_musa_organization(_) );
+	.
+
+//+musa_status(Status)
+//	<-
+//		.abolish(musa_status(_));
+//		+musa_status(Status);
+//	.
+

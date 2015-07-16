@@ -7,11 +7,11 @@ proxy(proxy_agent).
  * execution(deployment) 	-> parte senza nessun goal precariato e senza nessuna GUI, quando ci sarà l’interfaccia web si usa quella
  */
 
-execution(deployment).		 
+//execution(deployment).		 
 //execution(test).
-//execution(standalone).
+execution(standalone).
 
-local_ip_address("194.119.214.121").
+//local_ip_address("194.119.214.121"). --> INUTILIZZATA
 url_for_agent_services("http://194.119.214.121:8080/HTTPAgent/AgentService").
 
 frequency_periodic_update(10000).
@@ -36,7 +36,7 @@ blacklist_verbose(false).
 blacklist_expiration(0,1,0). //HH,MM,SS
 //#################################
 
-search_number_of_steps(5000).
+search_number_of_steps(5000).//5000
 search_number_of_solutions(5).
 search_max_depth(24).
 max_time_for_collecting(10).
@@ -78,10 +78,27 @@ goal_fusion_goalbase_last("src/asl/goalBaseSigmaTerremoto.asl").
 
 
 //#############################################
-// DEFAULT DATABASE CONFIG (FOR TEST EXECUTION)
+// DEFAULT DATABASE CONFIG
 //#############################################
 default_db_user("occp_root").
 default_db_port("3306").
 default_db_password("occp_root_password_2014").
 default_db_database("musa_workflow").
+//default_db_ip("127.0.0.1").
 default_db_ip("194.119.214.121").
+
+//#############################################
+// CLEAR THE DATABASE ON STARTUP
+//#############################################
+clearDatabase(false).
+
+
+
+//#############################################
+// CAPABILITY STATUS TRACKING.
+ //--------------------------
+// When active, the status of the capabilities
+// is saved into the database.
+//#############################################
+track_capability_status(true).
+

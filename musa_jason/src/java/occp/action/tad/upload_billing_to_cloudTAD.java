@@ -1,6 +1,5 @@
 package occp.action.tad;
 
-import http.ConnectionOCCP;
 import jason.asSemantics.DefaultInternalAction;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
@@ -11,6 +10,7 @@ import java.sql.SQLException;
 
 import musa_dropbox.Dropbox;
 import occp.database.CloudServiceTable;
+import occp.http.OCCPRequestParser;
 import occp.logger.musa_logger;
 import workflow_property.MusaProperties;
 
@@ -29,10 +29,10 @@ public class upload_billing_to_cloudTAD extends DefaultInternalAction
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
 		
-		String cloud_service_name = ConnectionOCCP.getCloudServiceName();
-		String access_token = ConnectionOCCP.getUserAccessToken();
+		String cloud_service_name = OCCPRequestParser.getCloudServiceName();
+		String access_token = OCCPRequestParser.getUserAccessToken();
 		String fname 		= MusaProperties.get_demo_billing_tmp_folder() + "billing.pdf";
-		String user_id 		= ConnectionOCCP.getIdUtente();
+		String user_id 		= OCCPRequestParser.getIdUtente();
 		
 		System.out.println("Uploading to user cloud ID:"+user_id);
 		

@@ -86,7 +86,6 @@ list_contains([H | T],Element)
 		+using_artifact("proxy_server",Id);
 	.
 
-
 @try_create_database_artifact[atomic]
 +!create_or_use_database_artifact(Id) : true
 	<-

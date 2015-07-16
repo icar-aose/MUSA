@@ -3,6 +3,7 @@
 package ids.artifact;
 
 import ids.database.BlacklistTable;
+import ids.database.CapabilityStatusTable;
 import ids.database.DepartmentTable;
 import ids.database.EntryPointTable;
 import ids.database.IPAddressTable;
@@ -13,6 +14,7 @@ import ids.database.StateTable;
 import ids.database.UserTable;
 import ids.database.ValueTable;
 import ids.model.BlacklistEntity;
+import ids.model.CapabilityStatusEntity;
 import ids.model.DepartmentEntity;
 import ids.model.Entity;
 import ids.model.IPAddressEntity;
@@ -83,6 +85,10 @@ public class Database extends Artifact
 		}
 	}
 	
+	/**
+	 * Set the database connection parameters
+	 * 
+	 */
 	@OPERATION
 	void set_default_database(String User, String port, String pass, String dbName, String database_ip)
 	{
@@ -93,22 +99,56 @@ public class Database extends Artifact
 		MusaProperties.setWorkflow_db_ip(database_ip);
 	}
 	
+	/**
+	 * Print a startup message
+	 */
 	void printStartupMessageInfo(String localIPAddress)
 	{
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("~~~~~~~~~~~~~MUSA~~~~~~~~~~~~~");
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~MUSA~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		System.out.println("local ip address: "+localIPAddress);
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		System.out.println("workflow ip: "+MusaProperties.getWorkflow_db_ip());
 		System.out.println("workflow port: "+MusaProperties.getWorkflow_db_port());
 		System.out.println("workflow user: "+MusaProperties.getWorkflow_db_user());
 		System.out.println("workflow pass: "+MusaProperties.getWorkflow_db_userpass());
-		System.out.println("demo ip: "+MusaProperties.getDemo_db_ip());
+		/*System.out.println("demo ip: "+MusaProperties.getDemo_db_ip());
 		System.out.println("demo port: "+MusaProperties.getDemo_db_port());
 		System.out.println("demo user: "+MusaProperties.getDemo_db_user());
-		System.out.println("demo pass: "+MusaProperties.getDemo_db_userpass());
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		System.out.println("demo pass: "+MusaProperties.getDemo_db_userpass());*/
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	}
+	
+	/**
+	 * Update the status of a capability in the database
+	 * 
+	 * @param CapName
+	 * @param Status
+	 */
+	@OPERATION
+	void set_capability_status(String CapName, String Status)
+	{
+		CapabilityStatusTable table = new CapabilityStatusTable();
+		
+		try 
+		{
+			CapabilityStatusEntity ee = (CapabilityStatusEntity) table.findOneBy("capability", CapName);
+			
+			if(ee == null)	
+			{
+				ee = new CapabilityStatusEntity();
+				ee.setCapability(CapName);
+				ee.setStatus(Status);
+				table.insertElement(ee);
+			}
+			else			
+			{
+				ee.setStatus(Status);
+				table.updateElementByPrimary(ee);
+			}
+		} 
+		catch (SQLException e) {e.printStackTrace();}
 	}
 	
 	
@@ -123,6 +163,10 @@ public class Database extends Artifact
 		
 	}
 	
+	/**
+	 * Delete all uncompleted projects in database
+	 * 
+	 */
 	@OPERATION
 	void deleteUncompletedProjects(int dept) throws SQLException
 	{
@@ -142,6 +186,14 @@ public class Database extends Artifact
 		execInternalOp("retrieve_users");
 	}
 
+	/**
+	 * Clear the following tables in the MUSA database:
+	 * 
+	 * - Department table
+	 * - Project table
+	 * - Value table
+	 * - State table
+	 */
 	@OPERATION
 	void clear() 
 	{
@@ -176,23 +228,6 @@ public class Database extends Artifact
 		}
 	}
 
-	/**
-	 * Clear adw_state and adw_value tables.
-	 */
-	@OPERATION
-	void clearStatesAndValues() 
-	{
-		try 
-		{
-			new StateTable().deleteAll();
-			new ValueTable().deleteAll();
-		} 
-		catch (SQLException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Remove all the blacklist entries from the database
 	 * 
@@ -385,6 +420,8 @@ public class Database extends Artifact
 	/**
 	 * Return the current timestamp of the machine in which the database server is installed
 	 * 
+	 * DEPRECATA
+	 * 
 	 * @author davide
 	 */
 	@OPERATION
@@ -443,6 +480,9 @@ public class Database extends Artifact
 		 result.set(new ValueTable().getParameterByType(parName, agName, project) != null);
 	}
 	
+	/**
+	 * Set/Update the MUSA host address in the database. 
+	 */
 	@OPERATION
 	void updateLocalHost() 
 	{
@@ -463,6 +503,12 @@ public class Database extends Artifact
 		
 	}
 
+	/**
+	 * Add a new department
+	 * 
+	 * @param name
+	 * @param owner
+	 */
 	@OPERATION
 	void addDepartment(String name, String owner) {
 		DepartmentEntity department = null;//new DepartmentEntity();
@@ -498,6 +544,12 @@ public class Database extends Artifact
 		ID.set(new ProjectTable().getProjectId(projectName));
 	}
 	
+	/**
+	 * Get the list of projects 
+	 * 
+	 * @param dept
+	 * @param list
+	 */
 	@OPERATION
 	void getProjects(String dept, OpFeedbackParam list) {
 		DepartmentTable dept_table = new DepartmentTable();
@@ -533,7 +585,7 @@ public class Database extends Artifact
 
 
 	/**
-	 * Store a new project to database.
+	 * Add a new project
 	 * 
 	 * @param name	project name
 	 * @param dept department name
@@ -824,7 +876,12 @@ public class Database extends Artifact
 		
 	}
 
-	
+	/**
+	 * Convert a timestamp into a string of the following form:
+	 * 
+	 * ts(YYYY,MM,DD,HH,mm,dd)
+	 * 
+	 */
 	private String convertTimeStamp(Timestamp t) 
 	{
 		StringBuilder stringBuilder = new StringBuilder();
@@ -835,7 +892,7 @@ public class Database extends Artifact
 		
 		stringBuilder.append(calendar.get(Calendar.YEAR));
 		stringBuilder.append(",");
-		stringBuilder.append(calendar.get(Calendar.MONTH)+1);
+		stringBuilder.append(calendar.get(Calendar.MONTH)+1);	//Calendar.MONTH starts from 0
 		stringBuilder.append(",");
 		stringBuilder.append(calendar.get(Calendar.DAY_OF_MONTH));
 		stringBuilder.append(",");

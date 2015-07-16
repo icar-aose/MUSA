@@ -15,8 +15,9 @@
 package ids.artifact;
 
 import http.Connection;
+import http.Connection.MUSA_HTTP_REQUEST;
 import http.Server;
-import http.ServerOCCP;
+import jason.asSyntax.ListTerm;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -28,15 +29,17 @@ import cartago.OpFeedbackParam;
 
 public class HTTPProxy extends Artifact 
 {
-	private boolean debug = false;
-	private int conn_id_counter = 0;
-	
-	private Server server = null;
-//	private ServerOCCP server = null;
-	
-	private java.util.Date date = new java.util.Date();
+	private boolean debug 				= true;
+	private int conn_id_counter 		= 0;
+	private Server server 				= null;
+	private ListTerm goalPackToInject 	= null;
+	private java.util.Date date 		= new java.util.Date();
 	private Hashtable<String,Connection> open_connections;
-
+	
+	
+	/**
+	 * Method called when this artifact is created from jason using 'makeArtifact'.
+	 */
 	void init() 
 	{
 		open_connections = new Hashtable<String,Connection>();
@@ -46,293 +49,144 @@ public class HTTPProxy extends Artifact
 	@OPERATION
 	void run_server() 
 	{
-		if (server!=null) 
+		if (server==null) 
 		{
-			if (debug) System.out.println("server is ready");
-			server.run();
+			if (debug) System.out.println("server is not ready");
+			return;
+		}
+		
+		if (debug) System.out.println("server is ready");
+		
+		server.run();
+	
+		if(server.getConnectionRequestType() == MUSA_HTTP_REQUEST.OCCP_REQUEST)
+		{
+			//#############################
+			//		OCCP REQUEST
+			//#############################
 			
-			for (String key : server.getParams().keySet())
+			for (String key : server.getOCCPParams().keySet())
 			{
-				String value = server.getParams().get(key);
+				String value = server.getOCCPParams().get(key);
 				signal("http_param",server.getConnection().getId(), key, value);
 			}
 			
-			signal("http_request", server.getConnection().getId(),server.getConnection().getSession(),server.getConnection().getAgent(),server.getConnection().getService(),server.getConnection().getUser(),server.getConnection().getRole() );
-		} 
-		else 
-			if (debug) System.out.println("server is not ready");
+			signal("http_request", 	server.getConnection().getId(),
+									server.getConnection().getSession(),
+									server.getConnection().getAgent(),
+									server.getConnection().getService(),
+									server.getConnection().getUser(),
+									server.getConnection().getRole() );
+		}
+		else if(server.getConnectionRequestType() == MUSA_HTTP_REQUEST.GOAL_INJECTION)
+		{
+			//#############################
+			//	GOAL INJECTION REQUEST
+			//#############################
+			
+			goalPackToInject = server.getPackToInject();
+			signal("remote_goal_pack_injected");
+		}
+		else if(server.getConnectionRequestType() == Connection.MUSA_HTTP_REQUEST.SET_CAPABILITY_FAILURE)
+		{
+			//#############################
+			// CAPABILITY FAILURE
+			//#############################
+			
+			signal("submitCapabilityFailure", server.getCapabilityThatMustFail());
+		}
+		else if(server.getConnectionRequestType() == Connection.MUSA_HTTP_REQUEST.MUSA_STATUS_REQUEST)
+		{
+			//#############################
+			// MUSA STATUS REQUEST
+			//#############################
+			
+			signal("request_for_musa_status");
+		}
+		else if(server.getConnectionRequestType() == Connection.MUSA_HTTP_REQUEST.SET_DATABASE_HOST)
+		{
+			signal("changed_database_configuration");
+		}
+		
 	}
 	
+	
 	@OPERATION
-	void connect(OpFeedbackParam result) {
-		if (server != null) {
-			result.set("ok");
-		} else {		
-			try {				
-//				server = new ServerOCCP(generate_id());
-				server = new Server(generate_id());
-				
-				if (debug) System.out.println("server created");
-				result.set("ok");
-			} 
-			catch (IOException e) 
-			{
-				if (debug) System.out.println("server error");
-				server = null;
-				result.set("error");
-			}
+	void reply_with_musa_status(String status)
+	{
+		System.out.println("Request for musa status. Reply: "+status);
+		
+		Connection selected = open_connections.get(new Integer(this.server.getConnectionId()).toString());
+		
+		String replyMessage = "{\"request_for_musa_status\":\""+status+"\"}";
+
+		if (selected != null) 
+		{
+			selected.reply(replyMessage);
 		}
 	}
 	
+	/**
+	 * Unify the parameter with the goal pack to inject, received
+	 * from a HTTP request. 
+	 * 
+	 */
 	@OPERATION
-	void reply(int id, String reply) {
+	private void get_received_goals(OpFeedbackParam<ListTerm> goals)
+	{
+		goals.set(this.goalPackToInject);
+	}
+	
+	@OPERATION
+	void connect(OpFeedbackParam<String> result) 
+	{
+		if (server != null) 
+		{
+			result.set("ok");
+			return;
+		}
+		
+		try 
+		{				
+			server = new Server(generate_id());
+			
+			if (debug) System.out.println("server created");
+			result.set("ok");
+		} 
+		catch (IOException e) 
+		{
+			if (debug) System.out.println("server error");
+			result.set("error");
+			server = null;
+		}
+	
+	}
+	
+	@OPERATION
+	void reply(int id, String reply) 
+	{
 		if (debug) System.out.println("Sending...");
 		Connection selected = open_connections.get(new Integer(id).toString());
-		if (selected != null) {
+		
+		if (selected != null) 
+		{
 			selected.reply_and_close(reply);
-			
 			open_connections.remove(id);
 		}
 	}
 
 		
-	public int generate_id() {
+	public int generate_id() 
+	{
 		int id = conn_id_counter;
 		conn_id_counter++;
 		return id;
 	}
 	
-	public String generate_session() {
+	public String generate_session() 
+	{
 		Timestamp ts = new Timestamp(date.getTime());
 		return ts.toString();
 	}
 	
-	
-	/**
-	 * 
-	 * @author luca
-	 */
-	/*
-	private class Server 
-	{
-		private int port = 2004;		
-		private ServerSocket providerSocket = null;
-
-		public Server() throws IOException {
-			providerSocket = new ServerSocket(port);
-			if (debug) System.out.println("Opened the connection on "+providerSocket.getInetAddress().getHostAddress());
-		}
-
-		public void run() 
-		{
-			if (providerSocket==null) 
-				return;
-			
-			Socket connection = null;
-
-			try 
-			{			
-				if (debug) System.out.println("waiting for request...");
-				connection  = providerSocket.accept();		
-				Connection conn = new Connection(connection);
-				conn.readParams();
-				
-				if (debug) System.out.println("connection established");
-				open_connections.put( conn.getId().toString() , conn );
-				
-				//Take parameters from the received JSON message
-				HashMap<String,String> params = conn.getParam_table();
-				Iterator<String> it = params.keySet().iterator();
-				
-				//per ogni parametro
-				while (it.hasNext()) 
-				{
-					String key = it.next();
-					String value = params.get(key);
-
-					signal("http_param",conn.getId(),key,value);
-				}
-
-				signal("http_request",conn.getId(),conn.getSession(),conn.getAgent(),conn.getService(),conn.getUser(),conn.getRole());
-				
-			} 
-			catch (IOException ioException) 
-			{
-				if (debug) System.out.println("Error with connection");
-				if (debug) ioException.printStackTrace();
-			}
-		}
-	}*/
-	
-	/*
-	private class ServerOCCP
-	{
-		private int port = 2004;		
-		private ServerSocket providerSocket = null;
-
-		public ServerOCCP() throws IOException {
-			providerSocket = new ServerSocket(port);
-			if (debug) System.out.println("Opened the connection on "+providerSocket.getInetAddress().getHostAddress());
-		}
-
-		public void run() 
-		{
-			if (providerSocket==null) 
-				return;
-			
-			Socket connection = null;
-
-			try 
-			{			
-				if (debug) System.out.println("waiting for request...");
-				connection  = providerSocket.accept();		
-				OCCP_Connection conn = null;
-				try 
-				{
-					conn = new OCCP_Connection(connection);
-					conn.setId(generate_id());
-				} 
-				catch (Exception e) {e.printStackTrace();}
-				if (debug) System.out.println("connection established");
-
-				//open_connections.put( conn.getId().toString() , conn );
-				signal("http_param",conn.getId(), "idOrder", conn.getIdOrdine());
-				signal("http_param",conn.getId(), "idUser", conn.getIdUtente());
-				signal("http_param",conn.getId(), "mailUser", conn.getMail());
-				signal("http_param",conn.getId(), "user_message", "");
-				
-				signal("http_request",conn.getId(),conn.getSession(),conn.getAgent(),conn.getService(),conn.getUser(),conn.getRole());
-			} 
-			catch (IOException ioException) 
-			{
-				if (debug) System.out.println("Error with connection");
-				if (debug) ioException.printStackTrace();
-			}
-		}
-	}*/
-	
-	/**
-	 * 
-	 * @author luca
-	 */
-	/*
-	private class Connection 
-	{
-		private int id;	
-		private Socket connection = null;
-		private ObjectOutputStream out = null;
-		private ObjectInputStream in = null;
-		private String user="";
-		private String role="";
-		private String session="";
-		private String service="";
-		private String agent="";
-		
-		private HashMap<String,String> param_table = new HashMap<String,String>();
-		
-		public Connection(Socket connection) 
-		{
-			id = generate_id();
-			this.connection = connection;
-			
-			try 
-			{
-				out = new ObjectOutputStream(connection.getOutputStream());
-				out.flush();
-				in = new ObjectInputStream(connection.getInputStream());
-				if (debug) System.out.println("Reading from stream");
-			} 
-			catch (IOException ioException) 
-			{
-				if (debug) System.out.println("Error with read from stream");
-			}
-
-			String message = null;
-			try 
-			{
-				while (message == null) 
-					message = (String) in.readObject();
-				
-				JSONObject json_message = new JSONObject(new JSONTokener(message));
-				
-				if (debug) System.out.println("Read " + json_message.toString() );
-				System.out.println("Read " + json_message.toString() );
-				
-				if( !(json_message.has("agent") && json_message.has("service") && json_message.has("session") && json_message.has("userrole")) )
-				{
-					try						{throw new Exception();}
-					catch(Exception E)		{System.out.println("ERROR: malformed json message received. \n"+E.getMessage());}
-				}
-				agent 	= json_message.getString("agent");
-				service = json_message.getString("service");
-				if (json_message.has("session")) 	session = json_message.getString("session");
-				if (json_message.has("username")) 	user = json_message.getString("username");
-				if (json_message.has("userrole")) 	role = json_message.getString("userrole");
-				if (json_message.has("params")) 
-				{
-					JSONObject params = json_message.getJSONObject("params");
-					Iterator it = params.keys();
-					
-					while (it.hasNext()) 
-					{
-						String key 		= (String) it.next();
-						String param 	= params.getString(key);
-						param_table.put(key, param);
-					}
-				}
-					
-			} 
-			catch (IOException e) 				{if (debug) System.out.println("Read failed");} 
-			catch (ClassNotFoundException e) 	{e.printStackTrace();}
-		}
-		
-		public void reply_and_close(String reply_message) {
-			if (out != null) {
-				try {
-					out.writeObject(reply_message);
-					out.flush();
-					if (debug) System.out.println("Sent message " + reply_message);
-				} catch (IOException ioException) {
-					if (debug) System.out.println("Error sending message " + reply_message);
-				}
-			}
-			
-			try {
-				out.close();
-				in.close();
-				connection.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		public Integer getId() {
-			return new Integer(id);
-		}
-		
-		public String getUser() {
-			return user;
-		}
-
-		public String getRole() {
-			return role;
-		}
-
-		public String getSession() {
-			return session;
-		}
-
-		public String getService() {
-			return service;
-		}
-
-		public String getAgent() {
-			return agent;
-		}
-
-		public HashMap<String, String> getParam_table() {
-			return param_table;
-		}
-
-	}*/
 }

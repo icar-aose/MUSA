@@ -131,30 +131,13 @@
 		.abolish( remove_from_blacklist(Capability) );
 	.
 	
-
-//+get_capability_set(CS)
-//	<-
-//		.my_name(Me);
-//		.print("Ho capability [",Me,"]");
-//		.findall(commitment(Me, Cap, 0), agent_capability(Cap), CS);
-//	.
 +request_for_capability_set[source(X)]
-	<-
-//		!get_capability_set(CS);
+	<-		
+		.my_name(Me);
+		.findall(Cap, agent_capability(Cap), CS);
 		
-		.my_name(Me);
-		.findall(commitment(Me, Cap, 0), agent_capability(Cap), CS);
-		for(.member(Cap,CS))
-		{
-			.send(X,tell,Cap);
-		}
-		.my_name(Me);
-		+agent_response(Me);
+		.send(X, tell, agent_capability_set(CS));
+		
+		.abolish( request_for_capability_set );
 	.
 	
-+!get_capability_set(CS)
-	<-
-		.my_name(Me);
-		.findall(commitment(Me, Cap, 0), agent_capability(Cap), CS);
-		
-	.

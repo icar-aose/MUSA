@@ -25,8 +25,7 @@
 	<-
 		Lifecycle = capability_lifecycle( Pack,Context,ready );
 		
-		.println(Capability, " is ready");
-		
+		.println(Capability, " is ready");		
 		!!capability_achievement_lifecycle(Capability,Lifecycle,TaskPre,TaskPost,AssignmentList);
 	.
 
@@ -175,6 +174,9 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,ready )
 	<-
+		?track_capability_status(TS);
+		if(TS){set_capability_status(Capability, ready);}
+		
 		.my_name(Me);
 		!get_remote_capability_precondition(commitment(Me,Capability,_), PreCondition);
 		!check_task_conditions_in_context(TaskPre, TaskPost, Context, AssignmentList, ValidityTaskPre);
@@ -206,6 +208,9 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,active )
 	<-
+		?track_capability_status(TS);
+		if(TS){set_capability_status(Capability, active);}
+		
 		.println("..........................................................................invoking ",Capability);
 		occp.logger.action.info("Invoking capability [",Capability,"]");
 		.my_name(Me);
@@ -269,6 +274,9 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,check )
 	<-
+		?track_capability_status(TS);
+		if(TS){set_capability_status(Capability, check);}
+	
 		?frequency_perception_loop(Delay);
 		.wait(Delay);
 	
@@ -297,9 +305,11 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,success )
 	<-
+		?track_capability_status(TS);
+		if(TS){set_capability_status(Capability, success);}
+	
 		?frequency_long_perception_loop(Delay);
 		.wait(Delay);
-
 	
 		//TODO DECREASE FAILURE RATE HERE
 		//ANTONELLA START MODIFY
@@ -327,6 +337,9 @@
 	:
 		Lifecycle = capability_lifecycle( Pack,Context,failure )
 	<-
+		?track_capability_status(TS);
+		if(TS){set_capability_status(Capability, failed);}
+		
 		//Takes the exact time in which the capability has failed
 		!numeric_timestamp(FailureTimestamp);
 

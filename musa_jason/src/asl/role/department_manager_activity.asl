@@ -28,6 +28,9 @@
 		.term2string(DptName,DptNameString);
 		.term2string(PackName,PackNameString);
 		
+		?boss(Boss);
+		.send(Boss, tell, musa_status(call_for_manager));
+		
 		!build_goal_pack(PackName,Pack);
 		!check_if_I_am_able_to_manage_dpt( Pack, ManagerBool);
 		

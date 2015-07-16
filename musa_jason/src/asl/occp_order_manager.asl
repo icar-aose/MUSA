@@ -90,12 +90,17 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 //		!register_statement( notifica_nel_calendario(event_name, location, description, event_date), Context );
 //	.
 
-+!prepare(notifica_calendario, Context) <- true .
++!prepare(notifica_calendario, Context) 
+	<- 
+		true
+	.
 +!terminate(notifica_calendario, Context) <- true.
 +!action(notifica_calendario, Context) 
 	<- 
 //		occp.action.insertGoogleCalendarEvent;
+
 		!register_statement( done(notificato_in_calendario), Context );
+		
 	.
 
 
@@ -130,15 +135,20 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
    		occp.logger.action.info("[deliver_billing] Billing for user ",User_id," related to order ",Order_id," sent to email address ",User_email);
     
 	    .print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- deliver_billing ACTION OK");
+	    
+	    !register_statement(billing_delivered(billing,recipient_id,order,email), Context);
 	.
 
 +!terminate(deliver_billing, Context, Assignment) 
 	<- 
-		!register_statement(billing_delivered(billing,recipient_id,order,email), Context);
+		true
 	.
 //-------------------------------------
 //upload_billing_to_dropbox---------
-+!prepare(upload_billing_to_dropbox, Context, Assignment) 	<- true .
++!prepare(upload_billing_to_dropbox, Context, Assignment) 	
+	<- 
+		true
+	.
 +!terminate(upload_billing_to_dropbox, Context, Assignment)	<- true .
 +!action(upload_billing_to_dropbox, Context, Assignment) 
 	<-
@@ -157,7 +167,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 //upload_billing_to_google_drive-------
  +!prepare(upload_billing_to_google_drive, Context, Assignment) 
 	<- 
-		true 
+		true
 	.
 +!action(upload_billing_to_google_drive, Context, Assignment) 
 	<-
@@ -201,6 +211,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
     	{
     		occp.logger.action.warn("[fulfill_order] Variables unbounded (order_id: ",Order_id,", user_id: ",User_id,")");		
     	}
+    	
     	!register_statement(fulfill_order(order,user),Context);
     	.print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- fulfill_order ACTION OK");
 	.

@@ -103,7 +103,14 @@
 			!prepare_blacklist(Context, Members, BlacklistScore)
 		}
 		
+//		?boss(Boss);
+//		.send(Boss, tell, musa_status(organizing_solution));
+		
+		!numeric_timestamp(StartOrchestrationTS);
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
+		!numeric_timestamp(EndOrchestrationTS);		
+		!how_many_times_elapsed(StartOrchestrationTS,EndOrchestrationTS, OrchestrationTime);
+		.print("Orchestration done in ",OrchestrationTime," sec");
 		
 		//##############
 		//#####TODO##### per adesso assumiamo che la orchestrate_search restituisca la migliore soluzione
@@ -123,6 +130,9 @@
 			updateProject(ProjectName, Me, CSString, "current");
 
 			.print("Soluzione finale: ",TheSolutionWithAssignment);
+			
+//			?boss(Boss);
+//			.send(Boss, tell, musa_status(executing_solution));
 			
 			//Start the social commitment
 //			occp.logger.action.info("Activating social commitment");
@@ -551,6 +561,9 @@
 		
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 		!social_terminate_the_project(Context,Solution);
+		
+//		?boss(Boss);
+//		.send(Boss, tell, musa_status(ready));
 		
 	.
 +!project_lifecycle(Project,Lifecycle)

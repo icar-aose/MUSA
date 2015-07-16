@@ -19,7 +19,7 @@
 +!debug_head
 	<-
 		//.println("I am the head");
-		!create_organization_artifact(OrgId);
+		!create_or_use_organization_artifact(OrgId);
 		!create_or_use_database_artifact(DBId);
 		!updateLocalHost;
 		
@@ -29,16 +29,21 @@
 
 +!awake_as_head : true
 	<-		
-		!create_organization_artifact(OrgId);
+//		!create_organization_artifact(OrgId);
+		!create_or_use_organization_artifact(OrgId);
 		!create_or_use_database_artifact(DBId);
 		
-		if(.desire(execution(test)))			
+		if(execution(test))			
 		{
 			!set_default_db;
 		}
-		if(.desire(execution(deployment)))
+		if(execution(deployment))
 		{
+			//Try to load the default database configuration from file ~./musa/config.properties
 			loadDefaultDatabaseConfiguration(Success);
+			
+			//If file doesn't exists nor file can't be read, set the default hard-coded
+			//database configuration (in configuration.asl)
 			if(not Success)						
 			{
 				!set_default_db;
@@ -66,8 +71,6 @@
 
 +!updateLocalHost
 	<-
-		//?local_ip_address(Address);
-//		updateLocalHost(Address);
 		updateLocalHost;
 	.
 

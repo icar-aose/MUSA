@@ -62,12 +62,12 @@ capability_evolution(place_order,[add( order_placed(order_id,user_id) )]).
 
 //---------------------------
 
-//agent_capability(set_user_data)[type(parametric)].
-//capability_parameters(set_user_data, [user_id,user_email]).
-//capability_precondition(set_user_data, condition(true) ).
-//capability_postcondition(set_user_data, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
-//capability_cost(set_user_data,[0]).
-//capability_evolution(set_user_data,[add( set_user_data(user_id,user_email) )]). 
+agent_capability(set_user_data)[type(parametric)].
+capability_parameters(set_user_data, [user_id,user_email]).
+capability_precondition(set_user_data, condition(true) ).
+capability_postcondition(set_user_data, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
+capability_cost(set_user_data,[0]).
+capability_evolution(set_user_data,[add( set_user_data(user_id,user_email) )]). 
 
 
 
@@ -119,18 +119,20 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 //set_user_data------------------------
  +!prepare(set_user_data_step1, Context, Assignment) 
 	<- 
-		true 
+		true
 	.
 
 +!action(set_user_data_step1, Context, Assignment) 
 	<- 
 		.print("..................................................(set_user_data_step1) setting user data...");		
 		occp.logger.action.info("[set_user_data_step1] Setting user data");
+		
+		!register_statement(set_user_data_step1(user,email),Context);
 	.
 
 +!terminate(set_user_data_step1, Context, Assignment) 
 	<- 
-		!register_statement(set_user_data_step1(user,email),Context);
+		true
 	.
 //set_user_data------------------------
  +!prepare(set_user_data_step2, Context, Assignment) 
@@ -144,11 +146,12 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		
 		occp.logger.action.info("[set_user_data_step2] Setting user data");
 		
+		!register_statement(set_user_data(user,email),Context);
 	.
 
 +!terminate(set_user_data_step2, Context, Assignment) 
 	<- 
-		!register_statement(set_user_data(user,email),Context);
+		true
 	.
 
 
@@ -163,11 +166,13 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 +!action(receive_order, Context, Assignment) 
 	<- 
 		.print("..................................................(receive_order) order received.");
+		
+		!register_statement(received_order(order,user),Context); 
 	.
 
 +!terminate(receive_order, Context, Assignment) 
 	<- 
-		!register_statement(received_order(order,user),Context);
+		true
 	.
 //-------------------------------------
 //place_order--------------------------
@@ -223,7 +228,7 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 +!action(place_order_alternative, Context, Assignment) 
 	<- 
 		.print("..................................................(place_order_alternative) placing order...");
-
+		
 		!register_statement(order_placed(order,user), Context);
 	.
 +!terminate(place_order_alternative, Context, Assignment) 
@@ -233,17 +238,14 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
 //-------------------------------------
 //place_order_alternative2--------------
-+!action(place_order_alternative2, Context, Assignment)  : fail(place_order) <- true.	
-+!terminate(place_order_alternative2, Context, Assignment)  : fail(place_order) <- true.
-
- +!prepare(place_order_alternative2, Context, Assignment) 
-	<- 
-	true
-	.
++!action(place_order_alternative2, Context, Assignment)  : fail(place_order).
++!terminate(place_order_alternative2, Context, Assignment)  : fail(place_order).
++!prepare(place_order_alternative2, Context, Assignment) .
 
 +!action(place_order_alternative2, Context, Assignment) 
 	<- 
 		.print("..................................................(place_order_alternative2) placing order...");
+		
 		!register_statement(order_placed(order,user), Context);
 	.
 +!terminate(place_order_alternative2, Context, Assignment) 
@@ -257,7 +259,7 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 //set_user_data------------------------
  +!prepare(set_user_data, Context, Assignment) 
 	<- 
-		true 
+		true
 	.
 
 +!action(set_user_data, Context, Assignment) 
@@ -265,6 +267,7 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		.print("..................................................(set_user_data) setting user data...");
 		
 		occp.logger.action.info("[set_user_data] Setting user data");
+		
 		!register_statement(set_user_data(user,email),Context);
 	.
 
@@ -276,7 +279,7 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 //check_order_feasibility--------------
  +!prepare(check_order_feasibility, Context, Assignment) 
 	<- 
-		true 
+		true
 	.
 
 +!action(check_order_feasibility, Context, Assignment) 
@@ -284,13 +287,12 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		.print("..................................................(check_order_feasibility) checking order feasibility...");
 		occp.logger.action.info("[check_order_feasibility] Checking order feasibility");
 
-//		.random(X);
-//		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
-//		else		{!register_statement(order_status(refused), Context);}
+		.random(X);
+		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
+		else		{!register_statement(order_status(refused), Context);}
 
 
-		!register_statement(order_status(accepted), Context);
-
+//		!register_statement(order_status(accepted), Context);
 		!register_statement(order_checked(order), Context);
 	.
 
@@ -303,13 +305,15 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 //complete_transaction-----------------
  +!prepare(complete_transaction, Context) 
 	<- 
-		true 
+		true
 	.
 
 +!action(complete_transaction, Context) 
 	<- 
 		.print("..................................................(complete_transaction) finishing transaction...");
 		occp.logger.action.info("[complete_transaction] Completing transaction");
+		
+		
 		!register_statement(done(complete_transaction),Context);
 	.
 

@@ -14,14 +14,14 @@
 		}
 		else
 		{
-			action.loadGoalBase("src/asl/goalBase.asl",GoalList);
+			action.loadGoalBase("src/asl/defaultGoalPack.asl",GoalList);
 			.send(boss, achieve, awake);
 		}
 	.
 	
 +!do_goal_base_fusion(WFType)
 	<-
-		action.clearGoalBase("src/asl/goalBase.asl");
+		action.clearGoalBase("src/asl/defaultGoalPack.asl");
 
 		?goal_fusion_goalbase_first(GoalList1Path);
 		?goal_fusion_goalbase_last(GoalList2Path);

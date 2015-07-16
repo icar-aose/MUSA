@@ -10,6 +10,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
@@ -24,18 +25,30 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import net.miginfocom.swing.MigLayout;
 
+import javax.swing.JList;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import javax.swing.ListSelectionModel;
+
 /**
  *
  * @author Davide Guastella
  */
-public class MusaConfigGUI extends javax.swing.JFrame {
-
+public class MusaConfigGUI extends javax.swing.JFrame 
+{
+	
     /**
      * Creates new form NewJFrame
      */
     public MusaConfigGUI() 
     {
-    	list_model 		= new DefaultListModel();
+    	this.AgentCapabilityListModel = new DefaultListModel();
+    	this.goalSPECparamListModel = new DefaultListModel();
     	paramsTable 	= new HashMap<String,String>();
         initComponents();
     }
@@ -47,597 +60,539 @@ public class MusaConfigGUI extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
-    private void initComponents() {
+    private void initComponents() 
+    {
+    	jPanel9 = new javax.swing.JPanel();
+    	jTabbedPane1 = new javax.swing.JTabbedPane();
+    	jPanel2 = new javax.swing.JPanel();
+    	jLabel6 = new javax.swing.JLabel();
+    	jScrollPane2 = new javax.swing.JScrollPane();
+    	jasonBeliefTextArea = new javax.swing.JTextArea();
+    	injectJasonBtn = new javax.swing.JButton();
+    	jPanel1 = new javax.swing.JPanel();
+    	jPanel10 = new javax.swing.JPanel();
+    	jLabel7 = new javax.swing.JLabel();
+    	dbIPTextField = new javax.swing.JTextField();
+    	jLabel8 = new javax.swing.JLabel();
+    	jLabel9 = new javax.swing.JLabel();
+    	jLabel10 = new javax.swing.JLabel();
+    	jLabel11 = new javax.swing.JLabel();
+    	dbPortTextField = new javax.swing.JTextField();
+    	dbNameTextField = new javax.swing.JTextField();
+    	dbUserTextField = new javax.swing.JTextField();
+    	dbPasswordTextField = new javax.swing.JTextField();
+    	jLabel12 = new javax.swing.JLabel();
+    	configFilePathTextField = new javax.swing.JTextField();
+    	chooseCfgFileBtn = new javax.swing.JButton();
+    	quitBtn = new javax.swing.JButton();
+    	jLabel13 = new javax.swing.JLabel();
+
+    	setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+    	jLabel6.setText("Jason Beliefs");
+
+    	jasonBeliefTextArea.setColumns(20);
+    	jasonBeliefTextArea.setRows(5);
+    	jasonBeliefTextArea.setName("jasonGoalsTextArea"); // NOI18N
+    	jScrollPane2.setViewportView(jasonBeliefTextArea);
+
+    	injectJasonBtn.setText("Inject goal(s)");
+
+    	loadJasonFromFileBtn = new JButton("Load from file");
+
+    	javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+    	jPanel2Layout.setHorizontalGroup(
+    	jPanel2Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel2Layout.createSequentialGroup()
+    		.addContainerGap()
+    		.addGroup(jPanel2Layout.createParallelGroup(Alignment.TRAILING)
+    		.addComponent(jScrollPane2, GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
+    		.addGroup(jPanel2Layout.createSequentialGroup()
+    		.addComponent(jLabel6)
+    		.addGap(0, 476, Short.MAX_VALUE))
+    		.addGroup(jPanel2Layout.createSequentialGroup()
+    		.addPreferredGap(ComponentPlacement.RELATED, 317, Short.MAX_VALUE)
+    		.addComponent(loadJasonFromFileBtn)
+    		.addPreferredGap(ComponentPlacement.RELATED)
+    		.addComponent(injectJasonBtn, GroupLayout.PREFERRED_SIZE, 127, GroupLayout.PREFERRED_SIZE)))
+    		.addContainerGap()));
+    	jPanel2Layout.setVerticalGroup(
+    	jPanel2Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel2Layout.createSequentialGroup()
+    		.addContainerGap()
+    		.addComponent(jLabel6)
+    		.addPreferredGap(ComponentPlacement.UNRELATED)
+    		.addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 443, GroupLayout.PREFERRED_SIZE)
+    		.addPreferredGap(ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
+    		.addGroup(jPanel2Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(injectJasonBtn)
+    		.addComponent(loadJasonFromFileBtn))
+    		.addContainerGap()));
+    	jPanel2.setLayout(jPanel2Layout);
+
+    	jTabbedPane1.addTab("Jason injection", jPanel2);
+
+    	jPanel1.setBorder(null);
+    	getContentPane().setLayout(new MigLayout("", "[634px]", "[638px]"));
+
+    	JPanel panel = new JPanel();
+    	jTabbedPane1.addTab("MUSA startup", null, panel, null);
+
+    	startMUSABtn = new JButton("Start Organization");
+    	startMUSABtn.setBounds(12, 478, 276, 25);
+
+    	panel.setLayout(null);
+    	panel.add(startMUSABtn);
+
+    	stopMUSABtn = new JButton("Stop Organization");
+    	stopMUSABtn.setBounds(314, 478, 279, 25);
+    	panel.add(stopMUSABtn);
+
+    	JPanel panel_2 = new JPanel();
+    	panel_2.setBounds(12, 12, 581, 454);
+    	panel.add(panel_2);
+    	panel_2.setLayout(null);
+
+    	JLabel lblAgentList = new JLabel("Agent list");
+    	lblAgentList.setBounds(12, 12, 70, 15);
+    	panel_2.add(lblAgentList);
+
+    	agentList = new JList<Object>(agentListContent);
+    	agentList.setBounds(12, 39, 272, 366);
     	
-        jPanel9 = new javax.swing.JPanel();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jasonBeliefTextArea = new javax.swing.JTextArea();
-        injectJasonBtn = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        goalNameTextField = new javax.swing.JTextField();
-        goalPackTextField = new javax.swing.JTextField();
-        goalDescriptionTextField = new javax.swing.JTextField();
-        jPanel5 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        goalSPECparamList = new javax.swing.JList();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        varNameTextField = new javax.swing.JTextField();
-        varValueTextField = new javax.swing.JTextField();
-        jPanel7 = new javax.swing.JPanel();
-        addParamBtn = new javax.swing.JButton();
-        removeParamBtn = new javax.swing.JButton();
-        addGoalToDBBtn = new javax.swing.JButton();
-        jPanel4 = new javax.swing.JPanel();
-        goalsComboBox = new javax.swing.JComboBox();
-        jPanel6 = new javax.swing.JPanel();
-        injectGoalBtn = new javax.swing.JButton();
-        injectPackBtn = new javax.swing.JButton();
-        removeGoalBtn = new javax.swing.JButton();
-        goalInfoBtn = new javax.swing.JButton();
-        jPanel10 = new javax.swing.JPanel();
-        jLabel7 = new javax.swing.JLabel();
-        dbIPTextField = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
-        dbPortTextField = new javax.swing.JTextField();
-        dbNameTextField = new javax.swing.JTextField();
-        dbUserTextField = new javax.swing.JTextField();
-        dbPasswordTextField = new javax.swing.JTextField();
-        jLabel12 = new javax.swing.JLabel();
-        configFilePathTextField = new javax.swing.JTextField();
-        chooseCfgFileBtn = new javax.swing.JButton();
-        quitBtn = new javax.swing.JButton();
-        jLabel13 = new javax.swing.JLabel();
+    	panel_2.add(agentList);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+    	JLabel lblCapability = new JLabel("Capability");
+    	lblCapability.setBounds(296, 12, 104, 15);
+    	panel_2.add(lblCapability);
 
-        jLabel6.setText("Jason Beliefs");
+    	AgentCapabilityList = new JList<Object>();
+    	AgentCapabilityList.setBounds(296, 39, 273, 366);
+    	panel_2.add(AgentCapabilityList);
 
-        jasonBeliefTextArea.setColumns(20);
-        jasonBeliefTextArea.setRows(5);
-        jasonBeliefTextArea.setName("jasonGoalsTextArea"); // NOI18N
-        jScrollPane2.setViewportView(jasonBeliefTextArea);
+    	addNewAgentBtn = new JButton("Add new agent from file");
+    	addNewAgentBtn.setBounds(296, 417, 273, 25);
+    	panel_2.add(addNewAgentBtn);
 
-        injectJasonBtn.setText("Inject goal(s)");
-        
-        loadJasonFromFileBtn = new JButton("Load from file");
+    	panel_1 = new JPanel();
+    	jTabbedPane1.addTab("Goal fusion", null, panel_1, null);
+    	panel_1.setLayout(null);
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2Layout.setHorizontalGroup(
-        	jPanel2Layout.createParallelGroup(Alignment.LEADING)
-        		.addGroup(jPanel2Layout.createSequentialGroup()
-        			.addContainerGap()
-        			.addGroup(jPanel2Layout.createParallelGroup(Alignment.TRAILING)
-        				.addComponent(jScrollPane2, GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
-        				.addGroup(jPanel2Layout.createSequentialGroup()
-        					.addComponent(jLabel6)
-        					.addGap(0, 476, Short.MAX_VALUE))
-        				.addGroup(jPanel2Layout.createSequentialGroup()
-        					.addPreferredGap(ComponentPlacement.RELATED, 317, Short.MAX_VALUE)
-        					.addComponent(loadJasonFromFileBtn)
-        					.addPreferredGap(ComponentPlacement.RELATED)
-        					.addComponent(injectJasonBtn, GroupLayout.PREFERRED_SIZE, 127, GroupLayout.PREFERRED_SIZE)))
-        			.addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-        	jPanel2Layout.createParallelGroup(Alignment.LEADING)
-        		.addGroup(jPanel2Layout.createSequentialGroup()
-        			.addContainerGap()
-        			.addComponent(jLabel6)
-        			.addPreferredGap(ComponentPlacement.UNRELATED)
-        			.addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, 443, GroupLayout.PREFERRED_SIZE)
-        			.addPreferredGap(ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
-        			.addGroup(jPanel2Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(injectJasonBtn)
-        				.addComponent(loadJasonFromFileBtn))
-        			.addContainerGap())
-        );
-        jPanel2.setLayout(jPanel2Layout);
+    	JScrollPane scrollPane = new JScrollPane();
+    	scrollPane.setBounds(12, 41, 581, 128);
+    	panel_1.add(scrollPane);
 
-        jTabbedPane1.addTab("Jason injection", jPanel2);
+    	goalTextArea_A = new JTextArea();
+    	scrollPane.setViewportView(goalTextArea_A);
 
-        jPanel1.setBorder(null);
+    	JLabel lblGoalPackA = new JLabel("Goal pack A");
+    	lblGoalPackA.setBounds(12, 14, 92, 15);
+    	panel_1.add(lblGoalPackA);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Submit new GoalSPEC goal"));
+    	loadPackABtn = new JButton("Load from file");
+    	loadPackABtn.setBounds(12, 178, 159, 25);
+    	panel_1.add(loadPackABtn);
 
-        jLabel1.setText("Name");
+    	JLabel lblGoalPackB = new JLabel("Goal pack B");
+    	lblGoalPackB.setBounds(12, 215, 92, 15);
+    	panel_1.add(lblGoalPackB);
 
-        jLabel2.setText("Pack");
+    	JScrollPane scrollPane_1 = new JScrollPane();
+    	scrollPane_1.setBounds(12, 242, 581, 128);
+    	panel_1.add(scrollPane_1);
 
-        jLabel3.setText("Description");
+    	goalTextArea_B = new JTextArea();
+    	scrollPane_1.setViewportView(goalTextArea_B);
 
-        goalNameTextField.setName("nameTextField"); // NOI18N
+    	loadPackBBtn = new JButton("Load from file");
+    	loadPackBBtn.setBounds(12, 382, 159, 25);
+    	panel_1.add(loadPackBBtn);
 
-        goalPackTextField.setName("packTextField"); // NOI18N
+    	mergeAndInjectGoalsBtn = new JButton("Merge and inject");
+    	mergeAndInjectGoalsBtn.setBounds(401, 382, 192, 25);
+    	panel_1.add(mergeAndInjectGoalsBtn);
 
-        goalDescriptionTextField.setName("descriptionTextField"); // NOI18N
+    	mergeAndSaveBtn = new JButton("Merge and save to file");
+    	mergeAndSaveBtn.setBounds(401, 419, 192, 25);
+    	panel_1.add(mergeAndSaveBtn);
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameters"));
+    	jTabbedPane1.addTab("GoalSPEC injection", jPanel1);
+    	jPanel1.setLayout(null);
 
-        jScrollPane1.setViewportView(goalSPECparamList);
+    	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+    	tabbedPane.setBounds(22, 12, 571, 491);
+    	jPanel1.add(tabbedPane);
 
-        jLabel4.setText("Var name");
+    	JPanel panel_3 = new JPanel();
+    	tabbedPane.addTab("Add new goal", null, panel_3, null);
+    	panel_3.setLayout(null);
+    	jPanel3 = new javax.swing.JPanel();
+    	jPanel3.setBounds(10, 5, 546, 447);
+    	panel_3.add(jPanel3);
+    	jLabel1 = new javax.swing.JLabel();
+    	jLabel2 = new javax.swing.JLabel();
+    	jLabel3 = new javax.swing.JLabel();
+    	goalNameTextField = new javax.swing.JTextField();
+    	goalPackTextField = new javax.swing.JTextField();
+    	goalDescriptionTextField = new javax.swing.JTextField();
 
-        jLabel5.setText("Var value");
+    	jPanel3.setBorder(null);
 
-        addParamBtn.setText("Add parameter");
-        addParamBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        jPanel7.add(addParamBtn);
+    	jLabel1.setText("Name");
 
-        removeParamBtn.setText("Remove parameter");
-        jPanel7.add(removeParamBtn);
+    	jLabel2.setText("Pack");
 
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(varNameTextField))
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(varValueTextField)))
-                .addContainerGap())
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(7, 7, 7)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(varNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(varValueTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+    	jLabel3.setText("Description");
 
-        addGoalToDBBtn.setText("Add goal to database");
+    	goalNameTextField.setName("nameTextField"); // NOI18N
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel1))
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(goalNameTextField)
-                            .addComponent(goalPackTextField)
-                            .addComponent(goalDescriptionTextField)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(addGoalToDBBtn)))
-                .addContainerGap())
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(goalNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(goalPackTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(goalDescriptionTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addGoalToDBBtn))
-        );
+    	goalPackTextField.setName("packTextField"); // NOI18N
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Goals in database")));
+    	goalDescriptionTextField.setName("descriptionTextField");
 
-        goalsComboBox.setToolTipText("");
-        goalsComboBox.addItemListener(new ItemListener() 
-		{	
-			public void itemStateChanged(ItemEvent itemEvent) 
-			{
-				SetCurrentGoal(itemEvent);
-			}
-		});
-        goalsComboBox.setName("goalsInDBComboBox"); // NOI18N
+    	addGoalToDbbtn = new JButton("Add goal to database");
+    	
+    	javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+    	jPanel3Layout.setHorizontalGroup(
+    		jPanel3Layout.createParallelGroup(Alignment.LEADING)
+    			.addGroup(jPanel3Layout.createSequentialGroup()
+    				.addContainerGap()
+    				.addGroup(jPanel3Layout.createParallelGroup(Alignment.LEADING)
+    					.addComponent(jLabel2)
+    					.addComponent(jLabel3)
+    					.addComponent(jLabel1))
+    				.addGap(18)
+    				.addGroup(jPanel3Layout.createParallelGroup(Alignment.LEADING)
+    					.addComponent(goalNameTextField, 423, 423, 423)
+    					.addComponent(goalPackTextField, 423, 423, 423)
+    					.addComponent(goalDescriptionTextField, 423, 423, 423))
+    				.addContainerGap())
+    			.addGroup(Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+    				.addContainerGap(347, Short.MAX_VALUE)
+    				.addComponent(addGoalToDbbtn)
+    				.addContainerGap())
+    	);
+    	jPanel3Layout.setVerticalGroup(
+    		jPanel3Layout.createParallelGroup(Alignment.LEADING)
+    			.addGroup(jPanel3Layout.createSequentialGroup()
+    				.addContainerGap(77, Short.MAX_VALUE)
+    				.addGroup(jPanel3Layout.createParallelGroup(Alignment.BASELINE)
+    					.addComponent(jLabel1)
+    					.addComponent(goalNameTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    				.addPreferredGap(ComponentPlacement.UNRELATED)
+    				.addGroup(jPanel3Layout.createParallelGroup(Alignment.BASELINE)
+    					.addComponent(jLabel2)
+    					.addComponent(goalPackTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    				.addPreferredGap(ComponentPlacement.UNRELATED)
+    				.addGroup(jPanel3Layout.createParallelGroup(Alignment.BASELINE)
+    					.addComponent(jLabel3)
+    					.addComponent(goalDescriptionTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    				.addGap(18)
+    				.addComponent(addGoalToDbbtn)
+    				.addGap(246))
+    	);
+    	jPanel3.setLayout(jPanel3Layout);
 
-        injectGoalBtn.setText("Inject goal");
-        injectGoalBtn.setFocusable(false);
-        injectGoalBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        injectGoalBtn.setName("btnInjectSelection"); // NOI18N
-        injectGoalBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jPanel6.add(injectGoalBtn);
+    	JPanel panel_4 = new JPanel();
+    	tabbedPane.addTab("Goals in database", null, panel_4, null);
+    	panel_4.setLayout(null);
 
-        injectPackBtn.setText("Inject pack");
-        injectPackBtn.setFocusable(false);
-        injectPackBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        injectPackBtn.setName("btnInjectGoalPack"); // NOI18N
-        injectPackBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        injectPackBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton6ActionPerformed(evt);
-            }
-        });
-        getContentPane().setLayout(new MigLayout("", "[634px]", "[638px]"));
-        
-        panel_1 = new JPanel();
-        jTabbedPane1.addTab("Goal fusion", null, panel_1, null);
-        panel_1.setLayout(null);
-        
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(12, 41, 581, 128);
-        panel_1.add(scrollPane);
-        
-        goalTextArea_A = new JTextArea();
-        scrollPane.setViewportView(goalTextArea_A);
-        
-        JLabel lblGoalPackA = new JLabel("Goal pack A");
-        lblGoalPackA.setBounds(12, 14, 92, 15);
-        panel_1.add(lblGoalPackA);
-        
-        loadPackABtn = new JButton("Load from file");
-        loadPackABtn.setBounds(12, 178, 159, 25);
-        panel_1.add(loadPackABtn);
-        
-        JLabel lblGoalPackB = new JLabel("Goal pack B");
-        lblGoalPackB.setBounds(12, 215, 92, 15);
-        panel_1.add(lblGoalPackB);
-        
-        JScrollPane scrollPane_1 = new JScrollPane();
-        scrollPane_1.setBounds(12, 242, 581, 128);
-        panel_1.add(scrollPane_1);
-        
-        goalTextArea_B = new JTextArea();
-        scrollPane_1.setViewportView(goalTextArea_B);
-        
-        loadPackBBtn = new JButton("Load from file");
-        loadPackBBtn.setBounds(12, 382, 159, 25);
-        panel_1.add(loadPackBBtn);
-        
-        mergeAndInjectGoalsBtn = new JButton("Merge and inject");
-        mergeAndInjectGoalsBtn.setBounds(401, 382, 192, 25);
-        panel_1.add(mergeAndInjectGoalsBtn);
-        
-        mergeAndSaveBtn = new JButton("Merge and save to file");
-        mergeAndSaveBtn.setBounds(401, 419, 192, 25);
-        panel_1.add(mergeAndSaveBtn);
-        jPanel6.add(injectPackBtn);
+    	goalSPECList = new JList<String>(goalListContent);
+    	goalSPECList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    	goalSPECList.addListSelectionListener(new ListSelectionListener() {
+    		public void valueChanged(ListSelectionEvent evt) {
+    			goalSPEClistSelectionChanged(evt);
+    		}
+    	});
+    	goalSPECList.setBounds(12, 12, 542, 382);
+    	panel_4.add(goalSPECList);
+    	jPanel6 = new javax.swing.JPanel();
+    	jPanel6.setBounds(22, 406, 532, 35);
+    	panel_4.add(jPanel6);
+    	injectGoalBtn = new javax.swing.JButton();
+    	injectPackBtn = new javax.swing.JButton();
+    	removeGoalBtn = new javax.swing.JButton();
+    	goalInfoBtn = new javax.swing.JButton();
 
-        removeGoalBtn.setText("Remove goal");
-        removeGoalBtn.setFocusable(false);
-        removeGoalBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        removeGoalBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jPanel6.add(removeGoalBtn);
+    	injectGoalBtn.setText("Inject goal");
+    	injectGoalBtn.setFocusable(false);
+    	injectGoalBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    	injectGoalBtn.setName("btnInjectSelection"); // NOI18N
+    	injectGoalBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    	jPanel6.add(injectGoalBtn);
 
-        goalInfoBtn.setText("Goal info");
-        goalInfoBtn.setFocusable(false);
-        goalInfoBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        goalInfoBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jPanel6.add(goalInfoBtn);
+    	injectPackBtn.setText("Inject pack");
+    	injectPackBtn.setFocusable(false);
+    	injectPackBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    	injectPackBtn.setName("btnInjectGoalPack"); // NOI18N
+    	injectPackBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    	jPanel6.add(injectPackBtn);
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(goalsComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(4, 4, 4)
-                .addComponent(goalsComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+    	removeGoalBtn.setText("Remove goal");
+    	removeGoalBtn.setFocusable(false);
+    	removeGoalBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    	removeGoalBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    	jPanel6.add(removeGoalBtn);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+    	goalInfoBtn.setText("Goal info");
+    	goalInfoBtn.setFocusable(false);
+    	goalInfoBtn.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    	goalInfoBtn.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    	jPanel6.add(goalInfoBtn);
 
-        jTabbedPane1.addTab("GoalSPEC injection", jPanel1);
+    	jLabel7.setText("IP address");
 
-        jLabel7.setText("IP address");
+    	jLabel8.setText("Database name");
 
-        jLabel8.setText("Database name");
+    	jLabel9.setText("User");
 
-        jLabel9.setText("User");
+    	jLabel10.setText("Password");
 
-        jLabel10.setText("Password");
+    	jLabel11.setText("Port");
 
-        jLabel11.setText("Port");
+    	jLabel12.setText("Load from configuration file");
 
-        jLabel12.setText("Load from configuration file");
+    	chooseCfgFileBtn.setText("Choose file");
 
-        chooseCfgFileBtn.setText("Choose file");
-        
-        submitDBconfigBtn = new JButton("Submit data");
-        
-        setDBconfigAsDefault = new JButton("Set as default");
+    	submitDBconfigBtn = new JButton("Submit data");
 
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10Layout.setHorizontalGroup(
-        	jPanel10Layout.createParallelGroup(Alignment.LEADING)
-        		.addGroup(jPanel10Layout.createSequentialGroup()
-        			.addContainerGap()
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
-        				.addGroup(jPanel10Layout.createSequentialGroup()
-        					.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
-        						.addGroup(jPanel10Layout.createSequentialGroup()
-        							.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
-        								.addComponent(jLabel7)
-        								.addComponent(jLabel11)
-        								.addComponent(jLabel8)
-        								.addComponent(jLabel9)
-        								.addComponent(jLabel10))
-        							.addGap(29)
-        							.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
-        								.addComponent(dbPasswordTextField, GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
-        								.addComponent(dbUserTextField, 426, 426, 426)
-        								.addComponent(dbNameTextField, 426, 426, 426)
-        								.addComponent(dbPortTextField, 426, 426, 426)
-        								.addComponent(dbIPTextField, 426, 426, 426)))
-        						.addGroup(jPanel10Layout.createSequentialGroup()
-        							.addComponent(jLabel12)
-        							.addGap(0, 371, Short.MAX_VALUE))
-        						.addGroup(jPanel10Layout.createSequentialGroup()
-        							.addComponent(configFilePathTextField, 448, 448, 448)
-        							.addPreferredGap(ComponentPlacement.RELATED)
-        							.addComponent(chooseCfgFileBtn)))
-        					.addContainerGap())
-        				.addGroup(Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
-        					.addGroup(jPanel10Layout.createParallelGroup(Alignment.TRAILING)
-        						.addComponent(submitDBconfigBtn, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
-        						.addComponent(setDBconfigAsDefault, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        					.addGap(445))))
-        );
-        jPanel10Layout.setVerticalGroup(
-        	jPanel10Layout.createParallelGroup(Alignment.LEADING)
-        		.addGroup(jPanel10Layout.createSequentialGroup()
-        			.addContainerGap()
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(jLabel7)
-        				.addComponent(dbIPTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-        			.addGap(18)
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(jLabel11)
-        				.addComponent(dbPortTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-        			.addGap(18)
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(jLabel8)
-        				.addComponent(dbNameTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-        			.addGap(18)
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(jLabel9)
-        				.addComponent(dbUserTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-        			.addGap(18)
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(jLabel10)
-        				.addComponent(dbPasswordTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-        			.addGap(30)
-        			.addComponent(jLabel12)
-        			.addPreferredGap(ComponentPlacement.RELATED)
-        			.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(configFilePathTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-        				.addComponent(chooseCfgFileBtn))
-        			.addGap(26)
-        			.addComponent(submitDBconfigBtn)
-        			.addPreferredGap(ComponentPlacement.RELATED)
-        			.addComponent(setDBconfigAsDefault)
-        			.addContainerGap(196, Short.MAX_VALUE))
-        );
-        jPanel10.setLayout(jPanel10Layout);
+    	setDBconfigAsDefault = new JButton("Set as default");
 
-        jTabbedPane1.addTab("Database configuration", jPanel10);
+    	javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+    	jPanel10Layout.setHorizontalGroup(
+    	jPanel10Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel10Layout.createSequentialGroup()
+    		.addContainerGap()
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel10Layout.createSequentialGroup()
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel10Layout.createSequentialGroup()
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
+    		.addComponent(jLabel7)
+    		.addComponent(jLabel11)
+    		.addComponent(jLabel8)
+    		.addComponent(jLabel9)
+    		.addComponent(jLabel10))
+    		.addGap(29)
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.LEADING)
+    		.addComponent(dbPasswordTextField, GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
+    		.addComponent(dbUserTextField, 426, 426, 426)
+    		.addComponent(dbNameTextField, 426, 426, 426)
+    		.addComponent(dbPortTextField, 426, 426, 426)
+    		.addComponent(dbIPTextField, 426, 426, 426)))
+    		.addGroup(jPanel10Layout.createSequentialGroup()
+    		.addComponent(jLabel12)
+    		.addGap(0, 371, Short.MAX_VALUE))
+    		.addGroup(jPanel10Layout.createSequentialGroup()
+    		.addComponent(configFilePathTextField, 448, 448, 448)
+    		.addPreferredGap(ComponentPlacement.RELATED)
+    		.addComponent(chooseCfgFileBtn)))
+    		.addContainerGap())
+    		.addGroup(Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.TRAILING)
+    		.addComponent(submitDBconfigBtn, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+    		.addComponent(setDBconfigAsDefault, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+    		.addGap(445)))));
+    	jPanel10Layout.setVerticalGroup(
+    	jPanel10Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel10Layout.createSequentialGroup()
+    		.addContainerGap()
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(jLabel7)
+    		.addComponent(dbIPTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    		.addGap(18)
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(jLabel11)
+    		.addComponent(dbPortTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    		.addGap(18)
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(jLabel8)
+    		.addComponent(dbNameTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    		.addGap(18)
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(jLabel9)
+    		.addComponent(dbUserTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    		.addGap(18)
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(jLabel10)
+    		.addComponent(dbPasswordTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+    		.addGap(30)
+    		.addComponent(jLabel12)
+    		.addPreferredGap(ComponentPlacement.RELATED)
+    		.addGroup(jPanel10Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(configFilePathTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+    		.addComponent(chooseCfgFileBtn))
+    		.addGap(26)
+    		.addComponent(submitDBconfigBtn)
+    		.addPreferredGap(ComponentPlacement.RELATED)
+    		.addComponent(setDBconfigAsDefault)
+    		.addContainerGap(196, Short.MAX_VALUE)));
+    	jPanel10.setLayout(jPanel10Layout);
 
-        quitBtn.setText("Quit");
-        quitBtn.setName("quitButton"); // NOI18N
+    	jTabbedPane1.addTab("Database configuration", jPanel10);
 
-        jLabel13.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel13.setText("MUSA configuration panel");
-        
-        aboutMUSAbtn = new JButton("About MUSA");
+    	quitBtn.setText("Quit");
+    	quitBtn.setName("quitButton"); // NOI18N
 
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9Layout.setHorizontalGroup(
-        	jPanel9Layout.createParallelGroup(Alignment.LEADING)
-        		.addGroup(jPanel9Layout.createSequentialGroup()
-        			.addContainerGap()
-        			.addGroup(jPanel9Layout.createParallelGroup(Alignment.TRAILING)
-        				.addComponent(jTabbedPane1)
-        				.addGroup(jPanel9Layout.createSequentialGroup()
-        					.addComponent(aboutMUSAbtn)
-        					.addPreferredGap(ComponentPlacement.UNRELATED)
-        					.addComponent(quitBtn, GroupLayout.PREFERRED_SIZE, 119, GroupLayout.PREFERRED_SIZE))
-        				.addGroup(jPanel9Layout.createSequentialGroup()
-        					.addComponent(jLabel13)
-        					.addGap(0, 428, Short.MAX_VALUE)))
-        			.addContainerGap())
-        );
-        jPanel9Layout.setVerticalGroup(
-        	jPanel9Layout.createParallelGroup(Alignment.TRAILING)
-        		.addGroup(jPanel9Layout.createSequentialGroup()
-        			.addGap(6)
-        			.addComponent(jLabel13)
-        			.addPreferredGap(ComponentPlacement.UNRELATED)
-        			.addComponent(jTabbedPane1, GroupLayout.PREFERRED_SIZE, 560, GroupLayout.PREFERRED_SIZE)
-        			.addPreferredGap(ComponentPlacement.RELATED)
-        			.addGroup(jPanel9Layout.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(quitBtn)
-        				.addComponent(aboutMUSAbtn))
-        			.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel9.setLayout(jPanel9Layout);
-        
-        JPanel panel = new JPanel();
-        jTabbedPane1.addTab("MUSA startup", null, panel, null);
-        
-        startMUSABtn = new JButton("Start MUSA");
-        startMUSABtn.setBounds(174, 12, 276, 25);
-        
-        panel.setLayout(null);
-        panel.add(startMUSABtn);
-        
-        stopMUSABtn = new JButton("Stop MUSA");
-        stopMUSABtn.setBounds(171, 49, 279, 25);
-        panel.add(stopMUSABtn);
-        getContentPane().add(jPanel9, "cell 0 0,alignx left,aligny top");
+    	jLabel13.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+    	jLabel13.setText("MUSA configuration panel");
 
-        pack();
+    	aboutMUSAbtn = new JButton("About MUSA");
+
+    	javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+    	jPanel9Layout.setHorizontalGroup(
+    	jPanel9Layout.createParallelGroup(Alignment.LEADING)
+    		.addGroup(jPanel9Layout.createSequentialGroup()
+    		.addContainerGap()
+    		.addGroup(jPanel9Layout.createParallelGroup(Alignment.TRAILING)
+    		.addComponent(jTabbedPane1)
+    		.addGroup(jPanel9Layout.createSequentialGroup()
+    		.addComponent(aboutMUSAbtn)
+    		.addPreferredGap(ComponentPlacement.UNRELATED)
+    		.addComponent(quitBtn, GroupLayout.PREFERRED_SIZE, 119, GroupLayout.PREFERRED_SIZE))
+    		.addGroup(jPanel9Layout.createSequentialGroup()
+    		.addComponent(jLabel13)
+    		.addGap(0, 428, Short.MAX_VALUE)))
+    		.addContainerGap()));
+    	jPanel9Layout.setVerticalGroup(
+    	jPanel9Layout.createParallelGroup(Alignment.TRAILING)
+    		.addGroup(jPanel9Layout.createSequentialGroup()
+    		.addGap(6)
+    		.addComponent(jLabel13)
+    		.addPreferredGap(ComponentPlacement.UNRELATED)
+    		.addComponent(jTabbedPane1, GroupLayout.PREFERRED_SIZE, 560, GroupLayout.PREFERRED_SIZE)
+    		.addPreferredGap(ComponentPlacement.RELATED)
+    		.addGroup(jPanel9Layout.createParallelGroup(Alignment.BASELINE)
+    		.addComponent(quitBtn)
+    		.addComponent(aboutMUSAbtn))
+    		.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+    	jPanel9.setLayout(jPanel9Layout);
+    	getContentPane().add(jPanel9, "cell 0 0,alignx left,aligny top");
+
+    	pack();
     }// </editor-fold>                        
 
-    /**
+  
+	/**
      * Show the current selected goal info in combobox (goalSPEC).
      */
     public void showCurrentSelectedGoalInfo()
     {
     	String s = "Name: "+ getSelectedGoalName()+"\nPack: "+getSelectedGoalPack()+"\nDescription: "+getSelectedGoalDescription();
 		JOptionPane.showMessageDialog(this, s);
-    }
-    
+    }                                
+
     /**
-     * Set the informations on the goal selected in the goals combobox (goalSPEC tab).
-     * 
+     * @param args the command line arguments
      */
-    protected void SetCurrentGoal(ItemEvent itemEvent) 
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Metal".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new MusaConfigGUI().setVisible(true);
+//            }
+//        });
+//    }
+    
+    private void goalSPEClistSelectionChanged(ListSelectionEvent evt)
     {
-    	if(this.goalsComboBox.getSelectedIndex() < 0)
-    	{
-    		selectedGoalName			= null;
-    		selectedGoalPack 			= null;
-    		selectedGoalDescription 	= null;
+    	if(goalSPECList.getSelectedIndex() < 0)
     		return;
-    	}
-    	
-    	String selectedItem = getGoalComboboxSelectedItem(itemEvent.getItemSelectable());		//Get the selected goal
-		Scanner sc = new Scanner(selectedItem);
+
+    	String selectedItem 	= goalSPECList.getSelectedValue();
+		Scanner sc 				= new Scanner(selectedItem);
 		sc.useDelimiter("\\S*(ID:|name:|pack:|description:)\\S*");					//Get the goal data (name,pack,description and id)
 		
 		sc.next();				 	//Ignore ID 
 		selectedGoalName 			= sc.next().trim();
 		selectedGoalPack 			= sc.next().trim();
-		selectedGoalDescription 	= sc.next().trim();
-		
+		selectedGoalDescription 	= sc.next();
 		sc.close();
 		
 		//Remove white spaces
-		selectedGoalName.replaceAll("\\s", "");
-
-		//TODO trovare una soluzione piu ragionevole...
-		String s = "";
-		for(int i=0;i<selectedGoalPack.length(); i++)
-		{
-			if(selectedGoalPack.charAt(i) != (char)32)
-				s = s + selectedGoalPack.charAt(i);
-		}
-		selectedGoalPack = s;
-		
-	}
-
-	private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {                                         
-        // TODO add your handling code here:
-    }                                        
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                         
-        // TODO add your handling code here:
-    }                                        
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Metal".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MusaConfigGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new MusaConfigGUI().setVisible(true);
-            }
-        });
+//		selectedGoalName.replaceAll("\\s", "");
+//
+//		//TODO trovare una soluzione piu ragionevole...
+//		String s = "";
+//		for(int i=0;i<selectedGoalPack.length(); i++)
+//		{
+//			if(selectedGoalPack.charAt(i) != (char)32)
+//				s = s + selectedGoalPack.charAt(i);
+//		}
+//		selectedGoalPack = s;
+    }
+    
+    public void addCapability(String elem)
+    {
+    	this.AgentCapabilityListModel.addElement(elem);
+    }
+    
+    public void clearCapabilityList()
+    {
+    	this.AgentCapabilityListModel.clear();
+    }
+    
+    public void refreshCapabilityList()
+    {
+    	this.AgentCapabilityList.setModel(this.AgentCapabilityListModel);
     }
     
     
-    
-    public javax.swing.JButton getAddParamBtn()
+    public void addAgent(String s)
     {
-    	return this.addParamBtn;
+    	agentListContent.addElement(s);
+    	agentList.setListData(agentListContent);
+    }
+    
+    public void clearAgentlist()
+    {
+    	agentListContent.clear();
+    	agentList.setListData(agentListContent);
+    }
+    
+    public void removeSelectedGoalSPEC()
+    {
+    	if(goalSPECList.getSelectedIndex() < 0)
+    		return;
+    	this.goalListContent.remove(goalSPECList.getSelectedValue());
+    	goalSPECList.setListData(goalListContent);
+    	
+    }
+    
+    public void addGoalSPEC(String s)
+    {
+    	goalListContent.addElement(s);
+    	goalSPECList.setListData(goalListContent);
+    }
+    
+    public void clearGoalSPEClist()
+    {
+    	goalListContent.clear();
+    	goalSPECList.setListData(goalListContent);
     }
 
     public javax.swing.JButton getInjectJasonBtn()
@@ -645,14 +600,9 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     	return this.injectJasonBtn;
     }
 
-    public javax.swing.JButton getRemoveParamBtn()
-    {
-    	return this.removeParamBtn;
-    }
-
     public javax.swing.JButton getAddGoalToDbbtn()
     {
-    	return this.addGoalToDBBtn;
+    	return this.addGoalToDbbtn;
     }
 
     public javax.swing.JButton getQuitBtn()
@@ -737,6 +687,10 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     {
     	return this.loadPackBBtn;
     }
+    
+    
+    
+    
 
     public javax.swing.JTextArea getGoalTextArea_A()
     {
@@ -778,18 +732,6 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     	return this.configFilePathTextField;
     }
 
-    
-
-    public javax.swing.JTextField getVarNameTextField()
-    {
-    	return this.varNameTextField;
-    }
-
-    public javax.swing.JTextField getVarValueTextField()
-    {
-    	return this.varValueTextField;
-    }
-
     public javax.swing.JTextField getDbIptextField()
     {
     	return this.dbIPTextField;
@@ -810,9 +752,9 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     	return this.dbUserTextField;
     }
     
-    public javax.swing.JComboBox getGoalsComboBox()
+    public javax.swing.JList getGoalsList()
     {
-    	return this.goalsComboBox;
+    	return this.goalSPECList;
     }
     
     public HashMap<String,String> getParamsTable()
@@ -835,38 +777,30 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     	return this.selectedGoalDescription;
     }
     
-    public DefaultListModel getGoalSPECgoalsListModel()
+    public JList getAgentList()
     {
-    	return this.list_model;
+    	return this.agentList;
     }
-    
-    public javax.swing.JList getGoalSPECparamList()
-    {
-    	return this.goalSPECparamList;
-    }
-    
-    
-    public void setGoalSPECgoalsListModel(DefaultListModel l)
-    {
-    	this.list_model = l;
-    }
-    
-    /**
-	 * Return the text of the selected item in the combobox control.
-	 */
-	static private String getGoalComboboxSelectedItem(ItemSelectable is) 
+	
+	public DefaultListModel getGoalSPECparamListModel() {
+		return goalSPECparamListModel;
+	}
+
+	public void setGoalSPECparamListModel(DefaultListModel goalSPECparamListModel) {
+		this.goalSPECparamListModel = goalSPECparamListModel;
+	}
+
+	public JButton getAddNewAgentBtn()
 	{
-	    Object selected[] = is.getSelectedObjects();
-	    return ((selected.length == 0) ? "" : (String) selected[0]);
+		return addNewAgentBtn;
 	}
 	
-
-
-    // Variables declaration - do not modify                     
-    private javax.swing.JButton addParamBtn;
+	public String getSelectedAgentName()
+	{
+		return selectedAgentName;
+	}
+	
     private javax.swing.JButton injectJasonBtn;
-    private javax.swing.JButton removeParamBtn;
-    private javax.swing.JButton addGoalToDBBtn;
     private javax.swing.JButton quitBtn;
     private javax.swing.JButton injectGoalBtn;
     private javax.swing.JButton injectPackBtn;
@@ -883,9 +817,13 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     private javax.swing.JButton mergeAndSaveBtn;
     private javax.swing.JButton loadPackABtn;
     private javax.swing.JButton loadPackBBtn;
+    private JButton addGoalToDbbtn;
+    private JButton addNewAgentBtn;
+    private JList<String> goalSPECList;
+    private JList AgentCapabilityList;
+    private JList agentList;
     private JTextArea goalTextArea_A;
     private JTextArea goalTextArea_B;
-    private javax.swing.JComboBox goalsComboBox;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -893,23 +831,16 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JList goalSPECparamList;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextArea jasonBeliefTextArea;
@@ -918,8 +849,6 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     private javax.swing.JTextField goalDescriptionTextField;
     private javax.swing.JTextField dbPasswordTextField;
     private javax.swing.JTextField configFilePathTextField;    
-    private javax.swing.JTextField varNameTextField;
-    private javax.swing.JTextField varValueTextField;
     private javax.swing.JTextField dbIPTextField;
     private javax.swing.JTextField dbPortTextField;
     private javax.swing.JTextField dbNameTextField;
@@ -930,6 +859,17 @@ public class MusaConfigGUI extends javax.swing.JFrame {
     private String selectedGoalName 			= null;
 	private String selectedGoalPack 			= null;
 	private String selectedGoalDescription 		= null;
-	private DefaultListModel  list_model;
+	
+	private String selectedAgentName;
+	
+	private DefaultListModel	goalSPECparamListModel;
+	
+
+
+
+	private DefaultListModel  AgentListModel;
+	private DefaultListModel  AgentCapabilityListModel;
+	private Vector goalListContent = new Vector<String>();
+	private Vector agentListContent = new Vector<String>();
 	private JPanel panel_1;
 }

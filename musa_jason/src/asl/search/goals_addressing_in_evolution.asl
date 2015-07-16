@@ -20,7 +20,7 @@
  * 				[firefighter,system] ) [pack(p1), parlist([ par(location,"palermo"), par(worker_operator,"firefighter") ])]
  */
  
-//{ include("core/goal_annotation.asl") }  
+{ include("core/goal_annotation.asl") }  
  
  
 +!debug_build_goal_pack
@@ -43,8 +43,10 @@
 	.
 
 +!build_goal_pack(SGName,Pack)
+	:
+		social_goal(STC,SFS,As)[goal(SG_ID),pack(SGName),parlist(SGpar)]
 	<-
-		?social_goal(STC,SFS,As)[goal(SG_ID),pack(SGName),parlist(SGpar)];
+//		?social_goal(STC,SFS,As)[goal(SG_ID),pack(SGName),parlist(SGpar)];
 		SG=social_goal(STC,SFS,As)[goal(SG_ID),pack(SGName),parlist(SGpar)];
 		
 		.findall(MT,agent_metric(MT)[pack(SGName)],Metrics);
@@ -58,137 +60,143 @@
 		
 		Pack=pack(SG,AgentGoalsWannotations,[],Metrics);
 	.
-//QUESTO È NUOVO
-//-!build_goal_pack(SGName,Pack)
-//	<-
-//		?social_goal(STC,SFS,As)[goalfused(SG_ID),pack(SGName),parlist(SGpar)];
-//		SG=social_goal(STC,SFS,As)[goalfused(SG_ID),pack(SGName),parlist(SGpar)];
-//		
-//		.findall(MT,agent_metric(MT)[pack(SGName)],Metrics);
-//		.findall(agent_goal(TC1,FS1,A1),agent_goal(TC1,FS1,A1),			AgentGoals);		
-//		
-//		!assign_annotations(AgentGoals,AgentGoalsWannotations);
-//		Pack=pack(SG,AgentGoalsWannotations,[],Metrics);
++!build_goal_pack(SGName,Pack)
+	:
+		social_goal(STC,SFS)[goal(SG_ID),pack(SGName),parlist(SGpar)]
+	<-
+//		?social_goal(STC,SFS,As)[goal(SG_ID),pack(SGName),parlist(SGpar)];
+		SG=social_goal(STC,SFS,system)[goal(SG_ID),pack(SGName),parlist(SGpar)];
+		
+		.findall(MT,agent_metric(MT)[pack(SGName)],Metrics);
+		
+		.findall(agent_goal(TC1,FS1,A1), agent_goal(TC1,FS1,A1), AgentGoals_1);
+		.findall(agent_goal(TC2,FS2), agent_goal(TC2,FS2), AgentGoals_2);
+		
+		.union(AgentGoals_1,AgentGoals_2,AgentGoals);		
+		
+		!assign_annotations(AgentGoals, AgentGoalsWannotations);
+		
+		Pack=pack(SG,AgentGoalsWannotations,[],Metrics);
+	.
+
+//
+//	
+//+!assign_annotations(AgentGoals,AgentGoalsWannotations)
+//	:	AgentGoals = []
+//	<-	AgentGoalsWannotations = [];
 //	.
-
-
-	
-+!assign_annotations(AgentGoals,AgentGoalsWannotations)
-	:	AgentGoals = []
-	<-	AgentGoalsWannotations = [];
-	.
-	
-//Agent goal
-+!assign_annotations(AgentGoals,AgentGoalsWannotations)
-	:
-		AgentGoals = [Head|Tail] & Head = agent_goal(TC,FS,A)
-	<-
-		!assign_annotations(Tail,AgentGoalsWannotationsRec);
-		
-		//?agent_goal(TC,FS,A)[GoalID,Pack,PL];
-		//?agent_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)];
-		//.concat([agent_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		
-		?agent_goal(TC,FS,A)[Identifier,pack(Pack),parlist(PL)];
-		
-		if(Identifier=goal(ID))
-		{
-			.concat([agent_goal(TC,FS,A)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		else
-		{
-			?agent_goal(TC,FS,A)[goalfused(GFusedID),_,_];
-			.concat([agent_goal(TC,FS,A)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		
-	.
-	
-//Agent goal
-+!assign_annotations(AgentGoals,AgentGoalsWannotations)
-	:
-		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS,A,T)
-	<-
-		!assign_annotations(Tail,AgentGoalsWannotationsRec);
-		
-		//?agent_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)];
-		//.concat([agent_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		?agent_goal(TC,FS,A,T)[Identifier,pack(Pack),parlist(PL)];
-		
-		if(Identifier=goal(ID))
-		{
-			.concat([agent_goal(TC,FS,A,T)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		else
-		{
-			?agent_goal(TC,FS,A,T)[goalfused(GFusedID),_,_];
-			.concat([agent_goal(TC,FS,A,T)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		/*
-		?agent_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)];
-		
-		//.findall(agent_goal(TC,FS,A,T)[Pack,Pars], agent_goal(TC,FS,A,T)[Pack,Pars], [G|_]);
-		!deleteSourceAnnotation(agent_goal(TC,FS,A,T)[Pack,Pars],OutG);
-		.concat([OutG],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		*/
-	.
-	
-	
-	
-//Social goal
-+!assign_annotations(AgentGoals,SocialGoalsWannotations)
-	:
-		AgentGoals = [Head|Tail] & Head = social_goal(TC,FS,A)
-	<-	
-		!assign_annotations(Tail,SocialGoalsWannotationsRec);
-		//?social_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)];
-		//.concat([social_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)]],SocialGoalsWannotationsRec,SocialGoalsWannotations);
-		
-		?social_goal(TC,FS,A)[Identifier,pack(Pack),parlist(PL)];
-		
-		if(Identifier=goal(ID))
-		{
-			.concat([social_goal(TC,FS,A)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		else
-		{
-			?social_goal(TC,FS,A)[goalfused(GFusedID),_,_];
-			.concat([social_goal(TC,FS,A)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		
-		
-		//.findall(social_goal(TC,FS,A)[Pack,Pars], social_goal(TC,FS,A)[Pack,Pars], [G|_]);
-		//!deleteSourceAnnotation(social_goal(TC,FS,A)[Pack,Pars],OutG);
-		//.concat([OutG],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-	.
-	
-
-//Social goal
-+!assign_annotations(AgentGoals,SocialGoalsWannotations)
-	:
-		AgentGoals = [Head|Tail] & Head = social_goal(TC,FS,A,T)
-	<-
-		!assign_annotations(Tail,SocialGoalsWannotationsRec);
-		//?social_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)];
-		//.concat([social_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)]],SocialGoalsWannotationsRec,SocialGoalsWannotations);
-		?social_goal(TC,FS,A,T)[Identifier,pack(Pack),parlist(PL)];
-		
-		if(Identifier=goal(ID))
-		{
-			.concat([social_goal(TC,FS,A,T)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		else
-		{
-			?social_goal(TC,FS,A,T)[goalfused(GFusedID),_,_];
-			.concat([social_goal(TC,FS,A,T)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		}
-		/*!assign_annotations(Tail,AgentGoalsWannotationsRec);
-		?social_goal(TC,FS,A,T)[GoalID,Pack,Pars];
-		//.findall(social_goal(TC,FS,A,T)[Pack,Pars], social_goal(TC,FS,A,T)[Pack,Pars], [G|_]);
-		!deleteSourceAnnotation(social_goal(TC,FS,A,T)[Pack,Pars],OutG);
-		.print("fatto");
-		.concat([OutG],AgentGoalsWannotationsRec,AgentGoalsWannotations);
-		*/
-	.
+//	
+////Agent goal
+//+!assign_annotations(AgentGoals,AgentGoalsWannotations)
+//	:
+//		AgentGoals = [Head|Tail] & Head = agent_goal(TC,FS,A)
+//	<-
+//		!assign_annotations(Tail,AgentGoalsWannotationsRec);
+//		
+//		//?agent_goal(TC,FS,A)[GoalID,Pack,PL];
+//		//?agent_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)];
+//		//.concat([agent_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		
+//		?agent_goal(TC,FS,A)[Identifier,pack(Pack),parlist(PL)];
+//		
+//		if(Identifier=goal(ID))
+//		{
+//			.concat([agent_goal(TC,FS,A)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		else
+//		{
+//			?agent_goal(TC,FS,A)[goalfused(GFusedID),_,_];
+//			.concat([agent_goal(TC,FS,A)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		
+//	.
+//	
+////Agent goal
+//+!assign_annotations(AgentGoals,AgentGoalsWannotations)
+//	:
+//		AgentGoals = [Head|Tail] &	Head = agent_goal(TC,FS,A,T)
+//	<-
+//		!assign_annotations(Tail,AgentGoalsWannotationsRec);
+//		
+//		//?agent_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)];
+//		//.concat([agent_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		?agent_goal(TC,FS,A,T)[Identifier,pack(Pack),parlist(PL)];
+//		
+//		if(Identifier=goal(ID))
+//		{
+//			.concat([agent_goal(TC,FS,A,T)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		else
+//		{
+//			?agent_goal(TC,FS,A,T)[goalfused(GFusedID),_,_];
+//			.concat([agent_goal(TC,FS,A,T)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		/*
+//		?agent_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)];
+//		
+//		//.findall(agent_goal(TC,FS,A,T)[Pack,Pars], agent_goal(TC,FS,A,T)[Pack,Pars], [G|_]);
+//		!deleteSourceAnnotation(agent_goal(TC,FS,A,T)[Pack,Pars],OutG);
+//		.concat([OutG],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		*/
+//	.
+//	
+//	
+//	
+////Social goal
+//+!assign_annotations(AgentGoals,SocialGoalsWannotations)
+//	:
+//		AgentGoals = [Head|Tail] & Head = social_goal(TC,FS,A)
+//	<-	
+//		!assign_annotations(Tail,SocialGoalsWannotationsRec);
+//		//?social_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)];
+//		//.concat([social_goal(TC,FS,A)[goal(GoalID),pack(Pack),parlist(PL)]],SocialGoalsWannotationsRec,SocialGoalsWannotations);
+//		
+//		?social_goal(TC,FS,A)[Identifier,pack(Pack),parlist(PL)];
+//		
+//		if(Identifier=goal(ID))
+//		{
+//			.concat([social_goal(TC,FS,A)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		else
+//		{
+//			?social_goal(TC,FS,A)[goalfused(GFusedID),_,_];
+//			.concat([social_goal(TC,FS,A)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		
+//		
+//		//.findall(social_goal(TC,FS,A)[Pack,Pars], social_goal(TC,FS,A)[Pack,Pars], [G|_]);
+//		//!deleteSourceAnnotation(social_goal(TC,FS,A)[Pack,Pars],OutG);
+//		//.concat([OutG],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//	.
+//	
+//
+////Social goal
+//+!assign_annotations(AgentGoals,SocialGoalsWannotations)
+//	:
+//		AgentGoals = [Head|Tail] & Head = social_goal(TC,FS,A,T)
+//	<-
+//		!assign_annotations(Tail,SocialGoalsWannotationsRec);
+//		//?social_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)];
+//		//.concat([social_goal(TC,FS,A,T)[goal(GoalID),pack(Pack),parlist(PL)]],SocialGoalsWannotationsRec,SocialGoalsWannotations);
+//		?social_goal(TC,FS,A,T)[Identifier,pack(Pack),parlist(PL)];
+//		
+//		if(Identifier=goal(ID))
+//		{
+//			.concat([social_goal(TC,FS,A,T)[goal(ID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		else
+//		{
+//			?social_goal(TC,FS,A,T)[goalfused(GFusedID),_,_];
+//			.concat([social_goal(TC,FS,A,T)[goalfused(GFusedID),pack(Pack),parlist(PL)]],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		}
+//		/*!assign_annotations(Tail,AgentGoalsWannotationsRec);
+//		?social_goal(TC,FS,A,T)[GoalID,Pack,Pars];
+//		//.findall(social_goal(TC,FS,A,T)[Pack,Pars], social_goal(TC,FS,A,T)[Pack,Pars], [G|_]);
+//		!deleteSourceAnnotation(social_goal(TC,FS,A,T)[Pack,Pars],OutG);
+//		.print("fatto");
+//		.concat([OutG],AgentGoalsWannotationsRec,AgentGoalsWannotations);
+//		*/
+//	.
 
 	
 +!test_goal_maintain(FinalState,Cardinality,Wprev,Wk,Bool)

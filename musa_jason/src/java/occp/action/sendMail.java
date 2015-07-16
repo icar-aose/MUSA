@@ -1,6 +1,9 @@
 package occp.action;
 
-import http.ConnectionOCCP;
+import jason.asSemantics.DefaultInternalAction;
+import jason.asSemantics.TransitionSystem;
+import jason.asSemantics.Unifier;
+import jason.asSyntax.Term;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
@@ -18,10 +21,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import occp.logger.musa_logger;
-import jason.asSemantics.DefaultInternalAction;
-import jason.asSemantics.TransitionSystem;
-import jason.asSemantics.Unifier;
-import jason.asSyntax.Term;
 
 /**
  * 

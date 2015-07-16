@@ -26,7 +26,7 @@
 		
 		!check_interface_is_ready(Capability, RequestType, Bool);
 
-		if (Bool=true) 
+		if (Bool) 
 		{
 			!get_context(Capability, Request, RequestType, Context);
 			!serve_request_with_capacity(Capability, RequestType, Request, Context);

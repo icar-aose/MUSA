@@ -77,7 +77,6 @@ public class loadFromFile extends DefaultInternalAction
     		
     		//args[0] is a valid file path, so proceed parsing its content.
     		executeForFile( ts, goalName, goalPack, goalDescriptionOrPathToGoalBase, goalParams );
-
     	}
     	catch (FileNotFoundException e) 
     	{
@@ -103,7 +102,7 @@ public class loadFromFile extends DefaultInternalAction
      * @throws RevisionFailedException 
      * @throws Exception
      */
-    private void executeForFile(TransitionSystem ts, String goalName, String goalPack, String filePath, String Params) throws FileNotFoundException, ParseException, RevisionFailedException
+    private void executeForFile(TransitionSystem ts, String goalPack, String goalName, String filePath, String Params) throws FileNotFoundException, ParseException, RevisionFailedException
     {
     	File file = new File( filePath );
         FileInputStream fis = null;
@@ -137,7 +136,7 @@ public class loadFromFile extends DefaultInternalAction
      * @throws ParseException
      * @throws RevisionFailedException
      */
-    private void executeForString(TransitionSystem ts, String goalName, String goalPack, String belief, String Params) throws ParseException, RevisionFailedException
+    private void executeForString(TransitionSystem ts, String goalPack, String goalName, String belief, String Params) throws ParseException, RevisionFailedException
     {
     	List<String> belief_base = generateGoalBeliefsFromString( belief );
         

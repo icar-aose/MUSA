@@ -107,20 +107,20 @@
 	:
 		GoalList 	= [Head|Tail]
 	<-
-		//Recursive call
-		!get_best_item_solution_for_goals(AG_items, Tail, OutItemsRec);
+		!get_best_item_solution_for_goals(AG_items, Tail, OutItemsRec);								//Recursive call
 		
 		!get_goal_TC([Head], [GoalTC|_]);		//Get the goal TC
 		!get_goal_FS([Head], [GoalFS|_]);		//Get the goal FS
 		
-		//Search for items that satisfy the current item TC and FS
-		!search_for_item_that_satisfy_goal_conditions(AG_items, GoalTC, GoalFS, OutItemsTmp);
+		!search_for_item_that_satisfy_goal_conditions(AG_items, GoalTC, GoalFS, OutItemsTmp);		//Search for items that satisfy the current item TC and FS
+		.print("OutItemsTmp: ",OutItemsTmp);
 		
-		//Get the item with the higher score
-		!get_item_with_higher_score(OutItemsTmp, BestItemForCurrentGoal, BestScore);
 		
-		//Add the found item into the output item list
-		.union(BestItemForCurrentGoal, OutItemsRec, OutItems);
+		!get_item_with_higher_score(OutItemsTmp, BestItemForCurrentGoal, BestScore);				//Get the item with the higher score
+		.print("BestItemForCurrentGoal: ",BestItemForCurrentGoal);
+		
+		
+		.union(BestItemForCurrentGoal, OutItemsRec, OutItems);										//Add the found item into the output item list
 	.
 	
 

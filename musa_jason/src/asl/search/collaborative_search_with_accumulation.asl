@@ -7,15 +7,9 @@
  * Accumulation state of the world
  * ----------------------------------------------------------------------------
  * Last Modifies:  
- * 	- (15/2/23) in filter_capabilities_that_triggers_on_accumulation, modified the var name that contains the logic formula truth percent
+ * 	- [davide] in +!get_item_with_higher_score, when BestScoreRec >= Score, is returned BestItemRec instead of [BestItemRec]
  *
  * TODOs:
- * - condition_to_world_statement must handle NEG predicates.
- * - get_goal_TC e get_goal_FS devono gestire i goal con annotazioni
- * 
- * - [IMPORTANTE] inserire dei piani !get_capability_postcondition e !get_capability_precondition che gestiscano i casi in cui le capability non 
- *   siano trovate. 
- * - manca EVO in !ask_for_tasks_that_address_final_state
  *
  * Reported Bugs:  
  * 
@@ -48,7 +42,7 @@
 		
 		if(BestScoreRec >= Score)
 		{
-			BestItem 	= [BestItemRec];
+			BestItem 	= BestItemRec;
 			BestScore 	= BestScoreRec;
 		}
 		else
@@ -97,7 +91,7 @@
 		AG_items 	= [Head|Tail] 						&
 		Head 		= item(cs([Task|_]),_,_,_) 			&
 		Task		= task(TaskTC, TaskFS,_,_,_,_)		&
-		TaskTC 		= GoalTC &	TaskFS = GoalFS 
+		(TaskTC 	== GoalTC &	TaskFS 		== GoalFS) 
 	<-
 		!search_for_item_that_satisfy_goal_conditions(Tail, GoalTC, GoalFS, ItemListRec);
 		.concat(ItemListRec, [Head], ItemList);
@@ -134,6 +128,8 @@
 		Task		= task(TaskTC, TaskFS, SGevo, cs(SG_CS), SG_assignment, SG_Norms)
 	<-
 		!get_best_item_solution_for_goals(AG_items, GoalList, AG_items_filtered);
+		
+		.print("(",TaskTC,") AG_items_filtered: ",AG_items_filtered);
 		!extract_tasks_from_item_set(AG_items_filtered, TaskSet);						//Unroll the solution to obtain the task set
 		!unroll_solution_to_get_commitment_set(TaskSet, AGCommitmentSet);				//Unroll the task set to obtain the commitment set
 		!unroll_solution_to_get_commitment_set(SG_CS, SGCommitmentSet);					//Unroll the solution commitment set
@@ -145,15 +141,9 @@
 		OutSolution = item(cs([SolTask]),Acc,ag(Ag),Score);
 	.
 +!assemble_final_solution_pack(SG_items, AG_items, GoalList, OutSolution)
-	:
-		SG_items = []  						
-	<-
-		.print("[WARNING] solutions not found...\n");
-		
+	:	SG_items = []  						
+	<-	.print("[WARNING] solutions not found...\n");
 		?frequency_very_long_perception_loop(Delay);
-		
-	
-		
 		.wait(Delay);
 	.
 	
@@ -182,7 +172,8 @@
 		
 		//Search solutions for agent goal set
 		!search_solution_for_agent_goals(AG_list, InputAccumulation, MaxSolution, Members, MaxDepth, 1, InitSolutions);	//restituisce ITEMS
-		
+		.print("InitSolutions: ",InitSolutions);
+		.wait(4000);
 		//After searching for agent goal solutions, clear the stack for searching the solution for the social goal 
 		clearStack;	
 		
@@ -221,6 +212,7 @@
 		!search_for_item_that_satisfy_goal_conditions(OutSolutions, SocialGoalTC, Sg_FS, SGitems);
 
 		!assemble_final_solution_pack(SGitems, InitSolutions, AG_list, MergedSolution);
+		
 		.print("Best solution found: ",MergedSolution);
 		 occp.logger.action.info("Best solution found: ",MergedSolution);
 		 
@@ -283,6 +275,7 @@
 						 0 );
 			
 			!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet,[], Item , Pack, MaxDepth, []);
+			
 			!orchestrate_search_with_accumulation([],MaxSolution,Pack,Members,MaxDepth,Steps, OutSol);		
 			
 			//Now prepare the assignments
@@ -360,6 +353,7 @@
 					
 					//Update the stack by adding a new solution which contains the found task set 
 					!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet, InSolutions, StackItem, Pack, MaxDepth, OutAssignmentList);	
+					
 				}
 				!orchestrate_search_with_accumulation(InSolutions,MaxSolution,Pack,Members,MaxDepth,Steps+1,OutSolutions);
 			}
@@ -620,35 +614,6 @@
 		Head 	= task(TC, FS, TaskEvo, cs(CS), _, norms(Norms))			//I task set trovati mediante il piano !ask_for_hypotetical_capabilities non contengono assignment		
 	<-
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(CS, InSolutions, StackItem, Pack, MaxDepth, AssignmentList);
-//		?orchestrate_verbose(VB);
-//		Pack 			= pack(Social,AgentGoals,Norms,Metrics);
-//		StackItem		= item(_, Accumulation, ag(AddressedItemGoal), ScoreOld);
-//		Accumulation 	= accumulation(_,_,assignment_list(OldAssignment));
-//					
-//		!unroll_solution_to_get_commitment_set(StackItem, 	CSonStack);
-//		!unroll_solution_to_get_commitment_set([Head], 		TaskCommitmentSet);				//Unroll the item to get the commitment set
-//		.union(CSonStack, TaskCommitmentSet, CSnew);
-//		
-//		!apply_accu_evolution_operator(CSnew, Accumulation, AccuNext);
-//		
-//		//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made).
-//		!unroll_agent_goals_to_get_addressed_goals(AgentGoals,AccuNext,OldAssignment,AddressedGoal, _);		
-// 		!score_sequence_on_accumulation(CSnew, InSolutions, AccuNext, Pack, AddressedGoal, MaxDepth, OldAssignment, NewScore);	//Measure the zz
-// 		
-//		//Concatenate old and new assignment sets
-//		.union(OldAssignment, AssignmentList, NewAssignment);
-//		AccuNext 	= accumulation(AccunextW, AccunextPW, _);
-//		
-//		!unroll_capabilities_to_get_evolution_plans(CSnew, TaskEvoPlans);				//Unroll the commitment set to get their evolution plans
-// 		!unroll_solution_to_get_commitment_set(CSnew, TaskCS);							//Unroll the task to get the inner commitment set
-//	   	!get_goal_TC([Social], [TaskTC|_]);					
-//		!get_goal_FS([Social], [TaskFS|_]);
-//	   	!create_new_task(TaskTC,TaskFS,TaskEvoPlans,TaskCS,NewAssignment,[],NewTask);	//Create a new task
-//		insertItem(cs([NewTask]),														//Put the new task into the solution stack
-//				   accumulation(AccunextW, AccunextPW, assignment_list(NewAssignment)), 
-//				   ag(AddressedGoal), 
-//				   NewScore);
-
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);		//Recursive call	
 	.	
 	
@@ -690,8 +655,7 @@
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);							//Recursive call on next capability			
 	.
 +!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,Item,Pack,MaxDepth,AssignmentList) : CPSet=[].
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 +!debug_unroll_agent_goals_to_get_addressed_goals
 	<-
@@ -808,14 +772,6 @@
 
  		if(BlacklistEnabled)	
  		{
-// 			!unroll_solution_to_get_commitment_set(CS, CommitmentSet);
-//			!unroll_solution_to_get_commitment_set(InSolutions, InSolutionCommitmentSet);		
-//			.union(InSolutionCommitmentSet, CommitmentSet, OverallCS);
-// 			!get_blacklisted_capability_list(OverallCS, BlacklistedCS);
-// 			!score_blacklisted_CS(BlacklistedCS,BlacklistScore);
- 			
- 			//!score_blacklisted_CS(CS, BlacklistScore);
- 			
  			!get_blacklisted_cs_score(CS, BlacklistScore);
  		}
 		else 					

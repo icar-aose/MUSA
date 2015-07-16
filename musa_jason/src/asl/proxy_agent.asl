@@ -4,8 +4,7 @@
 /* Last Modifies:
  * 
  * Todo:
- * MODIFICARE l'INTERFACCIA CON TOMCAT ADEGUANDOLA ALLA SIMULAZIONE
- *
+ * 
  * Bugs:  
  * 
 */
@@ -14,8 +13,6 @@
 { include( "configuration.asl" ) }
 { include( "peer/common.asl" ) }
 
-//!awake_test.
-//!awake_occp.
 
 /* Plans */
 
@@ -23,11 +20,7 @@
 	: 
 		execution(deployment) 
 	<- 
-		makeArtifact("proxy_server","occp.http.GoalServer",[],Id); 
-		focus(Id);
-		
-		!connect_proxy;
-		run_server;
+		!start_proxy_server;
 	.
 +!awake 
 	: 
@@ -52,24 +45,58 @@
 	<-
 		get_received_goals(RemoteGoalPack);
 		?boss(BossAgent);
-		
-		.print("Received remote goal pack: ",RemoteGoalPack,"\n\n\n\n");
-		.print("Sending to: ",BossAgent);
 		.send(BossAgent, achieve, injectJasonPack(RemoteGoalPack));	
+		
+		.abolish(remote_goal_pack_injected);
 	.
+
++!simulate_occp_request(ParamList)
+	<-
+		!create_or_use_database_artifact(Id1);
+		focus(Id1);
+		
+		?clearDatabase(ClearDB);
+		if(ClearDB)
+		{
+			clear;	
+		}
+		Session = "p4_dept";
+		User = user("luca","occp_user");
+		
+		.print("~~~ simulating request ~~~");
+		!forward(worker,"access_to_order",paramset(Session,User,ParamList),HTML1);
+ 	.
 
 /*
  * SIMULATE USER INTERACTION SCENARIO
  */
+ +!simulate_occp_request
+	<-
+		!create_or_use_database_artifact(Id1);
+		focus(Id1);
+		?clearDatabase(ClearDB);
+		if(ClearDB)
+		{
+			clear;	
+		}
+		Session = "p4_dept";
+		User = user("luca","occp_user");
+		
+		.wait(9000);
+		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
+	.
+ 
 +!simulate_quote_request
 	<-
 		/* for testing purpose */
-		
-		.println("clear database");
 		!create_or_use_database_artifact(Id1);
 		focus(Id1);
-//		clear;
 		
+		?clearDatabase(ClearDB);
+		if(ClearDB)
+		{
+			clear;	
+		}		
 		
 		.println("start simulation");
 		
@@ -96,7 +123,9 @@
 		
 		Session = "p4_dept";
 		User = user("luca","occp_user");
-		!forward(worker,"access_to_order",paramset(Session,User,[param(idOrder,1111),param(idUser,116)]),HTML1);
+//		!forward(worker,"access_to_order",paramset(Session,User,[param(idOrder,1111),param(idUser,116)]),HTML1);
+
+		!forward(worker,"access_to_order",paramset(Session,User,[param(idOrder,1111),param(idUser,116),param(mailUser,"musa.customer.service@gmail.com"),param(user_message,"Fallito"),param(userAccessToken,"")]),HTML1);
 	.		
 
 
@@ -111,6 +140,28 @@
 		!connect_proxy;
 		occp.logger.action.info("[PROXY] proxy server ready. Running...");
 		run_server;		/* proxy_server -> HTTPProxy artifact */
+	.
+
++changed_database_configuration
+	<-
+		?boss(Boss);
+		.send(Boss, achieve, updateLocalHost);
+		
+		.abolish(changed_database_configuration);
+	.
+
++request_for_musa_status
+	<-
+		?boss(Boss);
+		.send(Boss, askOne, musa_status(_), Reply);
+		
+		if (Reply \== false)
+		{
+			Reply = musa_status(Status)[source(Boss)];
+			reply_with_musa_status(Status);
+		}
+		
+		.abolish(request_for_musa_status);
 	.
 
 +http_param(Id,Key,Value)  
@@ -148,6 +199,21 @@
 		run_server;										/* proxy_server -> HTTPProxy artifact */
 	.
 
+/**
+ * [davide]
+ * 
+ * Event triggered when the proxy agent receive a request of capability failure. The
+ * request is forwarded to the boss agent.
+ * 
+ */
++submitCapabilityFailure(CapName)
+	<-
+		?boss(Boss);
+		.send(Boss, tell, submitCapabilityFailure(CapName));
+		.abolish( submitCapabilityFailure(CapName) );
+	.
+
+
 +!forward(Agent,RequestPath,ParamSet,Reply)
 	<-
 		.print("[forward] sending ",request(RequestPath,ParamSet)," to ",Agent);
@@ -159,7 +225,7 @@
 		.abolish(response(RequestPath, ParamSet, _ ));
 		
 		//TODO perchè questa attesa??
-		.wait(50000);
+//		.wait(50000);
 	.
 
 +html_response(RequestPath,ParamSet, HTML)
@@ -184,4 +250,3 @@
   		.wait(10);
      	!connect_proxy;
 	.
-
