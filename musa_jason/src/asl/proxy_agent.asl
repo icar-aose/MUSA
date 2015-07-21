@@ -41,15 +41,17 @@
  * This event is triggered when a jason goal pack is remotely 
  * injected into MUSA system from the web GUI.
  */	
-+remote_goal_pack_injected
++remote_goal_pack_injected(Pack)
 	<-
-		get_received_goals(RemoteGoalPack);
 		?boss(BossAgent);
-		.send(BossAgent, achieve, injectJasonPack(RemoteGoalPack));	
+		.send(BossAgent, tell, injectJasonGoals(Pack));	
 		
 		.abolish(remote_goal_pack_injected);
 	.
 
+/*
+ * SIMULATE USER INTERACTION SCENARIO
+ */
 +!simulate_occp_request(ParamList)
 	<-
 		!create_or_use_database_artifact(Id1);
@@ -64,12 +66,8 @@
 		User = user("luca","occp_user");
 		
 		.print("~~~ simulating request ~~~");
-		!forward(worker,"access_to_order",paramset(Session,User,ParamList),HTML1);
+		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
  	.
-
-/*
- * SIMULATE USER INTERACTION SCENARIO
- */
  +!simulate_occp_request
 	<-
 		!create_or_use_database_artifact(Id1);
@@ -84,8 +82,7 @@
 		
 		.wait(9000);
 		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
-	.
- 
+	. 
 +!simulate_quote_request
 	<-
 		/* for testing purpose */
@@ -123,9 +120,7 @@
 		
 		Session = "p4_dept";
 		User = user("luca","occp_user");
-//		!forward(worker,"access_to_order",paramset(Session,User,[param(idOrder,1111),param(idUser,116)]),HTML1);
-
-		!forward(worker,"access_to_order",paramset(Session,User,[param(idOrder,1111),param(idUser,116),param(mailUser,"musa.customer.service@gmail.com"),param(user_message,"Fallito"),param(userAccessToken,"")]),HTML1);
+		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
 	.		
 
 
@@ -134,34 +129,19 @@
  */
 +!start_proxy_server 
 	<-
-		!create_proxy_server_artifact(Id1);
+		!create_or_use_proxy_server_artifact(Id1);
 		focus(Id1);
 		
-		!connect_proxy;
 		occp.logger.action.info("[PROXY] proxy server ready. Running...");
 		run_server;		/* proxy_server -> HTTPProxy artifact */
 	.
 
-+changed_database_configuration
++update_database_configuration
 	<-
 		?boss(Boss);
 		.send(Boss, achieve, updateLocalHost);
 		
-		.abolish(changed_database_configuration);
-	.
-
-+request_for_musa_status
-	<-
-		?boss(Boss);
-		.send(Boss, askOne, musa_status(_), Reply);
-		
-		if (Reply \== false)
-		{
-			Reply = musa_status(Status)[source(Boss)];
-			reply_with_musa_status(Status);
-		}
-		
-		.abolish(request_for_musa_status);
+		.abolish(update_database_configuration);
 	.
 
 +http_param(Id,Key,Value)  
@@ -181,23 +161,12 @@
 		.term2string(AgentTerm,Agent);
 		.println("receive HTTP request ",log(Id,Session,Agent,Service,UserName,Role));
 		.findall( param(Key,Value), param(Id,Key,Value), Params );
- 
-		.abolish(param(Id,_,_));
-		
+		.abolish(param(Id,_,_));	
 		User = user(UserName,Role);
 		
 		!forward(Agent,Service,paramset(Session,User,Params),HTML);
-		//id sessione + codice html es "OK"
-		reply(Id,HTML);
+	.
 
-		run_server;					/* proxy_server -> HTTPProxy artifact */
-	.
--http_request(Id,Session,Agent,Service,User,Role)[artifact_name(_,"proxy_server")] 
-	<-
-		reply(Id,"500 error: something went wrong");	/* proxy_server -> HTTPProxy artifact */
-		.abolish(param(Id,_,_));
-		run_server;										/* proxy_server -> HTTPProxy artifact */
-	.
 
 /**
  * [davide]
@@ -210,22 +179,22 @@
 	<-
 		?boss(Boss);
 		.send(Boss, tell, submitCapabilityFailure(CapName));
+		 
 		.abolish( submitCapabilityFailure(CapName) );
 	.
 
-
+/**
+ * Forward a request to Agent
+ */
 +!forward(Agent,RequestPath,ParamSet,Reply)
 	<-
 		.print("[forward] sending ",request(RequestPath,ParamSet)," to ",Agent);
 		.send( Agent, tell, request(RequestPath,ParamSet) );
-		.wait(1000);
-		.findall(HTML, response(RequestPath,ParamSet,HTML), List);
-		!evaluate_reply(List,Reply);
-		.abolish(html_response(RequestPath, ParamSet, _ ));
-		.abolish(response(RequestPath, ParamSet, _ ));
-		
-		//TODO perchè questa attesa??
-//		.wait(50000);
+//		.wait(1000);
+//		.findall(HTML, response(RequestPath,ParamSet,HTML), List);
+//		!evaluate_reply(List,Reply);
+//		.abolish(html_response(RequestPath, ParamSet, _ ));
+//		.abolish(response(RequestPath, ParamSet, _ ));
 	.
 
 +html_response(RequestPath,ParamSet, HTML)
@@ -234,19 +203,6 @@
 		+response(RequestPath,ParamSet, HTML);
 	.
 
-+!evaluate_reply([A],A) : true <- true.
-+!evaluate_reply([H|T],H) : true <- true.
-+!evaluate_reply([],"agent error") : true <- true.
-
-
-+!connect_proxy: true
-  <- 
-  	connect(A);
-  	!test_connection(A);
-  	.
-+!test_connection("ok") : true <- true.
-+!test_connection(A) : true
-  	<- 
-  		.wait(10);
-     	!connect_proxy;
-	.
+//+!evaluate_reply([A],A).
+//+!evaluate_reply([H|T],H).
+//+!evaluate_reply([],"agent error").

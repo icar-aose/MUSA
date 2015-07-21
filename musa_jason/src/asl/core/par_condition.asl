@@ -646,9 +646,7 @@
 		}
 		if(not .member(A,InAssignment))
 		{
-			.union(OutAssignmentRec, A, OutAssignment);
-//			if(Head\==HeadB) 	{.concat(OutAssignmentRec,A,OutAssignment);}
-//			else				{.concat(OutAssignmentRec,[],OutAssignment);}	
+			.union(OutAssignmentRec, A, OutAssignment);	
 		}
 	.
 
@@ -682,17 +680,9 @@
 		//Check if every variable has a corresponding assignment
 		!check_if_vars_are_assigned(Variables,AssignmentSet,BoundBool);
 		
-		//If all variables are bounded
-		if (BoundBool)
-		{
-			//convert the input parametric condition to a simple formula using the input assignment set
-//			!convert_parametric_to_simple_formula(ParamLogicFormula, Variables, AssignmentSet, LogicFormula);
-			!check_if_par_condition_addresses_accumulation(PCN, World, [], [], OutAssignment, Bool, _);			
-		} 
-		else 
-		{
-			Bool = false;
-		}		
+		//If all variables are bounded, proceed testing the condition on the input world state
+		if (BoundBool)		{!check_if_par_condition_addresses_accumulation(PCN, World, [], [], OutAssignment, Bool, _);} 
+		else 				{Bool = false;}		
 	.
 /**
  * [davide]

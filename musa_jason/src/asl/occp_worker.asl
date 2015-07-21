@@ -25,7 +25,7 @@ capability_evolution(receive_order,[add( received_order(order_id,user_id) )]).
 
 agent_capability(place_order)[type(parametric)].
 capability_parameters(place_order, [order_id,user_id]).
-capability_precondition(place_order, condition(true) ).
+capability_precondition(place_order, par_condition([order_id,user_id], property(received_order,[order_id,user_id])) ).
 capability_postcondition(place_order, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
 capability_cost(place_order,[10,4]). 
 capability_evolution(place_order,[add( order_placed(order_id,user_id) )]).
@@ -64,7 +64,7 @@ capability_evolution(place_order,[add( order_placed(order_id,user_id) )]).
 
 agent_capability(set_user_data)[type(parametric)].
 capability_parameters(set_user_data, [user_id,user_email]).
-capability_precondition(set_user_data, condition(true) ).
+capability_precondition(set_user_data, par_condition([order_id,user_id], property(order_placed,[order_id,user_id])) ).
 capability_postcondition(set_user_data, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
 capability_cost(set_user_data,[0]).
 capability_evolution(set_user_data,[add( set_user_data(user_id,user_email) )]). 
@@ -88,7 +88,7 @@ capability_evolution(set_user_data_step2,[add( set_user_data(user_id,user_email)
 
 agent_capability(check_order_feasibility)[type(parametric)].
 capability_parameters(check_order_feasibility, [order_id]).
-capability_precondition(check_order_feasibility, condition(true) ).
+capability_precondition(check_order_feasibility, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
 capability_postcondition(check_order_feasibility, par_condition([order_id], property(order_checked,[order_id])) ).
 capability_cost(check_order_feasibility,[0]).
 capability_evolution(check_order_feasibility,[add( order_checked(order_id) )]).
@@ -104,7 +104,19 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
 +!awake
 	<-
-		!awake_as_employee;		
+		!awake_as_employee;
+//		!another_debug_test_condition;
+	.
+	
++!another_debug_test_condition
+	<-
+		CN 	= par_condition([order_id,user_id],property(order_placed,[order_id,user_id]));
+		Acc	= accumulation(world([order_placed(order,user),received_order(order,user)]),par_world([],[]),assignment_list([]));
+		
+//		!test_condition(CN, [], Acc, Bool);
+		!check_if_par_condition_addresses_accumulation(CN, Acc, [], [], OutAssignment, Bool, _);
+		
+		.print("--->",Bool);
 	.
 
 +!register_page(receive_order, Context)
@@ -257,11 +269,8 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
 
 //set_user_data------------------------
- +!prepare(set_user_data, Context, Assignment) 
-	<- 
-		true
-	.
-
++!prepare(set_user_data, Context, Assignment).
++!action(set_user_data, Context, Assignment) : fail(set_user_data).
 +!action(set_user_data, Context, Assignment) 
 	<- 
 		.print("..................................................(set_user_data) setting user data...");
@@ -270,7 +279,6 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		
 		!register_statement(set_user_data(user,email),Context);
 	.
-
 +!terminate(set_user_data, Context, Assignment) 
 	<- 
 		true
@@ -287,12 +295,12 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		.print("..................................................(check_order_feasibility) checking order feasibility...");
 		occp.logger.action.info("[check_order_feasibility] Checking order feasibility");
 
-		.random(X);
-		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
-		else		{!register_statement(order_status(refused), Context);}
+//		.random(X);
+//		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
+//		else		{!register_statement(order_status(refused), Context);}
 
 
-//		!register_statement(order_status(accepted), Context);
+		!register_statement(order_status(accepted), Context);
 		!register_statement(order_checked(order), Context);
 	.
 

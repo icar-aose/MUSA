@@ -70,8 +70,7 @@
 		.print("No execution profile specified. Aborting");
 	.
 //DEPRECATA
-+!awake_with_cap_failure_gui
-	
++!awake_with_cap_failure_gui	
 	<-
 		//GUI per il fallimento delle capability
 		?use_capability_failure_gui(UseFailureGUI);
@@ -86,33 +85,25 @@
 		}
 	.
 	
-	
 +addNewAgent(AgName, Path)
 	<-
-		.create_agent(AgName, Path);
+		.create_agent(AgName, Path, [agentArchClass("c4jason.CAgentArch")]);		//Create the agent using the cartago agent architecture
+		.wait(1000);
+		
+		.send(AgName, achieve, awake);												//awake the new agent
 		.print("Agent ",AgName," added");
-		.abolish( addNewAgent(AgName, Path) );
+		
+		.abolish( addNewAgent(AgName, Path) );									
 	.	
 	
-
 /**
- * [davide]
- * 
- * This event is triggered when user starts MUSA from the
- * configuration GUI, selecting 'Start MUSA' button. This 
- * plan awake all the agents.
+ * Awake the boss agent
  */
-+awake_boss
-	<-
-		!!awake_boss;					//Awake the boss
-		.broadcast(achieve, awake);		//Awake all the agents
-		-awake_boss;
-	.
 +!awake_boss
 	<-
 		!awake_as_head; 		/* in peer/department_head_activity.asl */		
 		!check_social_goal;
-//		+musa_status(ready);
+		!set_musa_status(ready);
 	.
 
 +!check_social_goal 
@@ -131,16 +122,12 @@
 		
 		.println("Goal Packs: ",SocialGoals," injected");
 
-		for ( .member(SG, SocialGoals) ) 			// For each social goal SG within the social goal list SocialGoals
+		for ( .member(SG, SocialGoals) ) 						// For each social goal SG within the social goal list SocialGoals
 		{	
-			//prima di creare un dipartimento si deve effettuare il parsing della descrizione
-			//del goal inserito. Questo e' possibile cambiando opportunamente i metodi presenti
-			//nella classe [ids.goalspec.loadFromFile]
-			
 			if(not created_dpt(StringSG))
 			{
-				.term2string(SG, StringSG);					// Converts the term SG into a string StringSG.
-				!create_department_for_social_goal(StringSG);
+				.term2string(SG, StringSG);						// Converts the term SG into a string StringSG.
+				!create_department_for_social_goal(StringSG);	// Create a new department
 				+created_dpt(StringSG);
 			}
 		}
@@ -148,8 +135,10 @@
 	
 +!create_department_for_social_goal(StringSG)
 	<-
-		.concat(StringSG, "_dept", DeptName);			// Unifies DeptName with "[StringSG]_dept"	
+		.concat(StringSG, "_dept", DeptName);			// Unifies DeptName with "[StringSG]_dept"
+		
 		createDepartment(DeptName, StringSG);			// Create a department for the social goal SG (in Organization artifact)
+		
 	.	
 
 /**
@@ -158,28 +147,19 @@
  * This event is triggered when user submit a jason goal pack
  * from the configuration GUI.
  */
-+injectJasonGoals
++injectJasonGoals(GoalList)
 	<-
-		getInjectedJasonGoals(GoalList);
 		!injectJasonPack(GoalList);
+		!check_social_goal;
 		
-		if( execution(deployment) )
+		?simulate_request_in_deployment(SimulateRequest);
+		if(SimulateRequest)
 		{
-//			.abolish(created_dpt(_));
-			!check_social_goal;
-			
 			?proxy(ProxyAgent);
-			.send(ProxyAgent, achieve, simulate_occp_request);
+			.send(ProxyAgent, achieve, simulate_occp_request);	
 		}
-		if( execution(standalone) )
-		{
-			!check_social_goal;
-			
-//			?proxy(ProxyAgent);
-//			.send(ProxyAgent, achieve, simulate_occp_request);
-		}
-		
-		.abolish(injectJasonGoals);
+
+		.abolish(injectJasonGoals(_));
 	.
 
 /**
@@ -188,6 +168,8 @@
  * Inject a jason goal pack
  */
 +!injectJasonPack(Pack)
+	: 
+		.list(Pack)
 	<-
 		.length(Pack,Len);
 		for (.range(I,0,Len-1))
@@ -198,6 +180,10 @@
 			.broadcast(tell,T);	
 		}		
 	.
+-!injectJasonPack(Pack)
+	<-
+		.print("Failed to inject goal pack ",Pack);		
+	.	
 
 /**
  * [davide]
@@ -288,10 +274,19 @@
 
 +request_for_agent_capability(Agent)
 	<-
-		.send(Agent, tell, request_for_capability_set);
-		.abolish(request_for_agent_capability);
+		if(.atom(Agent) | .string(Agent))
+		{
+			.send(Agent, tell, request_for_capability_set);
+			.abolish(request_for_agent_capability(_));
+		}
 	.
-	
+
++updateLocalHost
+	<-
+		updateLocalHost;
+		.abolish( updateLocalHost );
+	.
+
 	
 +agent_capability_set(CS)[source(Agent)]
 	<-
@@ -308,9 +303,14 @@
 		.abolish( start_musa_organization(_) );
 	.
 
-//+musa_status(Status)
-//	<-
-//		.abolish(musa_status(_));
-//		+musa_status(Status);
-//	.
-
+	
++!set_musa_status(Status)
+	:
+		track_musa_status(true)
+	<-
+		
+		
+		.abolish( musa_status(_) );
+		+musa_status(Status);
+	.
++!set_musa_status(Status).

@@ -6,8 +6,7 @@
  * 
  *
  * TODOs:
- * 	- tutti i piani +!get_variable_value dovranno prendere come parametro in ingresso anche il contesto
- * 
+ * 	
  * Bugs:  
  *
  *
@@ -66,23 +65,19 @@
 	<-
 		.my_name(Me);
 		!get_remote_capability_precondition( commitment(Me, Capability, _), PreCondition );
-		
-		
 		!check_condition_true_in_context(Capability, PreCondition, Context, AssignmentList, PreBool);
-//		!check_condition_true_in_context(PreCondition, Context, PreBool);
 
 		//Is the pre-condition is satisfied, proceed checking the post-condition
-		if (PreBool=true)
+		if (PreBool)
 		{			
 			!get_remote_capability_postcondition(commitment(Me, Capability, _), PostCondition);
-//			!check_condition_true_in_context(PostCondition, Context, PostBool);		//Check if the pre-condition is true within the context
 			!check_condition_true_in_context(Capability, PostCondition, Context, AssignmentList, PostBool);
 		} 
 		else {PostBool=false;}
 		
-		if (PreBool=true & PostBool=false) 	{Validity=true;}
-		if (PreBool=true & PostBool=true) 	{!check_action_validity(Capability,Context,Validity);}
-		if (PreBool=false) 					{Validity=false;}
+		if (PreBool==true & PostBool==false) 	{Validity=true;}
+		if (PreBool==true & PostBool==true) 	{!check_action_validity(Capability,Context,Validity);}
+		if (PreBool==false) 					{Validity=false;}
 	.
 	
 /* 
@@ -99,15 +94,14 @@
 		Lifecycle = capability_lifecycle( Pack,Context,ready )
 	<-
 		!check_condition_true_in_context(_, PreCondition, Context, AssignmentList, PreBool);
-//		!check_condition_true_in_context(PreCondition, Context, PreBool);
-		
+				
 		//Is the pre-condition is satisfied, proceed checking the post-condition
-		if (PreBool=true) 					{!check_condition_true_in_context(_, PostCondition, Context, AssignmentList, PostBool);}//{!check_condition_true_in_context(PostCondition, Context, PostBool);} 
+		if (PreBool==true) 					{!check_condition_true_in_context(_, PostCondition, Context, AssignmentList, PostBool);}//{!check_condition_true_in_context(PostCondition, Context, PostBool);} 
 		else 								{PostBool=false;}
 		
-		if (PreBool=true & PostBool=false) 	{Validity=true;}
-		if (PreBool=true & PostBool=true) 	{!check_action_validity(PreCondition,PostCondition,Context,Validity);}
-		if (PreBool=false) 					{Validity=false;}
+		if (PreBool==true & PostBool==false) 	{Validity=true;}
+		if (PreBool==true & PostBool==true) 	{!check_action_validity(PreCondition,PostCondition,Context,Validity);}
+		if (PreBool==false) 					{Validity=false;}
 	.
 	
 /* 
@@ -180,13 +174,14 @@
 		.my_name(Me);
 		!get_remote_capability_precondition(commitment(Me,Capability,_), PreCondition);
 		!check_task_conditions_in_context(TaskPre, TaskPost, Context, AssignmentList, ValidityTaskPre);
+		
 		!check_capability_precondition_in_context(Capability, Context, AssignmentList, ValidityPre);
 		
 		.eval(Validity, ValidityPre & ValidityTaskPre /*[TODO] & NormValidity*/);
-		if(Validity=true)
+		if(Validity)
 		{
 			!check_capability_parameters_in_context(Capability,Context,AssignmentList, ValidityPar);
-			if (ValidityPar==true)
+			if (ValidityPar)
 			{	
 				NewLifecycle = capability_lifecycle( Pack, Context, active );					//Change from ready to active state and start a new life cycle
 				!!capability_achievement_lifecycle(Capability,NewLifecycle, TaskPre,TaskPost,AssignmentList);
@@ -376,10 +371,13 @@
 		
 		//Test the condition within the current world state
 		if(not .empty(AssignmentSet))	
-		{
-			!test_condition(Condition, AssignmentSet, UpdatedAccumulation, Bool);
+		{	
+			!check_if_par_condition_addresses_accumulation(Condition, UpdatedAccumulation, [], [], _, Bool, _);
 		}
-		else							{!test_condition(Condition, UpdatedAccumulation, Bool);}
+		else							
+		{
+			!test_condition(Condition, UpdatedAccumulation, Bool);
+		}
 	.
 //TODO da eliminare.....
 +!check_condition_true_in_context(Condition, Context, Bool)

@@ -39,8 +39,7 @@
 		}
 		if(execution(deployment))
 		{
-			//Try to load the default database configuration from file ~./musa/config.properties
-			loadDefaultDatabaseConfiguration(Success);
+			!loadDefaultDatabaseConfiguration(Success);
 			
 			//If file doesn't exists nor file can't be read, set the default hard-coded
 			//database configuration (in configuration.asl)
@@ -50,9 +49,23 @@
 			}
 		}
 		
-		!updateLocalHost;
+//		!updateLocalHost;
 		clearJobsAndEntries;	// MAYBE SOME JOB OR ENTRY PERSISTED TO MAS END		
 	.
+
+
++!loadDefaultDatabaseConfiguration(Success)
+	<-
+		//Try to load the default database configuration from file ~./musa/config.properties
+		loadDefaultDatabaseConfiguration(Success);
+	
+		if(Success)
+		{
+			!updateLocalHost;
+		}
+			
+	.
+	
 
 /**
  * Load the default MUSA database configuration
@@ -66,6 +79,7 @@
 		?default_db_ip(Ip);
 		
 		set_default_database(User, Port, Pass, DbName, Ip);
+		updateLocalHost;
 	.
 
 

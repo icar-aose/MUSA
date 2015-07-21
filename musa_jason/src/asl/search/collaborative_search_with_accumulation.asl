@@ -195,7 +195,7 @@
 					 ag([]),
 					 0 );
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet,[], Item , Pack, MaxDepth, []);
-
+		
 		!orchestrate_search_with_accumulation(InitSolutions, MaxSolution, Pack, Members, MaxDepth, 1, OutSolutions);
 		.print("Init solution: ",InitSolutions,"\n\n\n");
 		
@@ -275,7 +275,6 @@
 						 0 );
 			
 			!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet,[], Item , Pack, MaxDepth, []);
-			
 			!orchestrate_search_with_accumulation([],MaxSolution,Pack,Members,MaxDepth,Steps, OutSol);		
 			
 			//Now prepare the assignments
@@ -303,24 +302,16 @@
 				
 		if (Size>0 & Steps<Max) 
 		{
-			pickItem( StackItem );																		//prendi un item dallo stack
+			pickItem( StackItem );																		//take the highest score item from the stack
 			StackItem = item(_,Accumulation,ag(AddressedGoal), Score);			
-			!get_commitment_from_stack_item(StackItem, CS);												//CS = item+task		
-			
-			if(VB){
-			.print("[orchestrate_search_with_accumulation] STACK ITEM: ",StackItem,"\n");
-			.print("[orchestrate_search_with_accumulation] Accumulation state: ",Accumulation);
-			}
+			!get_commitment_from_stack_item(StackItem, CS);												//CS = item+task
+					
 			Pack = pack(Social,AgentGoalList,Norms,Metrics);
 			
 			/* Verifica se Social è soddisfatto nello stato di accumulazione. Nella verifica possono essere trovati degli assignment (OutAssignmentList),
 			   utilizzati in fase di verifica (vengono applicati allo stato di accumulazione prima di effettuare il test delle condition del goal). */
-			   
-			//Input assignment!!!!
+			
 			!check_if_goal_pack_is_satisfied_in_accumulation(Social,AgentGoalList,Accumulation,[],GoalPackSatisfied, OutAssignmentList);
-			
-			if(VB){.print("[orchestrate_search_with_accumulation] Found assignment ",OutAssignmentList,"for (social) goal ",Social);}
-			
 			if (GoalPackSatisfied) 
 			{	
 				//Concatenate Item and InSolutions into a new list
@@ -335,8 +326,6 @@
 				!unroll_solutions_to_get_task_set(NewSolutions_tmp, TaskTC, TaskFS, OutAssignmentList, NewSolutionTaskAndCS);				//assemblo il task
 				
 				NewSolutions = [item(cs(NewSolutionTaskAndCS),Accumulation,ag(AgentGoalList),Score)]; 
-				
-				if(VB){.print("[orchestrate_search_with_accumulation] Goal Pack satisfied. Found solution(s): ",NewSolutions,"\n\n")};
 				.length(NewSolutionTaskAndCS, SolSize);
 				
 				if (MaxSolution-SolSize > 0) 	{!orchestrate_search_with_accumulation(NewSolutions_tmp,MaxSolution,Pack,Members,MaxDepth,Steps+1,OutSolutions);} 
@@ -349,11 +338,8 @@
 				{
 					!ask_for_hypotetical_capabilities(Members, Accumulation, TaskSet);
 					
-					if(VB){.print("[orchestrate_search_with_accumulation] FOUND TASK SET: ",TaskSet," DOVREBBE ANDARE CON ",OutAssignmentList);}
-					
 					//Update the stack by adding a new solution which contains the found task set 
 					!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet, InSolutions, StackItem, Pack, MaxDepth, OutAssignmentList);	
-					
 				}
 				!orchestrate_search_with_accumulation(InSolutions,MaxSolution,Pack,Members,MaxDepth,Steps+1,OutSolutions);
 			}
@@ -520,7 +506,7 @@
 /*
  * [davide]
  * 
- * Confronta due soluzioni.
+ * Compares two solutions.
  */
 +!compare_solutions(Item1,Item2,EqBool)
 	:
@@ -549,7 +535,6 @@
 		
 		.eval(EqBool,EqCPBool&TCequal&FSequal);
 	.
-
 +!compare_solutions(Item1,Item2,EqBool)
 	:
 		Item1=item(task(TC1,FS1,_,cs(CS1),_,_),_,_,_,_) &
@@ -615,8 +600,7 @@
 	<-
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(CS, InSolutions, StackItem, Pack, MaxDepth, AssignmentList);
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);		//Recursive call	
-	.	
-	
+	.		
 +!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,StackItem,Pack,MaxDepth,AssignmentList)
 	:
 		CPSet		= [ Head | Tail ]									
@@ -632,9 +616,9 @@
 		!apply_accu_evolution_operator([Head], Accumulation, AccuNext);		
 		
 		!unroll_solution_to_get_commitment_set(CSold, 	CSinItem);
-		.union(CSinItem,[Head],CSnew);																//Merge the input commitment with the old commitment set
+		.union(CSinItem,[Head],CSnew);																										//Merge the input commitment with the old commitment set
 		
-		!unroll_agent_goals_to_get_addressed_goals(AgentGoalList,AccuNext,OldAssignment,AddressedGoal, _); 				//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made). 
+		!unroll_agent_goals_to_get_addressed_goals(AgentGoalList,AccuNext,OldAssignment,AddressedGoal, _); 									//Get the list of satisfied goals in AccuNext (in which all the necessary substitutions have been made). 
 		!score_sequence_on_accumulation(CSnew,InSolutions,AccuNext,Pack,AddressedGoal,MaxDepth,OldAssignment, NewScore);
 		
 		.union(OldAssignment, AssignmentList, NewAssignment);																				//Concatenate old and new assignment sets
@@ -652,9 +636,11 @@
 				   NewScore);			//Insert the new item into the stack
 		
 		//recursive call
-		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);							//Recursive call on next capability			
+		!unroll_capabilities_to_update_stack_and_score_on_accumulation(Tail,InSolutions,StackItem,Pack,MaxDepth, AssignmentList);			//Recursive call on next capability			
 	.
 +!unroll_capabilities_to_update_stack_and_score_on_accumulation(CPSet,InSolutions,Item,Pack,MaxDepth,AssignmentList) : CPSet=[].
+
+
 
 
 +!debug_unroll_agent_goals_to_get_addressed_goals
@@ -796,17 +782,12 @@
 		}
 	.
 	
-	
-	
-	
-	
-	
-	
-	
-	
 //il costo delle capability in blacklist viene calcolato prima della pianificazione
 //per motivi di efficienza.
-+!get_blacklisted_cs_score(CS,Score)
+/**
+ * Calculate the score of the given commitment set.
+ */
++!get_blacklisted_cs_score(CS, Score)
 	:
 		CS 		= [Head|Tail] &
 		Head 	= task(_, _, _, cs(TaskCS), _, _) 
@@ -838,12 +819,6 @@
 	<-
 		Score = 0;
 	.
-
-
-
-
-
-
 
 +!unroll_metrics_on_accumulation_to_calculate_domain_score(Metrics,Weight,CS,Accumulation,DomainScore)
 	:
@@ -1134,26 +1109,6 @@
 		}
 		if(VB) {.println("[ask_for_hypotetical_capabilities]selected capabilities:",CommitmentSet);}
 
-		
-//		if(BlacklistEnabled)
-//		{
-//			.my_name(Me);
-//			.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), LocalBlacklistedCommitmentSet);
-//			
-//			if (.empty(Members))	
-//			{
-//				BlacklistedCS = LocalBlacklistedCommitmentSet
-//			}
-//			else					
-//			{
-//				!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
-//				.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
-//			}
-//			
-//			!numeric_timestamp(CurrentTimeStamp);
-//			!update_capability_blacklist(BlacklistedCS, CurrentTimeStamp, Context);
-//		}
-		
 		//Costruisco lista di task
 		!build_task_list_from_commitment_set(CommitmentSet, TaskSet);
 	.
@@ -1232,7 +1187,7 @@
 		-max_time_for_collecting(Token,MaxCounter);
 	.
 //#########################################################
-//		REQUEST FOR CS
+//		COLLABORATION REQUEST FOR CS
 //#########################################################
 +collaboration_request(Token,MaxCounter,Request)[source(Manager)]
 	:
@@ -1249,7 +1204,7 @@
 		-max_time_for_collecting(Token,MaxCounter);
 	.	
 //#########################################################
-//		REQUEST FOR BLACKLISTED CS
+//		COLLABORATION REQUEST FOR BLACKLISTED CS
 //#########################################################
 +collaboration_request(Token,MaxCounter,Request)[source(Manager)]
 	:
@@ -1315,8 +1270,6 @@
 		
 		.union(AllSimpleCapabilities, AllParCapabilities, AllCapabilities_tmp);													//ALLcapabilities
 		.union(OutFilteredCapabilities, AllCapabilities_tmp, AllCapabilities);
-		
-		
 		
 		!filter_capabilities_that_triggers_on_accumulation(AllCapabilities, Accumulation, CapabilitiesThatTriggersAcc);
 		!filter_capabilities_that_create_a_new_world_in_accumulation(CapabilitiesThatTriggersAcc, Accumulation, CommitmentSet);

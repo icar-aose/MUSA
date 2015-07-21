@@ -11,6 +11,10 @@ import java.io.IOException;
 
 import musa_gdrive.GoogleDrive;
 
+/**
+ * 
+ * @author davide
+ */
 public class createSpreadsheet  extends DefaultInternalAction 
 {
 	private final String json_app_secret_key_fname = "/home/davide/client_secrets.json";

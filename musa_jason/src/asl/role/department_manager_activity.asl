@@ -29,22 +29,21 @@
 		.term2string(PackName,PackNameString);
 		
 		?boss(Boss);
-		.send(Boss, tell, musa_status(call_for_manager));
+		.send(Boss, achieve, set_musa_status(call_for_manager));
 		
 		!build_goal_pack(PackName,Pack);
 		!check_if_I_am_able_to_manage_dpt( Pack, ManagerBool);
 		
 		//Initiate the logger for MUSA
 		action.initiateLogger(DptNameString);
-		
 		.my_name(Me);
 		
-		if (ManagerBool=true) 
+		if (ManagerBool) 
 		{	
 			.print("I'm able to manage dpt");
 			applyAsDptManager(Me,PackName,Result);
 			
-			if (Result=true) 
+			if (Result) 
 			{
 				occp.logger.action.info("Agent [",Me,"] is going to manage department",DptNameString);
 				.print("I'm going to manage department for pack ",Pack);

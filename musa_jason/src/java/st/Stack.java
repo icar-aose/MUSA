@@ -73,8 +73,7 @@ public class Stack extends Artifact {
 		
 		stack.add(item);
 		
-//		if(stack.add(item))		System.out.println("INSERT: "+cs);
-//		else					System.out.println("CANNOT INSERT: "+cs);
+//		stackLog();
 	}
 	
 	@OPERATION void pickItem(OpFeedbackParam<StackItem> item) 

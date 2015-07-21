@@ -36,7 +36,8 @@ blacklist_verbose(false).
 blacklist_expiration(0,1,0). //HH,MM,SS
 //#################################
 
-search_number_of_steps(5000).//5000
+//search_number_of_steps(5000).//5000
+search_number_of_steps(50).
 search_number_of_solutions(5).
 search_max_depth(24).
 max_time_for_collecting(10).
@@ -90,7 +91,7 @@ default_db_ip("194.119.214.121").
 //#############################################
 // CLEAR THE DATABASE ON STARTUP
 //#############################################
-clearDatabase(false).
+clearDatabase(true).
 
 
 
@@ -102,3 +103,12 @@ clearDatabase(false).
 //#############################################
 track_capability_status(true).
 
+track_musa_status(true).
+
+
+
+//#############################################
+//When in deployment execution, simulate a 
+//request when a goal pack is injected.
+//#############################################
+simulate_request_in_deployment(false).

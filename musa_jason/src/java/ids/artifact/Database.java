@@ -197,17 +197,19 @@ public class Database extends Artifact
 	@OPERATION
 	void clear() 
 	{
-		DepartmentTable dpt_table 	= new DepartmentTable();
-		ProjectTable project_table 	= new ProjectTable();
+//		DepartmentTable dpt_table 	= new DepartmentTable();
+//		ProjectTable project_table 	= new ProjectTable();
 		ValueTable value_table 		= new ValueTable();
 		StateTable state_table 		= new StateTable();
+		CapabilityStatusTable cap_status_table = new CapabilityStatusTable();
 		
 		try 
 		{
 			state_table.deleteAll();
 			value_table.deleteAll();
-			project_table.deleteAll();
-			dpt_table.deleteAll();
+//			project_table.deleteAll();
+//			dpt_table.deleteAll();
+			cap_status_table.deleteAll();
 		} 
 		catch (SQLException e) 
 		{

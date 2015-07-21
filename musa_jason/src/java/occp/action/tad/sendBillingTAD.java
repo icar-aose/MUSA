@@ -46,7 +46,7 @@ public class sendBillingTAD extends DefaultInternalAction
 	{
 		billing_filename 				= args[0].toString().replace("\"", "");
 		final String user_email 		= args[1].toString().replace("\"", "");		
-		final String order_id 			= OCCPRequestParser.getIdOrdine();
+		final String order_id 			= OCCPRequestParser.getIdOrdine() == null ? "0" : OCCPRequestParser.getIdOrdine();
 		final JSONArray product_details = OCCPRequestParser.getProductMessage();
 		
 		final Billing b = new Billing(billing_filename);		
@@ -63,19 +63,25 @@ public class sendBillingTAD extends DefaultInternalAction
 		b.set_customer_email(user_email);
 
 		//Iterate through products
-		for(int i=0;i<product_details.length();i++)
+		if(product_details != null)
 		{
-			JSONObject data = product_details.getJSONObject(i);
-			
-			String nome_prodotto 	= data.getString("nome_prodotto") != null ? data.getString("nome_prodotto") : "";
-			String prezzo 			= data.getString("prezzo") != null ? data.getString("prezzo") : "";
-			/*INUTILIZZATA*/String descrizione 		= data.getString("descrizione") != null ? data.getString("descrizione") : "";
-			String quantita 		= data.getString("quantita") != null ? data.getString("quantita") : "";
-			/*INUTILIZZATA*/String tipologia 		= data.getString("tipologia") != null ? data.getString("tipologia") : "";
-			
-			//Append a product entry into the PDF billing
-			b.add_billing_entry(OCCPRequestParser.getDataCreazioneOrdine(), nome_prodotto, quantita , prezzo );
+			for(int i=0;i<product_details.length();i++)
+			{
+				JSONObject data = product_details.getJSONObject(i);
+				
+				String nome_prodotto 	= data.getString("nome_prodotto") != null ? data.getString("nome_prodotto") : "";
+				String prezzo 			= data.getString("prezzo") != null ? data.getString("prezzo") : "";
+				/*INUTILIZZATA*/String descrizione 		= data.getString("descrizione") != null ? data.getString("descrizione") : "";
+				String quantita 		= data.getString("quantita") != null ? data.getString("quantita") : "";
+				/*INUTILIZZATA*/String tipologia 		= data.getString("tipologia") != null ? data.getString("tipologia") : "";
+				
+				//Append a product entry into the PDF billing
+				b.add_billing_entry(OCCPRequestParser.getDataCreazioneOrdine(), nome_prodotto, quantita , prezzo );
+			}
 		}
+		else
+			b.add_billing_entry("2015-12-25", "Product", "1" , "99" );
+		
 		
 		//Create the billing
 		b.populate_document();

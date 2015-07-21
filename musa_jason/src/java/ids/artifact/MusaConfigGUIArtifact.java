@@ -8,14 +8,17 @@ import gui.goalSPECparameterGUI;
 import ids.database.GoalTable;
 import ids.model.Entity;
 import ids.model.GoalEntity;
+import jason.architecture.AgArch;
 import jason.asSyntax.ASSyntax;
 import jason.asSyntax.ListTerm;
 import jason.asSyntax.ListTermImpl;
 import jason.asSyntax.Term;
 import jason.asSyntax.parser.ParseException;
 import jason.mas2j.AgentParameters;
+import jason.mas2j.ClassParameters;
 import jason.mas2j.MAS2JProject;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
@@ -38,9 +41,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 
 import workflow_property.MusaProperties;
+import c4jason.CartagoEnvironment;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -267,7 +272,7 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 			
 			setGuiDbTextFieldToCurrentConfiguration();
 			
-			database_is_configured = true;
+//			database_is_configured = true;
 			success.set(true);
 			System.out.println("Loaded default db configuration.");
 			
@@ -290,7 +295,7 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		MusaProperties.setWorkflow_db_ip(database_ip);
 		
 		setGuiDbTextFieldToCurrentConfiguration();	
-		database_is_configured = true;
+//		database_is_configured = true;
 		
 		loadGoalSPECFromDB();
 		System.out.println("Loaded default (hard-coded) db configuration.");		
@@ -374,7 +379,7 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 //			JOptionPane.showMessageDialog(gui, "Please configure MUSA database first.");
 //			return;
 //		}
-
+		UIManager.put("OptionPane.minimumSize",new Dimension(650,80)); 
 		String s = (String)JOptionPane.showInputDialog("Please insert parameters list", "[param(user_message,\"Fallito\"),param(userAccessToken,\"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR\"),param(idOrder,\"0\"),param(mailUser,\"musa.customer.service@gmail.com\"),param(idUser,\"116\")]");		
 		
 		if(s != null)
@@ -423,6 +428,8 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		//TODO
 //		loadGoalsFromDB();
 		
+		signal("updateLocalHost");
+		
 		database_is_configured = true;
 		JOptionPane.showMessageDialog(gui, "Database configured.");
 	}
@@ -466,7 +473,8 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		}
 		//Add a belief to the observer agent. The plan triggered is responsible
 		//for gathering the parsed goals and communicating to all agents.
-		this.defineObsProperty("injectJasonGoals");
+//		this.defineObsProperty("injectJasonGoals");
+		signal("injectJasonGoals", injectedJasonGoals );
 		
 		JOptionPane.showMessageDialog(gui, "Goals injected correctly");
 	}
@@ -571,11 +579,15 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 	private void loadJasonPackFromFile(ActionEvent ev)
 	{
 		BufferedReader in 	= null;
+		String str			= null;
 		String filename 	= chooseFile();
-		String str;
+		
+		if(filename == null)
+			return;
 		
 		try 
 		{
+			gui.clearJasonGoalsTextArea();
 			in = new BufferedReader(new FileReader(filename));
 			
 			while ((str = in.readLine()) != null)
@@ -626,6 +638,9 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		String filename 	= chooseFile();
 		String str;
 		
+		if(filename == null)
+			return;
+		
 		try 
 		{
 			in = new BufferedReader(new FileReader(filename));
@@ -649,6 +664,9 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		BufferedReader in 	= null;
 		String filename 	= chooseFile();
 		String str;
+		
+		if(filename == null)
+			return;
 		
 		try 
 		{
@@ -743,10 +761,14 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 	void addNewAgent(ActionEvent evt)
 	{
 		String filename_path	= chooseFile();
+		
+		if(filename_path == null)
+			return;
+		
 		File f 					= new File(filename_path);
 		String agName 			= f.getName().substring(0, f.getName().lastIndexOf("."));
-		
 		gui.addAgent(agName);
+		CartagoEnvironment ce = new CartagoEnvironment();
 		
 		defineObsProperty("addNewAgent", agName, filename_path );	
 	}
@@ -764,6 +786,7 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 
 		jason.mas2j.parser.mas2j parser = new jason.mas2j.parser.mas2j(is);
 		MAS2JProject project;
+		
 		try 
 		{
 			project = parser.mas();
@@ -772,6 +795,7 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 			for (AgentParameters ap: project.getAgents()) 
 			{
 				String agName = ap.name;
+
 				for (int cAg = 0; cAg < ap.getNbInstances(); cAg++) 
 				{
 					String numberedAg = agName;

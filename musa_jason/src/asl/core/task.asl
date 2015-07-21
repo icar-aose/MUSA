@@ -113,13 +113,8 @@
 		!get_goal_FS([Head], [GoalFS|_]);		//Get the goal FS
 		
 		!search_for_item_that_satisfy_goal_conditions(AG_items, GoalTC, GoalFS, OutItemsTmp);		//Search for items that satisfy the current item TC and FS
-		.print("OutItemsTmp: ",OutItemsTmp);
-		
-		
 		!get_item_with_higher_score(OutItemsTmp, BestItemForCurrentGoal, BestScore);				//Get the item with the higher score
-		.print("BestItemForCurrentGoal: ",BestItemForCurrentGoal);
-		
-		
+
 		.union(BestItemForCurrentGoal, OutItemsRec, OutItems);										//Add the found item into the output item list
 	.
 	

@@ -14,6 +14,10 @@ import musa_dropbox.Dropbox;
 
 import com.dropbox.core.DbxException;
 
+/**
+ * 
+ * @author davide
+ */
 @SuppressWarnings("serial")
 public class upload_file_to_dropbox extends DefaultInternalAction 
 {

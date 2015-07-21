@@ -17,6 +17,14 @@ import workflow_property.MusaProperties;
 import com.dropbox.core.DbxEntry;
 import com.dropbox.core.DbxException;
 
+/**
+ * DEPRECATA
+ * 
+ * 
+ * 
+ * @author davide
+ *
+ */
 public class upload_billing_to_cloudTAD extends DefaultInternalAction 
 {
 	private final String DROPBOX_SERVICE_LABEL 		= "Dropbox";

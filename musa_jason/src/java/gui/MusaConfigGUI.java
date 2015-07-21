@@ -546,6 +546,11 @@ public class MusaConfigGUI extends javax.swing.JFrame
 //		selectedGoalPack = s;
     }
     
+    public void clearJasonGoalsTextArea()
+    {
+    	this.jasonBeliefTextArea.setText(null);
+    }
+    
     public void addCapability(String elem)
     {
     	this.AgentCapabilityListModel.addElement(elem);

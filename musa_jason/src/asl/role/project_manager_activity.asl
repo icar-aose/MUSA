@@ -28,14 +28,14 @@
 		!build_goal_pack(SocialGoal,Pack);
 		!organize_solution(Context,Pack);
 	.
-//-!create_project(DepartmentName, ProjectName)
-//	<-
-//		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-//		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-//		?frequency_long_perception_loop(Delay);
-//		.wait(Delay);
-//		!!create_project(DepartmentName,ProjectName);
-//	.
+-!create_project(DepartmentName, ProjectName)
+	<-
+		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
+		?frequency_long_perception_loop(Delay);
+		.wait(Delay);
+		!!create_project(DepartmentName,ProjectName);
+	.
 
 /**
  * [davide]
@@ -103,8 +103,8 @@
 			!prepare_blacklist(Context, Members, BlacklistScore)
 		}
 		
-//		?boss(Boss);
-//		.send(Boss, tell, musa_status(organizing_solution));
+		?boss(Boss);
+		.send(Boss, achieve, set_musa_status(organizing_solution));
 		
 		!numeric_timestamp(StartOrchestrationTS);
 		!orchestrate_search_in_solution_space(Accumulation_state,Pack,Members,[TheSolution|_]);
@@ -131,8 +131,8 @@
 
 			.print("Soluzione finale: ",TheSolutionWithAssignment);
 			
-//			?boss(Boss);
-//			.send(Boss, tell, musa_status(executing_solution));
+			?boss(Boss);
+			.send(Boss, achieve, set_musa_status(executing_solution));
 			
 			//Start the social commitment
 //			occp.logger.action.info("Activating social commitment");
@@ -562,8 +562,8 @@
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 		!social_terminate_the_project(Context,Solution);
 		
-//		?boss(Boss);
-//		.send(Boss, tell, musa_status(ready));
+		?boss(Boss);
+		.send(Boss, achieve, set_musa_status(ready));
 		
 	.
 +!project_lifecycle(Project,Lifecycle)

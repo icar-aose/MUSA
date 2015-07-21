@@ -5,7 +5,7 @@
 
 agent_capability(deliver_billing)[type(parametric)].
 capability_parameters(deliver_billing, [billingFilename, theRecipient, orderId, recipientEmail]).
-capability_precondition(deliver_billing, condition(true) ).
+capability_precondition(deliver_billing, par_condition([order_id], [property(order_checked,[order_id]), property(order_status,[accepted])]) ).
 capability_postcondition(deliver_billing, par_condition([billingFilename, theRecipient, orderId, recipientEmail], property(billing_delivered,[billingFilename, theRecipient, orderId, recipientEmail])) ).
 capability_cost(deliver_billing,0).
 capability_evolution(deliver_billing,[add( billing_delivered(billingFilename, theRecipient, orderId, recipientEmail) )]).
@@ -13,7 +13,7 @@ capability_evolution(deliver_billing,[add( billing_delivered(billingFilename, th
 
 agent_capability(upload_billing_to_google_drive)[type(parametric)].
 capability_parameters(upload_billing_to_google_drive, [user_id,user_email,billingFilename]).
-capability_precondition(upload_billing_to_google_drive, condition(true) ).
+capability_precondition(upload_billing_to_google_drive, par_condition([billingFilename, theRecipient, orderId, recipientEmail], property(billing_delivered,[billingFilename, theRecipient, orderId, recipientEmail])) ).
 capability_postcondition(upload_billing_to_google_drive, par_condition([user_id,user_email,billingFilename],property(billing_uploaded_to_gdrive,[user_id,user_email,billingFilename])) ).
 capability_cost(upload_billing_to_google_drive,0).
 capability_evolution(upload_billing_to_google_drive,[add( billing_uploaded_to_gdrive(user_id,user_email,billingFilename) ),add( billing_uploaded(user_id) )]).
@@ -26,25 +26,16 @@ capability_evolution(upload_billing_to_google_drive,[add( billing_uploaded_to_gd
 //#################################################################
 
 
-
-
-
-
-
-
-
-
-
 agent_capability(upload_billing_to_dropbox)[type(parametric)].
 capability_parameters(upload_billing_to_dropbox, [user_id,the_access_token,billingFilename]).
-capability_precondition(upload_billing_to_dropbox, condition(true) ).
+capability_precondition(upload_billing_to_dropbox, par_condition([billingFilename, theRecipient, orderId, recipientEmail], property(billing_delivered,[billingFilename, theRecipient, orderId, recipientEmail])) ).
 capability_postcondition(upload_billing_to_dropbox, par_condition([user_id,the_access_token,billingFilename],property(billing_uploaded_to_dropbox,[user_id,the_access_token,billingFilename])) ).
 capability_cost(upload_billing_to_dropbox,0).
 capability_evolution(upload_billing_to_dropbox,[add( billing_uploaded_to_dropbox(user_id,the_access_token,billingFilename) ), add( billing_uploaded(user_id) )]).
 
 agent_capability(fulfill_order)[type(parametric)].
 capability_parameters(fulfill_order, [order_id,user_id]).
-capability_precondition(fulfill_order, condition(true) ).
+capability_precondition(fulfill_order, par_condition([user_id], property(billing_uploaded,[user_id])) ).
 capability_postcondition(fulfill_order, par_condition([order_id,user_id],property(fulfill_order,[order_id,user_id])) ).
 capability_cost(fulfill_order,0).
 capability_evolution(fulfill_order,[add( fulfill_order(order_id,user_id) )]).
@@ -67,7 +58,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 
 
 
-
+fail(upload_billing_to_google_drive).
 
 //!awake.
 
@@ -131,7 +122,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 		!get_variable_value(Assignment, Context, theRecipient, User_id);
 		!get_variable_value(Assignment, Context, recipientEmail, User_email);
 		
-//		occp.action.tad.sendBillingTAD(BillingFileName, User_email);
+		occp.action.tad.sendBillingTAD(BillingFileName, User_email);
    		occp.logger.action.info("[deliver_billing] Billing for user ",User_id," related to order ",Order_id," sent to email address ",User_email);
     
 	    .print("...-.-.-.-.-.-.-.-.-.-.-.--.-.-.-.-.-.-.- deliver_billing ACTION OK");
@@ -145,6 +136,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 	.
 //-------------------------------------
 //upload_billing_to_dropbox---------
++!action(upload_billing_to_dropbox, Context, Assignment)	: fail(upload_billing_to_dropbox).
 +!prepare(upload_billing_to_dropbox, Context, Assignment) 	
 	<- 
 		true
@@ -156,7 +148,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 	
 		!get_variable_value(Assignment, Context, the_access_token, Access_Token);
 		!get_variable_value(Assignment, Context, billingFilename, BillingFileName);
-//		occp.action.upload_file_to_dropbox(BillingFileName, Access_Token);
+		occp.action.upload_file_to_dropbox(BillingFileName, Access_Token);
 		
 		!register_statement(billing_uploaded_to_dropbox(user,accesstoken,billing), Context);
 		!register_statement(billing_uploaded(user), Context);
@@ -165,7 +157,8 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 
 //-------------------------------------
 //upload_billing_to_google_drive-------
- +!prepare(upload_billing_to_google_drive, Context, Assignment) 
++!action(upload_billing_to_google_drive, Context, Assignment)	: fail(upload_billing_to_google_drive).
++!prepare(upload_billing_to_google_drive, Context, Assignment) 
 	<- 
 		true
 	.
@@ -176,7 +169,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 		!get_variable_value(Assignment, Context, user_email, Email);
 		!get_variable_value(Assignment, Context, billingFilename, BillingFileName);
 
-//		occp.action.upload_file_to_googledrive(BillingFileName, Email);
+		occp.action.upload_file_to_googledrive(BillingFileName, Email);
 	
 		!register_statement(billing_uploaded(user), Context);
 		!register_statement(billing_uploaded_to_gdrive(user,email,billing),Context); 

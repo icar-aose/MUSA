@@ -439,9 +439,7 @@
 		//Passo2
 		!find_substitution_for_par_condition(CN, PA, InAssignment, OutAssignment, Success);
 		
-		
-		
-		if(Success=true)
+		if(Success)
 		{
 			//Passo3
 			!apply_substitution_to_Accumulation(Acc ,OutAssignment, AccII);
@@ -464,10 +462,9 @@
 //			.print("@@@@@@@@@@@@@@@@ InAssignment = ",InAssignment);
 //			.print("@@@@@@@@@@@@@@@@ OutAssignment = ",OutAssignment);
 //			.print("@@@@@@@@@@@@@@@@ VarsAssigned = ",VarsAssigned);
-			if(VarsAssigned = false)
+			if(VarsAssigned == false)
 			{
 				Bool = false;
-				
 			}
 			else
 			{
