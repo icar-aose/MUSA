@@ -16,9 +16,10 @@ package ids.artifact;
 
 
 import http.Server;
-import http.handlers.occp_request_handler;
+import http.handlers.occp.occp_request_handler;
 import jason.asSyntax.ListTerm;
 
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -83,10 +84,72 @@ public class HTTPProxy extends Artifact implements Observer
 			case SET_DEFAULT_DB_CONFIG:
 				execInternalOp("notify_set_default_db_config");
 				break;
+			case UNSET_CAPABILITY_FAILURE:
+				execInternalOp("notify_unset_capability_failure_state", arg.toString());
+				break;
+				
+			case CAPABILITY_INJECTION:
+				execInternalOp("notify_inject_capability", arg);
+				break;
+				
+			case OCCP_BILLING_APPROVAL:
+				execInternalOp("notify_occp_billing_approval");
+				break;
+				
+			case OCCP_SIMULATE_REQUEST:
+				execInternalOp("notify_simulate_occp_request");
+				break;
 			default:
 				break;
 		
 		}		
+	}
+	
+	@INTERNAL_OPERATION
+	void notify_simulate_occp_request()
+	{
+		signal("simulate_occp_request");
+	}
+	
+	@INTERNAL_OPERATION
+	void notify_occp_billing_approval()
+	{
+		
+	}
+	
+	
+	
+	@INTERNAL_OPERATION
+	void notify_inject_capability(Object cap_info_obj)
+	{
+		HashMap<String,String> cap_info = (HashMap<String,String>)cap_info_obj;
+		
+		String agent_owner 		= cap_info.remove("agent_owner");
+		String capability_plans = cap_info.remove("capability_plans").replaceAll("\\s", ""); 
+		String prepare_plan = "";
+		String action_plan = "";
+		String terminate_plan = "";
+		
+		String[] plans = capability_plans.split("\\+!");
+		for (String plan : plans)
+		{
+			if(plan.startsWith("prepare"))		prepare_plan	= "+!"+plan;
+			if(plan.startsWith("action"))		action_plan		= "+!"+plan;
+			if(plan.startsWith("terminate"))	terminate_plan	= "+!"+plan;
+		}
+		
+		String cap_name 		= cap_info.remove("capability_name");
+		String cap_type 		= cap_info.remove("capability_type");
+		String cap_params 		= cap_info.remove("capability_parameters");
+		String cap_pre 			= cap_info.remove("capability_precondition");
+		String cap_post 		= cap_info.remove("capability_postcondition");
+		String cap_cost 		= cap_info.remove("capability_cost");
+		String cap_evo 			= cap_info.remove("capability_evolution");
+		
+		System.out.println("Sending signal. Agent: "+agent_owner);
+		
+		signal("inject_implementation_capability",agent_owner, prepare_plan, action_plan, terminate_plan);
+		signal("inject_abstract_capability",agent_owner, cap_name, cap_type, cap_params, cap_pre, cap_post, cap_cost, cap_evo);
 	}
 	
 	@INTERNAL_OPERATION
@@ -118,6 +181,12 @@ public class HTTPProxy extends Artifact implements Observer
 	void notify_capability_failure_state(String capName)
 	{
 		signal("submitCapabilityFailure",capName);
+	}
+	
+	@INTERNAL_OPERATION
+	void notify_unset_capability_failure_state(String capName)
+	{
+		signal("unsetCapabilityFailure",capName);
 	}
 	
 	@INTERNAL_OPERATION

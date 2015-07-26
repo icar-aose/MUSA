@@ -129,7 +129,6 @@
 	<-
 		!get_best_item_solution_for_goals(AG_items, GoalList, AG_items_filtered);
 		
-		.print("(",TaskTC,") AG_items_filtered: ",AG_items_filtered);
 		!extract_tasks_from_item_set(AG_items_filtered, TaskSet);						//Unroll the solution to obtain the task set
 		!unroll_solution_to_get_commitment_set(TaskSet, AGCommitmentSet);				//Unroll the task set to obtain the commitment set
 		!unroll_solution_to_get_commitment_set(SG_CS, SGCommitmentSet);					//Unroll the solution commitment set
@@ -172,7 +171,7 @@
 		
 		//Search solutions for agent goal set
 		!search_solution_for_agent_goals(AG_list, InputAccumulation, MaxSolution, Members, MaxDepth, 1, InitSolutions);	//restituisce ITEMS
-		.print("InitSolutions: ",InitSolutions);
+//		.print("InitSolutions: ",InitSolutions);
 		.wait(4000);
 		//After searching for agent goal solutions, clear the stack for searching the solution for the social goal 
 		clearStack;	
@@ -197,11 +196,11 @@
 		!unroll_capabilities_to_update_stack_and_score_on_accumulation(TaskSet,[], Item , Pack, MaxDepth, []);
 		
 		!orchestrate_search_with_accumulation(InitSolutions, MaxSolution, Pack, Members, MaxDepth, 1, OutSolutions);
-		.print("Init solution: ",InitSolutions,"\n\n\n");
+//		.print("Init solution: ",InitSolutions,"\n\n\n");
 		
 		occp.logger.action.info("END SEARCH");
 		.println("END SEARCH");
-		.println("Out solution: ",OutSolutions);
+//		.println("Out solution: ",OutSolutions);
 		
 		/**
 		 * ASSEMBLAMENTO DELLE SOLUZIONI FINALI (CIOE' SCELTA DELLA SOLUZIONE MIGLIORE).
@@ -213,8 +212,8 @@
 
 		!assemble_final_solution_pack(SGitems, InitSolutions, AG_list, MergedSolution);
 		
-		.print("Best solution found: ",MergedSolution);
-		 occp.logger.action.info("Best solution found: ",MergedSolution);
+//		.print("Best solution found: ",MergedSolution);
+//		 occp.logger.action.info("Best solution found: ",MergedSolution);
 		 
 		 MergedSolutions = [MergedSolution];
 		 
@@ -325,7 +324,11 @@
 				
 				!unroll_solutions_to_get_task_set(NewSolutions_tmp, TaskTC, TaskFS, OutAssignmentList, NewSolutionTaskAndCS);				//assemblo il task
 				
-				NewSolutions = [item(cs(NewSolutionTaskAndCS),Accumulation,ag(AgentGoalList),Score)]; 
+				NewSolutions = [item(cs(NewSolutionTaskAndCS),Accumulation,ag(AgentGoalList),Score)];
+				
+				//CALCOLA CARICO DI LAVORO AD AGENTI QUI
+				//!calculate_involved_agents_workload(NewSolutionTaskAndCS);
+				
 				.length(NewSolutionTaskAndCS, SolSize);
 				
 				if (MaxSolution-SolSize > 0) 	{!orchestrate_search_with_accumulation(NewSolutions_tmp,MaxSolution,Pack,Members,MaxDepth,Steps+1,OutSolutions);} 
@@ -502,7 +505,8 @@
 	<-
 		OutCS=[];
 	. 	
-	
+
+
 /*
  * [davide]
  * 
@@ -1217,7 +1221,9 @@
 		+max_time_for_collecting(Token,MaxCounter);
 		
 		.my_name(Me);
-		.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), BlacklistCS);
+		.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS), 			BlacklistCS_1);
+		.findall(commitment(Me,Cap,TS), capability_blacklist(Me,Cap,TS)[source(X)], BlacklistCS_2);
+		.union(BlacklistCS_1,BlacklistCS_2,BlacklistCS);
 		
 		.send(Manager,tell,collaboration_answer(Token,BlacklistCS));
 		-max_time_for_collecting(Token,MaxCounter);

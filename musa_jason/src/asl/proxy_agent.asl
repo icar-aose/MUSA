@@ -17,24 +17,24 @@
 /* Plans */
 
 +!awake 
-	: 
-		execution(deployment) 
+	: 	execution(deployment) 
 	<- 
 		!start_proxy_server;
 	.
 +!awake 
-	: 
-		execution(standalone) 
+	: 	execution(standalone) 
 	<- 
 		!start_proxy_server;
 	.
 +!awake 
-	: 
-		execution(test) 
+	: 	execution(test) 
 	<- 
 		?simulated_request_delay(Delay);
 		.wait(Delay);
 		!simulate_quote_request;
+		
+		
+//		!start_proxy_server;
 	.
 
 /**
@@ -65,7 +65,6 @@
 		Session = "p4_dept";
 		User = user("luca","occp_user");
 		
-		.print("~~~ simulating request ~~~");
 		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
  	.
  +!simulate_occp_request
@@ -132,8 +131,14 @@
 		!create_or_use_proxy_server_artifact(Id1);
 		focus(Id1);
 		
-		occp.logger.action.info("[PROXY] proxy server ready. Running...");
 		run_server;		/* proxy_server -> HTTPProxy artifact */
+	.
+	
+	
++simulate_occp_request
+	<-
+		!simulate_occp_request;
+		.abolish( simulate_occp_request );
 	.
 
 +update_database_configuration
@@ -183,6 +188,17 @@
 		.abolish( submitCapabilityFailure(CapName) );
 	.
 
++unsetCapabilityFailure(CapName)
+	<-
+		?boss(Boss);
+		.send(Boss, tell, unsetCapabilityFailure(CapName));
+		 
+		.abolish( unsetCapabilityFailure(CapName) );
+	.
+
+
+
+
 /**
  * Forward a request to Agent
  */
@@ -202,6 +218,54 @@
 		.println("RECEIVED RESPONSE ",HTML);
 		+response(RequestPath,ParamSet, HTML);
 	.
+
+/**
+ * [davide]
+ * 
+ * Inject a new capability implementation plans (that is, +!action, +!prepare and +!terminate plans).
+ */
++inject_implementation_capability(Agent_owner, Prepare, Action, Terminate)
+	<-
+		.term2string(AgTerm, Agent_owner);
+		.send(AgTerm, tell, inject_implementation_capability_plans(Prepare, Action, Terminate));
+			
+		.abolish( inject_implementation_capability(_,_,_,_) );
+	.
+
+/**
+ * [davide]
+ * 
+ * Inject a new abstract capability
+ */
++inject_abstract_capability(Agent_owner, Cap_name, Cap_type, Cap_params, Cap_pre, Cap_post, Cap_cost, Cap_evo)
+	<-
+		.term2string(AgTerm,Agent_owner);
+		.term2string(CapTerm,Cap_name);
+		.term2string(CapTypeTerm,Cap_type);
+		.term2string(ParamsTerm,Cap_params);
+		.term2string(CapPreTerm,Cap_pre);
+		.term2string(CapPostTerm,Cap_post);
+		.term2string(CapCostTerm,Cap_cost);
+		.term2string(CapEvoTerm,Cap_evo);
+
+		.send(AgTerm, tell, agent_capability(AgTerm,CapTerm)[type(CapTypeTerm)]);
+		.send(AgTerm, tell, capability_parameters(CapTerm, ParamsTerm));
+		.send(AgTerm, tell, capability_precondition(CapTerm, CapPreTerm));
+		.send(AgTerm, tell, capability_postcondition(CapTerm, CapPostTerm));
+		.send(AgTerm, tell, capability_cost(capTerm, CapCostTerm));
+		.send(AgTerm, tell, capability_evolution(CapTerm, CapEvoTerm));
+		
+		.abolish( inject_abstract_capability(_,_,_,_,_,_,_,_) );
+	.
+
+
+
++received_occp_billing_approval
+	<-
+		.send(order_manager, tell, billing_approved);
+		.abolish( received_occp_billing_approval );
+	.
+	
 
 //+!evaluate_reply([A],A).
 //+!evaluate_reply([H|T],H).

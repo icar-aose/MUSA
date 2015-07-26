@@ -20,9 +20,7 @@ capability_postcondition(receive_order, par_condition([order_id,user_id], proper
 capability_cost(receive_order,[0]).
 capability_evolution(receive_order,[add( received_order(order_id,user_id) )]).
 
-
 //---------------------------
-
 agent_capability(place_order)[type(parametric)].
 capability_parameters(place_order, [order_id,user_id]).
 capability_precondition(place_order, par_condition([order_id,user_id], property(received_order,[order_id,user_id])) ).
@@ -44,7 +42,6 @@ capability_evolution(place_order,[add( order_placed(order_id,user_id) )]).
 //capability_cost(monitor_place_order,[10,4]). 
 //capability_evolution(monitor_place_order,[add( order_placed(order_id,user_id) )]).
 //##################
-
 
 //agent_capability(place_order_alternative)[type(parametric)].
 //capability_parameters(place_order_alternative, [order_id,user_id]).
@@ -68,8 +65,6 @@ capability_precondition(set_user_data, par_condition([order_id,user_id], propert
 capability_postcondition(set_user_data, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
 capability_cost(set_user_data,[0]).
 capability_evolution(set_user_data,[add( set_user_data(user_id,user_email) )]). 
-
-
 
 agent_capability(set_user_data_step1)[type(parametric)].
 capability_parameters(set_user_data_step1, [user_id,user_email]).
@@ -100,105 +95,49 @@ capability_postcondition(complete_transaction, condition( done(complete_transact
 capability_cost(complete_transaction,[0]).
 capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
-//!awake.
-
 +!awake
 	<-
 		!awake_as_employee;
-//		!another_debug_test_condition;
-	.
-	
-+!another_debug_test_condition
-	<-
-		CN 	= par_condition([order_id,user_id],property(order_placed,[order_id,user_id]));
-		Acc	= accumulation(world([order_placed(order,user),received_order(order,user)]),par_world([],[]),assignment_list([]));
-		
-//		!test_condition(CN, [], Acc, Bool);
-		!check_if_par_condition_addresses_accumulation(CN, Acc, [], [], OutAssignment, Bool, _);
-		
-		.print("--->",Bool);
 	.
 
+/**
+ * Register the capability receive_order
+ */
 +!register_page(receive_order, Context)
 	<-
-		//Register the capability
-		.print(".-.-.-.-.-> registering capability receive_order");
 		!standard_register_HTTP_page(receive_order, "Receive order ", Context );
 	.
 
-
-
-//set_user_data------------------------
- +!prepare(set_user_data_step1, Context, Assignment) 
-	<- 
-		true
-	.
-
+//set_user_data_step1------------------------
++!prepare(set_user_data_step1, Context, Assignment).
 +!action(set_user_data_step1, Context, Assignment) 
 	<- 
-		.print("..................................................(set_user_data_step1) setting user data...");		
-		occp.logger.action.info("[set_user_data_step1] Setting user data");
-		
 		!register_statement(set_user_data_step1(user,email),Context);
 	.
++!terminate(set_user_data_step1, Context, Assignment).
 
-+!terminate(set_user_data_step1, Context, Assignment) 
-	<- 
-		true
-	.
-//set_user_data------------------------
- +!prepare(set_user_data_step2, Context, Assignment) 
-	<- 
-		true 
-	.
-
+//set_user_data_step2------------------------
++!prepare(set_user_data_step2, Context, Assignment).
 +!action(set_user_data_step2, Context, Assignment) 
-	<- 
-		.print("..................................................(set_user_data_step2) setting user data...");
-		
-		occp.logger.action.info("[set_user_data_step2] Setting user data");
-		
+	<- 		
 		!register_statement(set_user_data(user,email),Context);
 	.
-
-+!terminate(set_user_data_step2, Context, Assignment) 
-	<- 
-		true
-	.
-
-
-
++!terminate(set_user_data_step2, Context, Assignment).
 
 //receive_order------------------------
- +!prepare(receive_order, Context, Assignment) 
-	<- 
-		true
-	.
-
++!prepare(receive_order, Context, Assignment).
 +!action(receive_order, Context, Assignment) 
-	<- 
-		.print("..................................................(receive_order) order received.");
-		
+	<- 		
 		!register_statement(received_order(order,user),Context); 
 	.
++!terminate(receive_order, Context, Assignment).
 
-+!terminate(receive_order, Context, Assignment) 
-	<- 
-		true
-	.
 //-------------------------------------
-//place_order--------------------------
-+!action(place_order, Context, Assignment)  : fail(place_order) <- true.	
-+!terminate(place_order, Context, Assignment)  : fail(place_order) <- true.
-
- +!prepare(place_order, Context, Assignment) 
-	<- 
-		true
-	.	
+//place_order--------------------------	
++!prepare(place_order, Context, Assignment).
++!action(place_order, Context, Assignment)  	: fail(place_order).	
 +!action(place_order, Context, Assignment) 
 	<- 
-		.print("..................................................(place_order) placing order...");
-
 		!get_variable_value(Assignment, Context, order_id, Order_id);
 		!get_variable_value(Assignment, Context, user_id, User_id);
 		
@@ -214,118 +153,61 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
     		occp.logger.action.warn("Variables unbounded (order_id: ",Order_id,", user_id: ",User_id,")");		
     	}
 
-    	.print("[",place_order,"]ACTION TERMINATA CORRETTAMENTE");
-    	
     	!register_statement(order_placed(order,user), Context);
 	.
 
-+!terminate(place_order, Context, Assignment)
-	<- 
-		true
-	.
-
-
++!terminate(place_order, Context, Assignment).
 
 //-------------------------------------
 //place_order_alternative--------------
-	
-+!action(place_order_alternative, Context, Assignment)  : fail(place_order) <- true.	
-+!terminate(place_order_alternative, Context, Assignment)  : fail(place_order) <- true.
 
- +!prepare(place_order_alternative, Context, Assignment) 
-	<- 
-		true
-	.
-
+ +!prepare(place_order_alternative, Context, Assignment).
++!action(place_order_alternative, Context, Assignment)  	: fail(place_order_alternative) <- true.
 +!action(place_order_alternative, Context, Assignment) 
 	<- 
-		.print("..................................................(place_order_alternative) placing order...");
-		
 		!register_statement(order_placed(order,user), Context);
 	.
-+!terminate(place_order_alternative, Context, Assignment) 
-	<- 
-		true
-	.
++!terminate(place_order_alternative, Context, Assignment).
 
 //-------------------------------------
 //place_order_alternative2--------------
++!prepare(place_order_alternative2, Context, Assignment).
 +!action(place_order_alternative2, Context, Assignment)  : fail(place_order).
-+!terminate(place_order_alternative2, Context, Assignment)  : fail(place_order).
-+!prepare(place_order_alternative2, Context, Assignment) .
-
 +!action(place_order_alternative2, Context, Assignment) 
 	<- 
-		.print("..................................................(place_order_alternative2) placing order...");
-		
 		!register_statement(order_placed(order,user), Context);
 	.
-+!terminate(place_order_alternative2, Context, Assignment) 
-	<- 
-		true	
-	.
-
++!terminate(place_order_alternative2, Context, Assignment).
 //-------------------------------------
-
 
 //set_user_data------------------------
 +!prepare(set_user_data, Context, Assignment).
 +!action(set_user_data, Context, Assignment) : fail(set_user_data).
 +!action(set_user_data, Context, Assignment) 
 	<- 
-		.print("..................................................(set_user_data) setting user data...");
-		
-		occp.logger.action.info("[set_user_data] Setting user data");
-		
 		!register_statement(set_user_data(user,email),Context);
 	.
-+!terminate(set_user_data, Context, Assignment) 
-	<- 
-		true
-	.
++!terminate(set_user_data, Context, Assignment).
+
 //-------------------------------------
 //check_order_feasibility--------------
- +!prepare(check_order_feasibility, Context, Assignment) 
-	<- 
-		true
-	.
-
++!prepare(check_order_feasibility, Context, Assignment).
 +!action(check_order_feasibility, Context, Assignment) 
 	<- 
-		.print("..................................................(check_order_feasibility) checking order feasibility...");
-		occp.logger.action.info("[check_order_feasibility] Checking order feasibility");
-
 //		.random(X);
 //		if(X>=0.5)	{!register_statement(order_status(accepted), Context);}
 //		else		{!register_statement(order_status(refused), Context);}
 
-
 		!register_statement(order_status(accepted), Context);
 		!register_statement(order_checked(order), Context);
 	.
-
-+!terminate(check_order_feasibility, Context, Assignment) 
-	<- 
-		true
-	.
++!terminate(check_order_feasibility, Context, Assignment).
 	
 //-------------------------------------
 //complete_transaction-----------------
- +!prepare(complete_transaction, Context) 
-	<- 
-		true
-	.
-
++!prepare(complete_transaction, Context). 
 +!action(complete_transaction, Context) 
 	<- 
-		.print("..................................................(complete_transaction) finishing transaction...");
-		occp.logger.action.info("[complete_transaction] Completing transaction");
-		
-		
 		!register_statement(done(complete_transaction),Context);
 	.
-
-+!terminate(complete_transaction, Context) 
-	<- 
-		true 
-	.
++!terminate(complete_transaction, Context).

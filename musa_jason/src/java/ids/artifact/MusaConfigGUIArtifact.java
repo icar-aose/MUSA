@@ -473,7 +473,6 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		}
 		//Add a belief to the observer agent. The plan triggered is responsible
 		//for gathering the parsed goals and communicating to all agents.
-//		this.defineObsProperty("injectJasonGoals");
 		signal("injectJasonGoals", injectedJasonGoals );
 		
 		JOptionPane.showMessageDialog(gui, "Goals injected correctly");
@@ -768,7 +767,6 @@ public class MusaConfigGUIArtifact extends GUIArtifact
 		File f 					= new File(filename_path);
 		String agName 			= f.getName().substring(0, f.getName().lastIndexOf("."));
 		gui.addAgent(agName);
-		CartagoEnvironment ce = new CartagoEnvironment();
 		
 		defineObsProperty("addNewAgent", agName, filename_path );	
 	}

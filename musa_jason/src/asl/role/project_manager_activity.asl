@@ -13,7 +13,7 @@
  **************************/
 
 { include("core/goal.asl") }
-
+{ include("core/blacklist.asl") }
 
 /*
  * For debug purpose use existing project name and department name.
@@ -51,9 +51,25 @@
 		getBlacklistedCapabilitySet(Project,String);
 		
 		.term2string(List,String);
-		if(BV){.print("---------------> RECEIVED BLACKLISTED CS: ",List,"\n");}
+		if(true){.print("BLACKLISTED CS: ",List,"\n");}
+		
+		!communicate_blacklisted_capabilities_to_members(List);
 	.
-	
+
++!communicate_blacklisted_capabilities_to_members(CS)
+	:
+		CS 		= [Head|Tail]	&
+		Head 	= capability_blacklist(Agent,Cap,TS)
+	<-
+		!communicate_blacklisted_capabilities_to_members(Tail);
+		.send(Agent, tell, capability_blacklist(Agent,Cap,TS));
+	.
++!communicate_blacklisted_capabilities_to_members(CS)
+	:
+		CS = []
+	.
+
+
 /**
  * 
  * This plan is triggered when an employee agent tell the project manager that 
@@ -129,20 +145,22 @@
 			.term2string(CS,CSString);
 			updateProject(ProjectName, Me, CSString, "current");
 
-			.print("Soluzione finale: ",TheSolutionWithAssignment);
 			
-			?boss(Boss);
-			.send(Boss, achieve, set_musa_status(executing_solution));
 			
+			
+//			!unroll_solution_to_get_commitment_set(Item, OutCS);
+//			occp.action.communicate_solution_capabilities(OutCS);
+//			
+//			
 			//Start the social commitment
 //			occp.logger.action.info("Activating social commitment");
-			.print("Activating social commitment");
+//			.print("Activating social commitment");
 			!activate_social_commitment(Context,Pack,TheSolutionWithAssignment);
 //			occp.logger.action.info("Activating project monitoring");
-			.print("Activating project monitoring");
+//			.print("Activating project monitoring");
 			!activate_project_monitoring(Context,Pack,TheSolutionWithAssignment);
 //			occp.logger.action.info("Activating goal state monitoring");
-			.print("Activating goal state monitoring");	
+//			.print("Activating goal state monitoring");	
 			!activate_goal_state_monitoring(Context, Pack);
 		}
 		else
@@ -155,6 +173,27 @@
 		}
 	.		
 
+
++!unroll_commitment_to_get_capabilities(CS, CSout)
+	:
+		CS = [Head|Tail]	&
+		Head = commitment(_,CapName,_)
+	<-
+		.union([CapName],CSout);
+	.
++!unroll_commitment_to_get_capabilities(CS, CSout)
+	:	CS = []
+	<-	.concat([],CSout);	
+	.	
+
+
+
+
+
+
+
+
+
 /**
  * [davide]
  * 
@@ -166,7 +205,8 @@
 	<-
 		.my_name(Me);
 		!read_blacklist_from_database(Context); // da sistemare
-			
+					
+		//TODO VA VESSA IN ORGANIZE SOLUTION	
 		//Keep the timestamp of when the solution planning is starting  
 		.abolish(orchestration_start_at(_));
 		!numeric_timestamp(Now);
@@ -183,7 +223,7 @@
 			!ask_for_collaborations(Members, blacklist_request, RemoteBlacklistedCommitmentSet);
 			.union(LocalBlacklistedCommitmentSet, RemoteBlacklistedCommitmentSet, BlacklistedCS);
 		}
-
+		
 		!score_blacklisted_CS(BlacklistedCS, BlacklistScore);
 	.
 
@@ -507,6 +547,9 @@
 		!get_goal_TC([SocialGoal], 	[TC|_]);
 		!get_goal_FS([SocialGoal], 	[FS|_]);
 		
+		?boss(Boss);
+		.send(Boss, achieve, set_musa_status(running));
+		
 		Lifecycle = capability_lifecycle( Pack,Context,Solution,running );
 		!!project_lifecycle(Project,Lifecycle);
 		!!team_monitoring(Solution,Context);
@@ -572,6 +615,9 @@
 	<-
 		Context = project_context(Department , Project);
 		Pack = pack(SocialGoal,GoalList,Norms,Metrics);
+
+		?boss(Boss);
+		.send(Boss, achieve, set_musa_status(replanning));
 
 		occp.logger.action.info("The project (",Project,") is going to be re-organizing");
 		.println("The project is going to be re-organizing");

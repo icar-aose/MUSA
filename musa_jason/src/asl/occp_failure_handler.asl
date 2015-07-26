@@ -36,8 +36,6 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 	.
 +!action(notify_order_unfeasibility, Context, Assignment) 
 	<- 
-		.print("..................................................(notify_order_unfeasibility) NOTIFYING ERROR MESSAGE.");
-		.print("ASSIGNMENT FOR CAPABILITY ",notify_order_unfeasibility," -------------------.-.-.-.-.-.-.-> ",Assignment);
 		
 		!get_variable_value(Assignment, Context, notification_message, NotificationMessage);
 		!get_variable_value(Assignment, Context, email_param, User_email);
@@ -61,9 +59,9 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 +!action(delete_order, Context, Assignment) 
 	<- 
 		occp.logger.action.info("[delete_order] Deleting order");
-		.print("..................................................(delete_order) ORDER DELETED.");
 		
 		!register_statement(order_deleted(order), Context);
+
 	.
 
 +!terminate(delete_order, Context, Assignment) 

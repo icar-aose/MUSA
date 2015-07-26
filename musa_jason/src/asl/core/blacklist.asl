@@ -17,13 +17,14 @@
 		CS 		= [Head|Tail]					&
 		Head 	= commitment(Agent,Cap,_)
 	<-
+		.print("eccomii");
 		!score_blacklisted_CS(Tail,OutScoreRec);
 	
 		?blacklist_verbose(BV);
 		?orchestration_start_at(Orchestration_start_time);
 		
 		!get_remote_capability_blacklist(Head, Reply);
-		
+		.print("Head reply: ",Reply);
 		if(Reply \== no_timestamp)	
 		{
 			Failure_timestamp = Reply;
@@ -40,7 +41,7 @@
 			//Questa quantita indica quant'è il tempo massimo per cui la capability deve rimanere in blacklist.
 			!how_many_times_elapsed(Orchestration_start_time, RemoveTimestamp, Yet_to_finish_time);
 			
-			if(BV)
+			if(true)
 			{			
 				.print("######################");
 				.print("Score for [",Cap,"] from agent [",Agent,"]: ", (Past_in_blacklist_time/Blacklist_max_time));
@@ -60,7 +61,7 @@
 				//tell the owner of the capability to remove it from the blacklist
 				.send(Agent, tell, remove_from_blacklist(Cap));
 				
-				if(BV){.print("[#############BLACKLIST#############] Capability [",Cap,"] blacklist period expired. Removing from blacklist.");}
+				if(true){.print("[#############BLACKLIST#############] Capability [",Cap,"] blacklist period expired. Removing from blacklist.");}
 				
 				OutScore=0;
 			}

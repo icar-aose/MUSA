@@ -7,9 +7,9 @@ proxy(proxy_agent).
  * execution(deployment) 	-> parte senza nessun goal precariato e senza nessuna GUI, quando ci sarà l’interfaccia web si usa quella
  */
 
-//execution(deployment).		 
+execution(deployment).		 
 //execution(test).
-execution(standalone).
+//execution(standalone).
 
 //local_ip_address("194.119.214.121"). --> INUTILIZZATA
 url_for_agent_services("http://194.119.214.121:8080/HTTPAgent/AgentService").
@@ -36,11 +36,19 @@ blacklist_verbose(false).
 blacklist_expiration(0,1,0). //HH,MM,SS
 //#################################
 
+
+//#################################
+// SEARCH PARAMETERS
+//#################################
 //search_number_of_steps(5000).//5000
-search_number_of_steps(50).
+search_number_of_steps(250).
+
+
 search_number_of_solutions(5).
 search_max_depth(24).
 max_time_for_collecting(10).
+
+
 
 //#################################
 //	GUI FOR GOAL INJECTION
@@ -109,6 +117,6 @@ track_musa_status(true).
 
 //#############################################
 //When in deployment execution, simulate a 
-//request when a goal pack is injected.
+//request after a goal pack is injected.
 //#############################################
-simulate_request_in_deployment(false).
+simulate_request_in_deployment(true).

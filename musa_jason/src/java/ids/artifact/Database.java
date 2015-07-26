@@ -152,6 +152,32 @@ public class Database extends Artifact
 	}
 	
 	
+	
+	@OPERATION
+	void set_capability_activation_timestamp(String TS)
+	{
+		CapabilityStatusTable table = new CapabilityStatusTable();
+		
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss");
+		DateTime dt 				= formatter.parseDateTime(TS);
+		
+		
+	}
+	
+	
+	@OPERATION
+	void set_capability_termination_timestamp(String TS)
+	{
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss");
+		DateTime dt 				= formatter.parseDateTime(TS);
+	}
+
+	
+	
+	
+	
+	
+	
 	@OPERATION
 	void updateFailureRate(String capabilityName)
 	{
@@ -390,18 +416,14 @@ public class Database extends Artifact
 	@OPERATION
 	void getBlacklistedCapabilitySet(String project, OpFeedbackParam list)
 	{
-		BlacklistTable tt 			= new BlacklistTable();
-		List<Entity> blacklistedCap;
 		String belief = "[";
 		boolean first = true;
 		
 		try 
 		{
-			blacklistedCap = tt.getAll();
-			
-			Iterator<Entity> it = blacklistedCap.iterator();
-			while (it.hasNext()) {
-				
+			Iterator<Entity> it = new BlacklistTable().getAll().iterator();
+			while (it.hasNext()) 
+			{
 				BlacklistEntity blacklistedCapability = (BlacklistEntity) it.next();
 					
 				if (!first) 	{belief += ",";} 

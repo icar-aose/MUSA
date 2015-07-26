@@ -98,7 +98,7 @@
 		ParamSet 	= [Head|Tail]	&
 		Head 		= param(VarName,VarValue)
 	<-
-		.print("[register_user_params_to_context] registering ",Head);
+		.print("received ",Head);
 		!register_data_value(VarName, VarValue, Context);
 		!register_user_params_to_context(Tail, Context);
 	.
@@ -204,7 +204,7 @@
 		
 		//!check_if_capability_require_http_interaction(Commitment, RequireInteraction);
 		!check_if_capability_is_of_type(Commitment, http_interaction, RequireInteraction);
-		if(RequireInteraction==true)
+		if(RequireInteraction)
 		{
 			!generate_html_page(Capability, Path, ParamSet, NewContext, ReturnHtml);
 			.send(Proxy, tell, html_response(Path, ParamSet, ReturnHtml));	
@@ -213,7 +213,7 @@
 		{
 			!check_if_capability_is_of_type(Commitment, http_service, IsService);
 			
-			if(IsService==true)
+			if(IsService)
 			{
 				.send(Proxy, tell, html_response(Path, ParamSet, "OK"));	
 			}

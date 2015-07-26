@@ -97,7 +97,8 @@
 /**
  * [davide]
  * 
- * Used for debug to test blacklist.  
+ * Set a capability to failure state by adding a belief fail([CAPABILITY_NAME]) to the belief
+ * base of the agent who owns the capability.
  */
 +capability_failure_state(Ag,CapStr,Failure)
 	<-
@@ -124,7 +125,7 @@
 		?blacklist_verbose(BV);
 		.my_name(Me);
 		
-		if(BV){.print("############################ [BLACKLIST] Capability ",Capability," removed from local blacklist");}
+		if(BV){.print("[BLACKLIST] Capability ",Capability," removed from local blacklist");}
 
 		.abolish( capability_blacklist(Me,Capability,_) );
 		.abolish( capability_blacklist_cost(Me,Capability,_) );
@@ -140,4 +141,26 @@
 		
 		.abolish( request_for_capability_set );
 	.
+	
+/**
+ * [davide]
+ * 
+ * Add the prepare/action/terminate plans to the agent's plans library.
+ */
++inject_implementation_capability_plans(Prepare, Action, Terminate)
+	<-
+		.my_name(Me);
+		
+		.add_plan(Prepare, Me, end);
+		.add_plan(Action, Me, end);
+		.add_plan(Terminate, Me, end);
+		
+		
+		
+		.list_plans({ +!prepare(_,_,_) });
+		.list_plans({ +!action(_,_,_) });
+		.list_plans({ +!terminate(_,_,_) });
+		
+		.abolish( inject_implementation_capability_plans(_,_,_) );
+	.	
 	

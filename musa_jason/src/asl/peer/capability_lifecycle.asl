@@ -170,6 +170,10 @@
 	<-
 		?track_capability_status(TS);
 		if(TS){set_capability_status(Capability, ready);}
+		occp.action.setOCCPcapabilityStatus(Capability, ready);
+		
+		
+		
 		
 		.my_name(Me);
 		!get_remote_capability_precondition(commitment(Me,Capability,_), PreCondition);
@@ -205,13 +209,15 @@
 	<-
 		?track_capability_status(TS);
 		if(TS){set_capability_status(Capability, active);}
+		occp.action.setOCCPcapabilityStatus(Capability, active);
 		
-		.println("..........................................................................invoking ",Capability);
-		occp.logger.action.info("Invoking capability [",Capability,"]");
+		
+		.print("Invoking capability [",Capability,"]");
+		
 		.my_name(Me);
 		!check_if_capability_is_of_type(commitment(Me,Capability,_), parametric, IsParametric);
-		.print("Capability ",Capability," is parametric? ->",IsParametric);
-		if(IsParametric == true)		{!invoke_project_capability(Capability, Context, AssignmentList);}
+		
+		if(IsParametric)				{!invoke_project_capability(Capability, Context, AssignmentList);}
 		else							{!invoke_project_capability(Capability, Context);}
 		
 		NewLifecycle = capability_lifecycle( Pack,Context,wait );
@@ -303,6 +309,9 @@
 		?track_capability_status(TS);
 		if(TS){set_capability_status(Capability, success);}
 	
+		occp.action.setOCCPcapabilityStatus(Capability, success);
+	
+	
 		?frequency_long_perception_loop(Delay);
 		.wait(Delay);
 	
@@ -334,6 +343,7 @@
 	<-
 		?track_capability_status(TS);
 		if(TS){set_capability_status(Capability, failed);}
+		occp.action.setOCCPcapabilityStatus(Capability, failed);
 		
 		//Takes the exact time in which the capability has failed
 		!numeric_timestamp(FailureTimestamp);

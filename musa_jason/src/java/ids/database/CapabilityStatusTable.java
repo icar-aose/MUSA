@@ -36,6 +36,8 @@ public class CapabilityStatusTable extends Table
 		response.setId( set.getInt("id") );
 		response.setCapability( set.getString("capability") );
 		response.setStatus( set.getString("status") );
+//		response.setActivated( set.getString("status") );
+//		response.setTerminated( set.getString("status") );
 		
 		return response;
 	}

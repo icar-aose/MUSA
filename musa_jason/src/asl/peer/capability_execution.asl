@@ -59,29 +59,43 @@
 
 +!invoke_project_capability(Capability,Context,Assignment) 
 	<- 
-		!action(Capability,Context,Assignment);
-		.my_name(Me);
-		Commitment 	= commitment(Me,Capability,_);
-		!check_if_capability_is_of_type(Commitment, http_service, IsService);
-		.print("Capability ",Capability," is http_service? ",IsService);
-		if(IsService==false)	
+		if(not fail(Capability)) 
 		{
-			!terminate(Capability,Context,Assignment);
-		}	
+			if(execution(deployment)){.wait(8000);}
+			
+			!action(Capability,Context,Assignment);
+		}
+		
+		.my_name(Me);
+		!check_if_capability_is_of_type(commitment(Me,Capability,_), http_service, IsService);
+		
+		if(not IsService)	
+		{
+			if(not fail(Capability))
+			{
+				!terminate(Capability,Context,Assignment);	
+			}
+		}
 		
 		+done(Capability,Context);
 	.
 +!invoke_project_capability(Capability,Context) 
 	<- 
-		!action(Capability,Context);
-		.my_name(Me);
-		Commitment 	= commitment(Me,Capability,_);
-		
-		!check_if_capability_is_of_type(Commitment, http_service, IsService);
-		.print("Capability ",Capability," is http_service? ",IsService);
-		if(IsService==false)	
+		if(not fail(Capability)) 
 		{
-			!terminate(Capability,Context);
+			if(execution(deployment)){.wait(8000);}
+			!action(Capability,Context);
+		}
+		
+		.my_name(Me);
+		!check_if_capability_is_of_type(commitment(Me,Capability,_), http_service, IsService);
+
+		if(not IsService)	
+		{
+			if(not fail(Capability))
+			{
+				!terminate(Capability,Context);	
+			}
 		}	
 		
 		+done(Capability,Context);

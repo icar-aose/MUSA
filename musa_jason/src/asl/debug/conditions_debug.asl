@@ -17,7 +17,20 @@
 	Bool
 ); .println(Bool).
 
-	
+
+
++!debug_test_condition_6
+	<-
+		CN 	= par_condition([order_id,user_id],property(order_placed,[order_id,user_id]));
+		Acc	= accumulation(world([order_placed(order,user),received_order(order,user)]),par_world([],[]),assignment_list([]));
+		
+//		!test_condition(CN, [], Acc, Bool);
+		!check_if_par_condition_addresses_accumulation(CN, Acc, [], [], OutAssignment, Bool, _);
+		
+		.print("--->",Bool);
+	.
+
+
 +!debug_truth_percent_1 
 	<-
 		!elaborate_condition_truth_percent(

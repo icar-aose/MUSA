@@ -84,15 +84,16 @@
 			.print("starting musa...");			
 		}
 	.
-	
+
+/**
+ * Add a new agent to MUSA 
+ */
 +addNewAgent(AgName, Path)
 	<-
 		.create_agent(AgName, Path, [agentArchClass("c4jason.CAgentArch")]);		//Create the agent using the cartago agent architecture
 		.wait(1000);
-		
 		.send(AgName, achieve, awake);												//awake the new agent
 		.print("Agent ",AgName," added");
-		
 		.abolish( addNewAgent(AgName, Path) );									
 	.	
 	
@@ -224,7 +225,6 @@
 		occp.logger.action.info("Department for Pack ",PackName, "has been created.");
 		
 		.abolish( createDepartmentForInjectedGoalPack(PackName) );
-//		-createDepartmentForInjectedGoalPack(PackName);
 	.
 	
 /**
@@ -245,32 +245,45 @@
 		.print("[ERROR] Failed to inject goal '",Description,"'");
 	.
 
-+submitCapabilityFailure(CapName)[source(proxy_agent)]
++submitCapabilityFailure(CapName)
 	<-
 		.print("Set ",CapName," to Failure state");
 		.all_names(Members);
-		!submitCapabilityFailureToMember(CapName, Members);
+		!submitCapabilityFailureToMember(CapName, Members, tell);
 		.abolish( submitCapabilityFailure(CapName) );
 	.
 
-+!submitCapabilityFailureToMember(CapName, Members)
++unsetCapabilityFailure(CapName)
+	<-
+		.print("Unset ",CapName," from Failure state");
+		.all_names(Members);
+		!submitCapabilityFailureToMember(CapName, Members, untell);
+		.abolish( unsetCapabilityFailure(CapName) );
+	.
+	
++!submitCapabilityFailureToMember(CapName, Members, Message)
 	:
 		Members = []
 	.
-+!submitCapabilityFailureToMember(CapNameStr, Members)
++!submitCapabilityFailureToMember(CapNameStr, Members, Message)
 	:
 		Members = [Head|Tail]
 	<-
-		!submitCapabilityFailureToMember(CapNameStr, Tail);
+		!submitCapabilityFailureToMember(CapNameStr, Tail, Message);
 		
 		.term2string(CapName, CapNameStr);
 		.send(Head,askOne, agent_capability(CapName), Reply);
 		
-		if(Reply \== null)
+		if(Reply \== false)
 		{
-			.send(Head, tell, fail(CapName));
+			.send(Head, Message, fail(CapName));
 		}
 	.
+
+
+
+
+
 
 +request_for_agent_capability(Agent)
 	<-
@@ -280,7 +293,9 @@
 			.abolish(request_for_agent_capability(_));
 		}
 	.
-
+/**
+ * triggered from "submitDBconfiguration" in MusaConfigGUIArtifact class
+ */
 +updateLocalHost
 	<-
 		updateLocalHost;
@@ -308,9 +323,9 @@
 	:
 		track_musa_status(true)
 	<-
-		
-		
 		.abolish( musa_status(_) );
 		+musa_status(Status);
+		
+		action.set_musa_status(Status);
 	.
 +!set_musa_status(Status).
