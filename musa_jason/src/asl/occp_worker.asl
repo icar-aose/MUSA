@@ -8,7 +8,8 @@
 { include( "peer/act_as_server.asl" ) }
 { include( "search/collaborative_search_with_accumulation.asl" ) }
 
-http_interface(receive_order,request_result,"access_to_order","manager_quote_interface").
+http_interface(receive_order, request_result, "access_to_order", "manager_quote_interface").
+http_interface(approve_billing, request_result, "approve_billing", "manager_quote_interface").
 
 my_user(luca, occp_user).
 my_user(mario, occp_user).
@@ -80,7 +81,6 @@ capability_postcondition(set_user_data_step2, par_condition([user_id,user_email]
 capability_cost(set_user_data_step2,[0]).
 capability_evolution(set_user_data_step2,[add( set_user_data(user_id,user_email) )]). 
 
-
 agent_capability(check_order_feasibility)[type(parametric)].
 capability_parameters(check_order_feasibility, [order_id]).
 capability_precondition(check_order_feasibility, par_condition([user_id,user_email], property(set_user_data,[user_id,user_email])) ).
@@ -95,6 +95,17 @@ capability_postcondition(complete_transaction, condition( done(complete_transact
 capability_cost(complete_transaction,[0]).
 capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 
+
+
+
+//for remote billing approval
+//agent_capability(approve_billing)[type(simple)].
+//capability_parameters(approve_billing, []).
+//capability_precondition(approve_billing, condition(true) ).
+//capability_postcondition(approve_billing, condition( approved(billing) ) ).
+//capability_cost(approve_billing,[0]).
+//capability_evolution(approve_billing,[add( approved(billing) )]).
+
 +!awake
 	<-
 		!awake_as_employee;
@@ -106,7 +117,20 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 +!register_page(receive_order, Context)
 	<-
 		!standard_register_HTTP_page(receive_order, "Receive order ", Context );
+		
+//		!standard_register_HTTP_page(approve_billing, "Approve billing", Context );
 	.
+
+
+
++!prepare(approve_billing, Context).
++!action(approve_billing, Context)
+	<-
+		!register_statement(notified_gdrive_upload(user_id,user_email), Context);
+	.
++!terminate(approve_billing, Context).
+
+
 
 //set_user_data_step1------------------------
 +!prepare(set_user_data_step1, Context, Assignment).
@@ -144,14 +168,8 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 		if(Order_id 	\== unbound 	& 
 		   User_id 		\== unbound)
 	    {
-	    	occp.logger.action.info("[place_order] Registerind order ",Order_id);
 //	    	occp.action.registerOrder(Order_id, User_id);
-			occp.logger.action.info("[place_order] Order ",Order_id," registered");
 	    }
-	    else
-    	{
-    		occp.logger.action.warn("Variables unbounded (order_id: ",Order_id,", user_id: ",User_id,")");		
-    	}
 
     	!register_statement(order_placed(order,user), Context);
 	.
@@ -199,6 +217,7 @@ capability_evolution(complete_transaction,[add( done(complete_transaction) )]).
 //		else		{!register_statement(order_status(refused), Context);}
 
 		!register_statement(order_status(accepted), Context);
+		
 		!register_statement(order_checked(order), Context);
 	.
 +!terminate(check_order_feasibility, Context, Assignment).

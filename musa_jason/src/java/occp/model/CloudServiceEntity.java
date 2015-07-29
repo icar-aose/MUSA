@@ -1,6 +1,6 @@
 package occp.model;
 
-import ids.model.Entity;
+import musa.model.Entity;
 
 public class CloudServiceEntity extends Entity
 {

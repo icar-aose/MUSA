@@ -24,7 +24,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import occp.http.OCCPRequestParser;
-import occp.logger.musa_logger;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,16 +86,12 @@ public class sendBillingTAD extends DefaultInternalAction
 		//Create the billing
 		b.populate_document();
 		
-		musa_logger.get_instance().info("Billing created at " + billing_filename);
-		musa_logger.get_instance().info("Sending billing e-mail");
-		
 		//Send the billing to the user email
 		Thread sendmail_thread = new Thread("MUSA_sendmail")
 		{
 			public void run() 
 			{
 				send_billing(user_email);
-				musa_logger.get_instance().info("Billing e-mail has been succesfully sent.");
 			}
 		};
 		
@@ -108,7 +104,6 @@ public class sendBillingTAD extends DefaultInternalAction
 	private void send_billing(String to)
 	{
 		to = to.toLowerCase().replace("_at_", "@");		
-		musa_logger.get_instance().info("sending billing to "+to);
 		
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "smtp.gmail.com");

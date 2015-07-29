@@ -20,16 +20,14 @@ public class OCCPRequestParser
 	{
 		json_message = message;
 		
+		
 		agent 	= json_message.getString("agent");
 		service = json_message.getString("service");
 		session = json_message.getString("session");
 		user 	= json_message.getString("username");
 		role 	= json_message.getString("userrole");		
-		if (json_message.has("params")) 
-		{
-			JSONObject params = json_message.getJSONObject("params");
-			parse_params(params);
-		}		
+		
+		parse_params(json_message);
 	}
 	
 	/**
@@ -39,10 +37,10 @@ public class OCCPRequestParser
 	private static void parse_params(JSONObject json_message)
 	{
 		if (json_message.has("orderData")) 
-			parse_order_data(new JSONObject(json_message.getString("orderData")));
+			parse_order_data(json_message.getJSONObject("orderData"));
 		
 		if (json_message.has("userData")) 
-			parse_user_data(new JSONObject(json_message.getString("userData")));
+			parse_user_data(json_message.getJSONObject("userData"));
 		
 		if (json_message.has("user_message"))
 			param_table.put("user_message", json_message.getString("user_message"));
@@ -91,7 +89,7 @@ public class OCCPRequestParser
 		if (json_message.has("indirizzo")) 					param_table.put("indirizzo", json_message.getString("indirizzo"));
 		if (json_message.has("indirizzo_spedizione")) 		param_table.put("indirizzo_spedizione", json_message.getString("indirizzo_spedizione"));
 		
-		if (json_message.has("cloudeServiceName")) 		param_table.put("cloudeServiceName", json_message.getString("cloudeServiceName"));
+		if (json_message.has("cloudeServiceName")) 			param_table.put("cloudeServiceName", json_message.getString("cloudeServiceName"));
 		if (json_message.has("accesstoken")) 				param_table.put("accesstoken", json_message.getString("accesstoken"));
 	}
 

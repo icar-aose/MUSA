@@ -286,17 +286,7 @@
 		
 //		.print("-.-.-..-.-.PA: ",PA,"\n\n");
 	.
- 
-/**
- * [davide]
- * 
- * Unroll a nested predicate, returning the inner one.
- */
-+!unroll_nested_condition(Statement, UnrolledPred)
-	<-
-		st.unroll_nested_predicate(Statement, UnrolledPred);
-	.
- 
+
 /**
  * [davide]
  * 

@@ -290,7 +290,6 @@
 		?my_user(UserName,UserRole);
 		
 		.my_name(Me);
-		occp.logger.action.info("[",Me,"] registering service [",Capability,"] to database.");
 		!registerStandardHTTPInterface(ServiceAccess,Me,ServiceDescription,UserName,UserRole,Context);
 	.
 +!registerStandardHTTPInterface(Path,Owner,Description,UserName,UserRole,Context)

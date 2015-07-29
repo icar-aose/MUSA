@@ -49,39 +49,7 @@
 		.abolish(remote_goal_pack_injected);
 	.
 
-/*
- * SIMULATE USER INTERACTION SCENARIO
- */
-+!simulate_occp_request(ParamList)
-	<-
-		!create_or_use_database_artifact(Id1);
-		focus(Id1);
-		
-		?clearDatabase(ClearDB);
-		if(ClearDB)
-		{
-			clear;	
-		}
-		Session = "p4_dept";
-		User = user("luca","occp_user");
-		
-		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
- 	.
- +!simulate_occp_request
-	<-
-		!create_or_use_database_artifact(Id1);
-		focus(Id1);
-		?clearDatabase(ClearDB);
-		if(ClearDB)
-		{
-			clear;	
-		}
-		Session = "p4_dept";
-		User = user("luca","occp_user");
-		
-		.wait(9000);
-		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
-	. 
+
 +!simulate_quote_request
 	<-
 		/* for testing purpose */
@@ -135,11 +103,7 @@
 	.
 	
 	
-+simulate_occp_request
-	<-
-		!simulate_occp_request;
-		.abolish( simulate_occp_request );
-	.
+
 
 +update_database_configuration
 	<-
@@ -264,6 +228,49 @@
 	<-
 		.send(order_manager, tell, billing_approved);
 		.abolish( received_occp_billing_approval );
+	.
++simulate_occp_request
+	<-
+		!simulate_occp_request;
+		.abolish( simulate_occp_request );
+	.
+/*
+ * SIMULATE USER INTERACTION SCENARIO
+ */
++!simulate_occp_request(ParamList)
+	<-
+		!create_or_use_database_artifact(Id1);
+		focus(Id1);
+		
+		?clearDatabase(ClearDB);
+		if(ClearDB)
+		{
+			clear;	
+		}
+		Session = "p4_dept";
+		User = user("luca","occp_user");
+		
+		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
+ 	.
+ +!simulate_occp_request
+	<-
+		!create_or_use_database_artifact(Id1);
+		focus(Id1);
+		?clearDatabase(ClearDB);
+		if(ClearDB)
+		{
+			clear;	
+		}
+		Session = "p4_dept";
+		User = user("luca","occp_user");
+		
+		.wait(9000);
+		!forward(worker,"access_to_order",paramset(Session,User,[param(user_message,"Fallito"),param(userAccessToken,"poS0fEDTJ1AAAAAAAAAAPlo48ljrLSP-uRtjHE2zva9z3yY1rH9SsFkOXYwefliR"),param(idOrder,"0"),param(mailUser,"musa.customer.service@gmail.com"),param(idUser,"116")]),HTML1);
+	. 
++occp_approve_billing
+	<-
+		true
+		
 	.
 	
 

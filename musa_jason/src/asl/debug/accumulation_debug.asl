@@ -66,13 +66,7 @@
 		.print("Accumulation: ",Accumulation);
 		.print("PA: ",Pa);	
 	.
-	
-+!debug_unroll_nested_condition
-	<-
-		!unroll_nested_condition(a(b(f(g))), OutStatement);
-		.print("OutStatement: ",OutStatement);
-	.
-	
+
 /**
   * DEBUG PLANS FOR check_if_par_condition_addresses_accumulation plan.
   */

@@ -1,8 +1,5 @@
 package occp.database;
 
-import ids.database.DynamicTable;
-import ids.model.Entity;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,7 +10,8 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-import occp.logger.musa_logger;
+import musa.database.DynamicTable;
+import musa.model.Entity;
 import occp.model.CloudServiceEntity;
 
 public class CloudServiceTable extends DynamicTable 
@@ -75,7 +73,6 @@ public class CloudServiceTable extends DynamicTable
 		List<CloudServiceEntity> response = new LinkedList<CloudServiceEntity>();
 		
 		String query = "SELECT * FROM "+getTableName()+" WHERE idUtente="+String.format("%d", user_id)+";";
-		musa_logger.get_instance().info("Executing query: "+query+"\n");
 		
 		try 
 		{

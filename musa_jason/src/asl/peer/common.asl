@@ -44,7 +44,7 @@ list_contains([H | T],Element)
 +!create_organization_artifact(Id)
 	<-
 		.my_name(Me);
-		makeArtifact("workflow_org","ids.artifact.Organization",[Me],Id);
+		makeArtifact("workflow_org","musa.artifact.Organization",[Me],Id);
 		+using_artifact("workflow_org",Id);
 		focus(Id);
 	.
@@ -77,7 +77,7 @@ list_contains([H | T],Element)
 	.
 +!create_proxy_server_artifact(Id) : true
 	<-
-		makeArtifact("proxy_server","ids.artifact.HTTPProxy",[],Id);
+		makeArtifact("proxy_server","musa.artifact.HTTPProxy",[],Id);
 		+using_artifact("proxy_server",Id);
 	.
 +!use_proxy_server_artifact(Id) : true
@@ -99,7 +99,7 @@ list_contains([H | T],Element)
 	.
 +!create_database_artifact(Id)
 	<-
-		makeArtifact("workflow_database","ids.artifact.Database",[],Id);
+		makeArtifact("workflow_database","musa.artifact.Database",[],Id);
 	.
 
 
@@ -116,7 +116,7 @@ list_contains([H | T],Element)
 	.
 +!create_http_artifact(BaseUrl,Id) : true
 	<-
-		makeArtifact("http_protocol","ids.artifact.HTTP",[BaseUrl],Id);
+		makeArtifact("http_protocol","musa.artifact.HTTP",[BaseUrl],Id);
 		+using_artifact("http_protocol",Id);
 	.
 +!use_http_protocol_artifact(Id) : true

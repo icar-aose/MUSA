@@ -1,8 +1,5 @@
 package occp.database;
 
-import ids.database.DynamicTable;
-import ids.model.Entity;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import musa.database.DynamicTable;
+import musa.model.Entity;
 import occp.model.UserEntity;
 
 /**

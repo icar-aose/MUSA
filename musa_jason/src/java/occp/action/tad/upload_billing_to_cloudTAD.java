@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import musa_dropbox.Dropbox;
 import occp.database.CloudServiceTable;
 import occp.http.OCCPRequestParser;
-import occp.logger.musa_logger;
+
 import workflow_property.MusaProperties;
 
 import com.dropbox.core.DbxEntry;
@@ -61,22 +61,10 @@ public class upload_billing_to_cloudTAD extends DefaultInternalAction
 		Dropbox dp = new Dropbox(APP_KEY, APP_SECRET);
 		DbxEntry.File ff	= null;
 		
-		if(access_token.isEmpty())
-		{
-			musa_logger.get_instance().info("User "+user_id+" not registered. Authentication required...");
-			return false;
-		}
-		else
-		{
-			musa_logger.get_instance().info("User "+user_id+" already registered. Authenticating...");
-			dp.do_authentication(access_token);
-		}
+		if(access_token.isEmpty())		return false;
+		else							dp.do_authentication(access_token);
 		
-		
-		musa_logger.get_instance().info("Uploading file "+fname+" to dropbox");
 		ff = dp.uploadFile(fname);
-		musa_logger.get_instance().info("[upload_billing_to_cloud] Billing uploaded to dropbox cloud storage. Public link: \'"+dp.getSharedLink(ff.path)+"\'");
-		
 		return true;
 	}
 

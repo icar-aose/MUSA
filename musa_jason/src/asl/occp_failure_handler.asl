@@ -58,8 +58,6 @@ capability_evolution(delete_order,[add( order_deleted(order_id) )]).
 
 +!action(delete_order, Context, Assignment) 
 	<- 
-		occp.logger.action.info("[delete_order] Deleting order");
-		
 		!register_statement(order_deleted(order), Context);
 
 	.

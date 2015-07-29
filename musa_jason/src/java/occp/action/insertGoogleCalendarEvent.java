@@ -31,6 +31,8 @@ public class insertGoogleCalendarEvent extends DefaultInternalAction
     	//Create a new google calendar object 
 		CalendarQuickstart aa = new CalendarQuickstart();
 		
+		System.out.println("-->"+json_app_secret_key_fname);
+		
 		//Set the file path to the secret key related to the application
 		aa.set_app_secret_key_json_file(new FileInputStream(json_app_secret_key_fname));
 		

@@ -20,12 +20,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import occp.logger.musa_logger;
-
 /**
  * 
+ * Send an email
+ * 
  * @author davide
- *
  */
 public class sendMail extends DefaultInternalAction 
 {
@@ -39,8 +38,6 @@ public class sendMail extends DefaultInternalAction
 		final String email_subject 		= args[1].toString().replace("\"", "");
 		final String email_body 		= args[2].toString().replace("\"", "");
 		final String personal_name 		= args[3].toString().replace("\"", "");
-		
-		musa_logger.get_instance().info("Sending billing to "+to);
 		
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "smtp.gmail.com");

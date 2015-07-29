@@ -91,7 +91,7 @@
  */
 +new_goal(Name, Pack, Description,GoalParams)[source(X)]
 	<-
-		ids.goalspec.loadFromFile(Name, Pack, Description,GoalParams);
+		musa.goalspec.loadFromFile(Name, Pack, Description,GoalParams);
 	.
 
 /**

@@ -19,7 +19,7 @@ MAS musa_jason {
 		proxy_agent 							agentArchClass c4jason.CAgentArch;
 		worker 			occp_worker 			agentArchClass c4jason.CAgentArch;
 		order_manager 	occp_order_manager 		agentArchClass c4jason.CAgentArch;
-//   		failure_handler occp_failure_handler 	agentArchClass c4jason.CAgentArch;
+   		failure_handler occp_failure_handler 	agentArchClass c4jason.CAgentArch;
 		//-------------
 		
 		//----IDS-----

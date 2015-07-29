@@ -4,7 +4,6 @@ import occp.database.OrderDetailTable;
 import occp.database.OrderTable;
 import occp.database.ProductTable;
 import occp.database.UserTable;
-import occp.logger.musa_logger;
 import occp.model.OrderDetailEntity;
 import occp.model.OrderEntity;
 import occp.model.ProductEntity;
@@ -24,17 +23,10 @@ import javax.mail.internet.*;
 import javax.activation.*;  
 
 import workflow_property.MusaProperties;
-import workflow_property.WorkflowProperties;
 
 /**
  * 
- * @author davide
- *
- *	Usage example:
- * 		
- * 		occp.action.sendBilling("12345", "14", "user_AT_email.com", "Hello!"); 
- * 
- *  DA MODIFICARE
+ *  @author davide
  */
 public class sendBilling extends DefaultInternalAction 
 {
@@ -95,15 +87,11 @@ public class sendBilling extends DefaultInternalAction
 		
 		b.populate_document();
 		
-		musa_logger.get_instance().info("Billing created at " + BILLING_PATH);
-		musa_logger.get_instance().info("Sending billing e-mail");
-		
 		Thread sendmail_thread = new Thread("MUSA_sendmail")
 		{
 			public void run() 
 			{
 				send_billing(user_email);
-				musa_logger.get_instance().info("Billing e-mail has been succesfully sent.");
 			}
 		};
 		
@@ -117,8 +105,6 @@ public class sendBilling extends DefaultInternalAction
 	{
 		to = to.replace("_AT_", "@");
 		to = to.replace("_at_", "@"); 
-		
-		musa_logger.get_instance().info("sending billing to "+to);
 		
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "smtp.gmail.com");

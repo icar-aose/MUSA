@@ -20,6 +20,10 @@ capability_evolution(notify_gdrive_upload,[add( notified_gdrive_upload(user_id,u
 agent_capability(upload_to_google_drive)[type(parametric)].
 capability_parameters(upload_to_google_drive, [user_id,user_email,billingFilename]).
 capability_precondition(upload_to_google_drive, par_condition([user_id,user_email], property(notified_gdrive_upload,[user_id,user_email])) ).
+
+
+//capability_precondition(upload_to_google_drive, par_condition([user_id,user_email], [property(approved,[billing])]) ).
+
 capability_postcondition(upload_to_google_drive, par_condition([user_id,user_email,billingFilename],property(billing_uploaded_to_gdrive,[user_id,user_email,billingFilename])) ).
 capability_cost(upload_to_google_drive,[0]).
 capability_evolution(upload_to_google_drive,[add( billing_uploaded_to_gdrive(user_id,user_email,billingFilename) ),add( billing_uploaded(user_id) )]).
@@ -52,15 +56,6 @@ capability_precondition(notifica_calendario, condition(true) ).
 capability_postcondition(notifica_calendario, condition(done(notificato_in_calendario)) ).
 capability_cost(notifica_calendario,0).
 capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]).
-
-
-+billing_approved
-	<-
-		.print("######################################## APPROVO LA FATTURA");
-		.abolish(billing_approved);
-	.
-
-
 
 +!awake
 	<-
@@ -138,13 +133,11 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 		if(Order_id 	\== unbound 	& 
 		   User_id 		\== unbound)
 	    {
-	    	occp.logger.action.info("[fulfill_order] Fulfilling order ",Order_id);
-			occp.logger.action.info("[fulfill_order] order ",Order_id," fulfilled");
-				
+	    	//fulfill order
 	    }
 	    else
     	{
-    		occp.logger.action.warn("[fulfill_order] Variables unbounded (order_id: ",Order_id,", user_id: ",User_id,")");		
+    		//vars unbounded		
     	}
     	
     	!register_statement(fulfill_order(order,user),Context);
@@ -163,7 +156,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 		.print("Email: ",Email);
 		
 		//occp.action.sendMail(Email,"~~~","Dear customer,\n\n the billing for your order has been upload to your Google Drive cloud storage.","MUSA");	
-		!register_statement(notified_gdrive_upload(user_id,user_email), Context);
+//		!register_statement(notified_gdrive_upload(user_id,user_email), Context);
 	.
 
 +!terminate(notify_gdrive_upload, Context, Assignment) 

@@ -97,7 +97,7 @@
 +!create_database_artifact_simulated(Id)
 	<-
 		.print("creating DB artifact");
-		makeArtifact("workflow_database", "ids.artifact.Database", [], Id);
+		makeArtifact("workflow_database", "musa.artifact.Database", [], Id);
 	.
 	
 /**

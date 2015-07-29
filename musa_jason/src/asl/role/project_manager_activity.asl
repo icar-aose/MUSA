@@ -31,7 +31,6 @@
 -!create_project(DepartmentName, ProjectName)
 	<-
 		.println("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
-		occp.logger.action.fatal("Cannot create project (Dpt name: ",DepartmentName," Project name: ",ProjectName,")");
 		?frequency_long_perception_loop(Delay);
 		.wait(Delay);
 		!!create_project(DepartmentName,ProjectName);
@@ -104,7 +103,6 @@
 	<-
 		?blacklist_enabled(BlacklistEnabled);
 //		action.clearContext;
-		occp.logger.action.info("Organizing solution. Context: ",Context);
 		getEmployees(DptMembers);
 
 		.my_name(Me);
@@ -145,22 +143,9 @@
 			.term2string(CS,CSString);
 			updateProject(ProjectName, Me, CSString, "current");
 
-			
-			
-			
-//			!unroll_solution_to_get_commitment_set(Item, OutCS);
-//			occp.action.communicate_solution_capabilities(OutCS);
-//			
-//			
 			//Start the social commitment
-//			occp.logger.action.info("Activating social commitment");
-//			.print("Activating social commitment");
 			!activate_social_commitment(Context,Pack,TheSolutionWithAssignment);
-//			occp.logger.action.info("Activating project monitoring");
-//			.print("Activating project monitoring");
-			!activate_project_monitoring(Context,Pack,TheSolutionWithAssignment);
-//			occp.logger.action.info("Activating goal state monitoring");
-//			.print("Activating goal state monitoring");	
+			!activate_project_monitoring(Context,Pack,TheSolutionWithAssignment);	
 			!activate_goal_state_monitoring(Context, Pack);
 		}
 		else
@@ -172,27 +157,6 @@
 			!!organize_solution(Context, Pack);
 		}
 	.		
-
-
-+!unroll_commitment_to_get_capabilities(CS, CSout)
-	:
-		CS = [Head|Tail]	&
-		Head = commitment(_,CapName,_)
-	<-
-		.union([CapName],CSout);
-	.
-+!unroll_commitment_to_get_capabilities(CS, CSout)
-	:	CS = []
-	<-	.concat([],CSout);	
-	.	
-
-
-
-
-
-
-
-
 
 /**
  * [davide]
@@ -495,8 +459,7 @@
 		
 		if(FSBool = true)
 		{
-			.wait(3000);													//Wait...
-			occp.logger.action.info("Goal ",Goal," is ADDRESSED");	
+			.wait(3000);													//Wait...	
 			NewGoalLifeCycle = goal_lifecycle( Context, addressed );		//Go from active to addressed state
 			!!check_goal_lifecycle(Goal, NewGoalLifeCycle);					
 			//TODO remove parameters from context
@@ -619,7 +582,6 @@
 		?boss(Boss);
 		.send(Boss, achieve, set_musa_status(replanning));
 
-		occp.logger.action.info("The project (",Project,") is going to be re-organizing");
 		.println("The project is going to be re-organizing");
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 

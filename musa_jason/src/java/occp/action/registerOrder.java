@@ -8,10 +8,9 @@ import jason.asSyntax.Term;
 import java.util.Date;
 
 import occp.database.OrderTable;
-import occp.logger.musa_logger;
+
 import occp.model.OrderEntity;
 import workflow_property.MusaProperties;
-import workflow_property.WorkflowProperties;
 
 /**
  * 
@@ -22,11 +21,6 @@ public class registerOrder extends DefaultInternalAction
 {
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
-//		String ip_address 	= WorkflowProperties.get_ip_address();
-//		String port 		= WorkflowProperties.get_port();
-//		String database 	= "DemoOCCP";
-//		String user 		= "occp_root";
-//		String password 	= "root"; 
 		String ip_address 	= MusaProperties.getDemo_db_ip();
 		String port 		= MusaProperties.getWorkflow_db_port();
 		String database 	= MusaProperties.getDemo_db_name();
@@ -58,10 +52,7 @@ public class registerOrder extends DefaultInternalAction
 		
 		//Check if order already exists
 		if(orders.getOrder(Integer.parseInt(order_id)) != null)
-		{
-			musa_logger.get_instance().warn("Order "+order_id+" already registered");
 			return true;
-		}
 		
 		orders.insertElement(e);
 		

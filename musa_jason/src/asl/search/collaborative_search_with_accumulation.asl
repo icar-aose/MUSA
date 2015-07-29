@@ -157,8 +157,7 @@
 		?search_max_depth(MaxDepth);
 		?search_number_of_solutions(MaxSolution);
 
-		.println("START SEARCH");
-		occp.logger.action.info("START SEARCH");		
+		.println("START SEARCH");		
 		Pack = pack(SocialGoal, AG_list, _, _);
 		
 		!check_if_goal_pack_is_satisfied_in_accumulation(SocialGoal,AG_list,InputAccumulation,[],GoalPackSatisfied, _);
@@ -198,7 +197,6 @@
 		!orchestrate_search_with_accumulation(InitSolutions, MaxSolution, Pack, Members, MaxDepth, 1, OutSolutions);
 //		.print("Init solution: ",InitSolutions,"\n\n\n");
 		
-		occp.logger.action.info("END SEARCH");
 		.println("END SEARCH");
 //		.println("Out solution: ",OutSolutions);
 		
@@ -212,14 +210,8 @@
 
 		!assemble_final_solution_pack(SGitems, InitSolutions, AG_list, MergedSolution);
 		
-//		.print("Best solution found: ",MergedSolution);
-//		 occp.logger.action.info("Best solution found: ",MergedSolution);
-		 
-		 MergedSolutions = [MergedSolution];
-		 
-		 
-		 
-		 disposeArtifact(ArtifactId);
+		MergedSolutions = [MergedSolution];
+		disposeArtifact(ArtifactId);
 	.
 
 /**
@@ -242,9 +234,6 @@
 		if(GoalPackSatisfied = true)
 		{
 			.term2string(Sg, SgStr);
-			 occp.logger.action.warn("Goal already Satisfied");
-			 occp.logger.action.warn(SgStr);
-			
 			.print("[WARNING] Goal satisfied: ",Sg);
 			
 			!search_solution_for_agent_goals(Tail, InputAccumulation, MaxSolution, Members, MaxDepth, Steps, OutSolRec);
@@ -278,7 +267,6 @@
 			
 			//Now prepare the assignments
 			.println("Solution for ",Sg,"\n->",OutSol);			
-			occp.logger.action.info("Found a solution for ",Sg);
 			
 			!search_solution_for_agent_goals(Tail, InputAccumulation, MaxSolution, Members, MaxDepth, Steps, OutSolRec);
 			.concat(OutSol, OutSolRec, OutSolutions);

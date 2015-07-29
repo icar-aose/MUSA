@@ -29,7 +29,7 @@
 		?use_gui(V);
 		if(V)
 		{
-			makeArtifact("AddNewGoalGUI", "ids.artifact.MusaConfigGUIArtifact", [], GuiID);
+			makeArtifact("AddNewGoalGUI", "musa.artifact.MusaConfigGUIArtifact", [], GuiID);
 			loadDefaultDatabaseConfiguration(Success);													//Load the default db configuration
 			+using_artifact("addNewGoalGUI", GuiID);											//add the ID to the belief base
 			focus(GuiID);																		//focus the GUI artifact
@@ -76,7 +76,7 @@
 		?use_capability_failure_gui(UseFailureGUI);
 		if(UseFailureGUI)
 		{
-			makeArtifact("FailureGUI", "ids.artifact.HandleCapabilityFailureGUIartifact", [], GuiID);		//Create the GUI artifact for submitting new goal
+			makeArtifact("FailureGUI", "musa.artifact.HandleCapabilityFailureGUIartifact", [], GuiID);		//Create the GUI artifact for submitting new goal
 			+using_artifact("FailureGUI", GuiID);											//adHd the ID to the belief base
 			focus(GuiID);
 			!get_all_capabilities(CS);
@@ -222,8 +222,6 @@
 +createDepartmentForInjectedGoalPack(PackName)
 	<-
 		!create_department_for_social_goal(PackName);
-		occp.logger.action.info("Department for Pack ",PackName, "has been created.");
-		
 		.abolish( createDepartmentForInjectedGoalPack(PackName) );
 	.
 	
@@ -233,10 +231,8 @@
  */
 +!doGoalInjection(Name, Pack, Description, GoalParams)
 	<- 
-		ids.goalspec.loadFromFile(Name, Pack, Description, GoalParams);				//Parse the goal
+		musa.goalspec.loadFromFile(Name, Pack, Description, GoalParams);				//Parse the goal
 		+goal_injected(Name, Pack, Description, GoalParams);						//Keep a mental note about the goal
-		
-		occp.logger.action.info("Goal injected: ",Description,",",GoalParams);
 		.broadcast(tell, new_goal(Name, Pack, Description,GoalParams) );			//Tell the customers that a new goal has been injected						
 	.
 	

@@ -1,8 +1,8 @@
 package occp.model;
 
-import ids.model.Entity;
-
 import java.util.Date;
+
+import musa.model.Entity;
 
 public class OrderEntity  extends Entity
 {

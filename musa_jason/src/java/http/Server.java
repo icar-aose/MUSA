@@ -11,10 +11,11 @@ import http.handlers.unset_capability_failure_request;
 import http.handlers.occp.occp_billing_approval_handler;
 import http.handlers.occp.occp_request_handler;
 import http.handlers.occp.occp_simulated_request_handler;
-import ids.artifact.HTTPProxy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+
+import musa.artifact.HTTPProxy;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -59,6 +60,7 @@ public class Server
 											SET_DATABASE_HOST, 
 											SET_DEFAULT_DB_CONFIG,
 											REQUEST_FOR_CAPABILITY_STATUS,
+											/*###OCCP REQUEST CONTEXT###*/
 											OCCP_BILLING_APPROVAL,
 											OCCP_REQUEST,
 											OCCP_SIMULATE_REQUEST};
@@ -75,19 +77,19 @@ public class Server
 	public Server(HTTPProxy a)
 	{
 		proxy_artifact 			= a;
+			
+		cap_handler 				= new capability_failure_request_handler();
+		jason_pack_handler 			= new jason_pack_injection_handler();
+		musa_status_handler 		= new request_for_musa_status_handler();
+		db_config_handler 			= new remote_db_config_handler();
+		default_db_handler 			= new set_default_db_config_handler();
+		unset_cap_failure_handler 	= new unset_capability_failure_request();
+		cap_injection_handler		= new capability_injection_request_handler();
+		request_cap_status 			= new request_for_capability_status_handler();
 		
-		cap_handler 			= new capability_failure_request_handler();
-		jason_pack_handler 		= new jason_pack_injection_handler();
-		musa_status_handler 	= new request_for_musa_status_handler();
-		db_config_handler 		= new remote_db_config_handler();
-		default_db_handler 		= new set_default_db_config_handler();
-		unset_cap_failure_handler = new unset_capability_failure_request();
-		cap_injection_handler	= new capability_injection_request_handler();
-		request_cap_status 		= new request_for_capability_status_handler();
-		
-		approval_handler 		= new occp_billing_approval_handler();
-		occp_request_handler 	= new occp_request_handler();
-		simulated_request_handler = new occp_simulated_request_handler();
+		approval_handler 			= new occp_billing_approval_handler();
+		occp_request_handler 		= new occp_request_handler();
+		simulated_request_handler 	= new occp_simulated_request_handler();
 		
 		cap_handler.addObserver(proxy_artifact);
 		jason_pack_handler.addObserver(proxy_artifact);

@@ -18,8 +18,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 
-import workflow_property.WorkflowProperties;
-
 /**
  * @author Patrizia Ribino
  */
@@ -55,8 +53,6 @@ public class loadGoalBase extends DefaultInternalAction
     	
     	
     	if (System.getProperty("java.class.path").contains("org.eclipse.equinox.launcher"))
-//    	System.out.println("---->Environment: "+WorkflowProperties.getExecutionEnvironment());
-//    	if(WorkflowProperties.getExecutionEnvironment().equals("run"))
 		{
     		f = new FileReader(path);
         	b = new BufferedReader(f);

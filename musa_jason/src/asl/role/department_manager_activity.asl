@@ -34,8 +34,6 @@
 		!build_goal_pack(PackName,Pack);
 		!check_if_I_am_able_to_manage_dpt( Pack, ManagerBool);
 		
-		//Initiate the logger for MUSA
-		action.initiateLogger(DptNameString);
 		.my_name(Me);
 		
 		if (ManagerBool) 
@@ -45,7 +43,6 @@
 			
 			if (Result) 
 			{
-				occp.logger.action.info("Agent [",Me,"] is going to manage department",DptNameString);
 				.print("I'm going to manage department for pack ",Pack);
 				!manage_department(Pack, department_context(DptNameString) );
 			}			
@@ -53,7 +50,6 @@
 		else 
 		{
 			.wait(100);
-			occp.logger.action.info("Agent [",Me,"] is NOT able to manage department");
 			.println("I am NOT able to manage ",DptName);
 		}
 	.
@@ -233,24 +229,10 @@
 		 SocialGoal=social_goal(TC,FS,A)[_,_,_])
 	<-
 		.print("I'M GOING TO ACTIVATE DPT MONITORING. TC: ",TC);
-		occp.logger.action.info("Activating department monitoring for ",DptContext);
 		!get_goal_Pars([SocialGoal],Pars);
 			
 		.my_name(Me);
 		.findall(commitment(Me,Capability,_), agent_capability(Capability), CS);	
-		
-		
-		//QUI
-		
-		
-		//assegna capability monitor
-		
-		
-		
-		
-		
-		
-		
 		
 		!unroll_parametric_cap_set_to_activate_project(TC, Pars, CS, DptContext);
 	.
@@ -291,7 +273,7 @@
 													   GoalParams, OutAssignmentTC,  
 													   TC_Satisfied, PercentTC);
 		
-		if(TC_Satisfied==true)
+		if(TC_Satisfied)
 		{
 			//If the trigger condition is satisfied, then the current capability is registered to the database.
 			!!register_capability(CapabilityName, DptContext);			

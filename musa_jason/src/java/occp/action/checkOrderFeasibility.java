@@ -5,12 +5,11 @@ import java.util.List;
 import occp.database.OrderDetailTable;
 import occp.database.OrderTable;
 import occp.database.ProductTable;
-import occp.logger.musa_logger;
+
 import occp.model.OrderDetailEntity;
 import occp.model.OrderEntity;
 import occp.model.ProductEntity;
 import workflow_property.MusaProperties;
-import workflow_property.WorkflowProperties;
 import jason.asSemantics.DefaultInternalAction;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
@@ -28,12 +27,6 @@ public class checkOrderFeasibility extends DefaultInternalAction
 {
 	public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception 
 	{
-		/*String ip_address 	= WorkflowProperties.get_ip_address();
-		String port 		= WorkflowProperties.get_port();
-		String database 	= "DemoOCCP";
-		String user 		= "occp_root";
-		String password 	= "root";*/
-		
 		String ip_address 	= MusaProperties.getDemo_db_ip();
 		String port 		= MusaProperties.getWorkflow_db_port();
 		String database 	= MusaProperties.getDemo_db_name();
@@ -52,8 +45,6 @@ public class checkOrderFeasibility extends DefaultInternalAction
 		
 		System.out.println("Checking if order "+order_id+" can be fulfilled");
 		
-		musa_logger.get_instance().info("Checking if order "+order_id+" can be fulfilled");
-		
 		//Check the order feasibility
 		for (OrderDetailEntity order_detail : order_details)
 		{
@@ -64,7 +55,6 @@ public class checkOrderFeasibility extends DefaultInternalAction
 			qta_richiesta	= order_detail.get_quantita();
 			
 			System.out.println(String.format("product %s, q.ty request: %d, q.ty avaible: %d",product.get_id(), qta_richiesta, qta_disponibile));
-			musa_logger.get_instance().info(String.format("[check_order_feasibility] product %s, q.ty request: %d, q.ty avaible: %d",product.get_id(), qta_richiesta, qta_disponibile));
 			if(qta_disponibile - qta_richiesta < 0)
 				order_success = false;
 		}

@@ -26,7 +26,6 @@
 -!recover_projects_from_database(Pack, DptContext)
 	<-
 		.println("Unable to recover project from database. May be a (NULL) project is contained in database?");
-		occp.logger.action.error("Unable to recover project from database. May be a (NULL) project is contained in database?");
 	.
 
 +!recover_project_list(Pack, DptContext, ProjectList)

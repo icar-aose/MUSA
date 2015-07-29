@@ -1,8 +1,5 @@
 package occp.database;
 
-import ids.database.DynamicTable;
-import ids.model.Entity;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,7 +10,8 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-import occp.logger.musa_logger;
+import musa.database.DynamicTable;
+import musa.model.Entity;
 import occp.model.OrderDetailEntity;
 
 /**
@@ -73,9 +71,7 @@ public class OrderDetailTable extends DynamicTable
 		List<OrderDetailEntity> response = new LinkedList<OrderDetailEntity>();
 		
 		String query = "SELECT * FROM "+getTableName()+" WHERE idOrdine="+String.format("%d", order_id)+";";
-		musa_logger.get_instance().info("Executing query: "+query+"\n");
-		//System.out.println("Executing query: "+query+"\n");
-		
+
 		try 
 		{
 			Connection conn = getConnection();
