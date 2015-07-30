@@ -150,7 +150,6 @@
 		}
 		else
 		{
-			occp.logger.action.warn("No solution found. Waiting...");
 			.print("NO SOLUTION. Idle...");
 			?frequency_long_perception_loop(Delay);
 			.wait(Delay);
@@ -563,7 +562,6 @@
 		.drop_intention( capability_achievement_lifecycle(_,capability_lifecycle( _,Context,_ ),_,_,_) );
 		
 		.println("The project is correctly terminated");
-		occp.logger.action.info("The project (",Project,") is correctly terminated");
 		
 		!suspend_social_commitment(SocialGoal,Solution,Context);
 		!social_terminate_the_project(Context,Solution);

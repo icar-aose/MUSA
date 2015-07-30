@@ -61,8 +61,7 @@
 	<- 
 		if(not fail(Capability)) 
 		{
-//			if(execution(deployment)){.wait(8000);}
-			
+			if(execution(deployment)){.wait(8000);}
 			!action(Capability,Context,Assignment);
 		}
 		
@@ -83,7 +82,7 @@
 	<- 
 		if(not fail(Capability)) 
 		{
-//			if(execution(deployment)){.wait(8000);}
+			if(execution(deployment)){.wait(8000);}
 			!action(Capability,Context);
 		}
 		
