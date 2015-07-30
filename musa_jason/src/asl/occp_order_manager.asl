@@ -20,21 +20,9 @@ capability_evolution(notify_gdrive_upload,[add( notified_gdrive_upload(user_id,u
 agent_capability(upload_to_google_drive)[type(parametric)].
 capability_parameters(upload_to_google_drive, [user_id,user_email,billingFilename]).
 capability_precondition(upload_to_google_drive, par_condition([user_id,user_email], property(notified_gdrive_upload,[user_id,user_email])) ).
-
-
-//capability_precondition(upload_to_google_drive, par_condition([user_id,user_email], [property(approved,[billing])]) ).
-
 capability_postcondition(upload_to_google_drive, par_condition([user_id,user_email,billingFilename],property(billing_uploaded_to_gdrive,[user_id,user_email,billingFilename])) ).
 capability_cost(upload_to_google_drive,[0]).
 capability_evolution(upload_to_google_drive,[add( billing_uploaded_to_gdrive(user_id,user_email,billingFilename) ),add( billing_uploaded(user_id) )]).
-//---------------------------------------
-
-//agent_capability(upload_billing_to_google_drive)[type(parametric)].
-//capability_parameters(upload_billing_to_google_drive, [user_id,user_email,billingFilename]).
-//capability_precondition(upload_billing_to_google_drive, par_condition([billingFilename, theRecipient, orderId, recipientEmail], property(billing_delivered,[billingFilename, theRecipient, orderId, recipientEmail])) ).
-//capability_postcondition(upload_billing_to_google_drive, par_condition([user_id,user_email,billingFilename],property(billing_uploaded_to_gdrive,[user_id,user_email,billingFilename])) ).
-//capability_cost(upload_billing_to_google_drive,0).
-//capability_evolution(upload_billing_to_google_drive,[add( billing_uploaded_to_gdrive(user_id,user_email,billingFilename) ),add( billing_uploaded(user_id) )]).
 
 agent_capability(upload_billing_to_dropbox)[type(parametric)].
 capability_parameters(upload_billing_to_dropbox, [user_id,the_access_token,billingFilename]).
@@ -156,7 +144,7 @@ capability_evolution(notifica_calendario,[add( done(notificato_in_calendario) )]
 		.print("Email: ",Email);
 		
 		//occp.action.sendMail(Email,"~~~","Dear customer,\n\n the billing for your order has been upload to your Google Drive cloud storage.","MUSA");	
-//		!register_statement(notified_gdrive_upload(user_id,user_email), Context);
+		!register_statement(notified_gdrive_upload(user_id,user_email), Context);
 	.
 
 +!terminate(notify_gdrive_upload, Context, Assignment) 
